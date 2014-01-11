@@ -16,10 +16,18 @@
  */
 package org.thoughtcrime.securesms;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.whispersystems.textsecure.crypto.IdentityKey;
+import org.thoughtcrime.securesms.util.Mnemonic;
+import org.whispersystems.textsecure.util.FutureTaskListener;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Activity for displaying an identity key.
@@ -28,8 +36,11 @@ import org.whispersystems.textsecure.crypto.IdentityKey;
  */
 public class ViewIdentityActivity extends KeyScanningActivity {
 
+  private TextView    identityFingerprintMnemonic;
   private TextView    identityFingerprint;
   private IdentityKey identityKey;
+  private ImageButton mnemonicHelpButton;
+  private Mnemonic    mnemonic;
 
   @Override
   public void onCreate(Bundle state) {
@@ -42,21 +53,59 @@ public class ViewIdentityActivity extends KeyScanningActivity {
 
   protected void initialize() {
     initializeResources();
+    initializeMnemonicDictionary();
     initializeFingerprint();
   }
 
   private void initializeFingerprint() {
+    identityFingerprintMnemonic.setText("");
+
     if (identityKey == null) {
-      identityFingerprint.setText(R.string.ViewIdentityActivity_you_do_not_have_an_identity_key);
+      identityFingerprintMnemonic.setText(R.string.ViewIdentityActivity_you_do_not_have_an_identity_key);
     } else {
+      byte[] fingerprintBytes = identityKey.serialize();
+
       identityFingerprint.setText(identityKey.getFingerprint());
+
+      mnemonic.fromBytes(fingerprintBytes, new FutureTaskListener<String>() {
+        @Override
+        public void onSuccess(String result) {
+          identityFingerprintMnemonic.setText(result);
+        }
+
+        @Override
+        public void onFailure(Throwable error) {
+          findViewById(R.id.mnemonic_fingerprint_title).setVisibility(View.GONE);
+          findViewById(R.id.identity_fingerprint_mnemonic).setVisibility(View.GONE);
+          findViewById(R.id.fingerprint_or_separator).setVisibility(View.GONE);
+          findViewById(R.id.mnemonic_help_button).setVisibility(View.GONE);
+        }
+      });
     }
   }
 
+  private void initializeMnemonicDictionary() {
+    mnemonic = new Mnemonic(this);
+  }
+
   private void initializeResources() {
-    this.identityKey         = (IdentityKey)getIntent().getParcelableExtra("identity_key");
+    this.identityKey         = getIntent().getParcelableExtra("identity_key");
+    this.identityFingerprintMnemonic = (TextView)findViewById(R.id.identity_fingerprint_mnemonic);
     this.identityFingerprint = (TextView)findViewById(R.id.identity_fingerprint);
+    this.mnemonicHelpButton  = (ImageButton)findViewById(R.id.mnemonic_help_button);
     String title             = getIntent().getStringExtra("title");
+
+    final Context appContext = this;
+    mnemonicHelpButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(appContext);
+            builder.setTitle("Mnemonic Fingerprints");
+            builder.setMessage("Mnemonic fingerprints are a representation of your unique fingerprint using specifically chosen words that make it easier to read and verify fingerprints without error.");
+            builder.setPositiveButton("OK", null);
+            builder.show();
+        }
+    });
 
     if (title != null) {
       getSupportActionBar().setTitle(getIntent().getStringExtra("title"));
