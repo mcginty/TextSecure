@@ -16,6 +16,7 @@
  */
 package org.thoughtcrime.securesms;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -190,6 +191,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     return false;
   }
 
+  @SuppressLint("InlinedApi")
   private void initializePlatformSpecificOptions() {
     PreferenceGroup    pushSmsCategory          = (PreferenceGroup) findPreference("push_sms_category");
     PreferenceGroup    advancedCategory         = (PreferenceGroup) findPreference("advanced_category");

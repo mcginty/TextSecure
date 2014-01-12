@@ -200,6 +200,7 @@ public class KeyCachingService extends Service {
 
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   private void foregroundServiceModern() {
+    // only called within condition: `if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)`
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
     builder.setContentTitle(getString(R.string.KeyCachingService_passphrase_cached));
