@@ -1,5 +1,6 @@
 package org.thoughtcrime.securesms;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -148,6 +149,7 @@ public class ConversationFragment extends SherlockListFragment
     builder.show();
   }
 
+  @SuppressLint("DefaultLocale")
   private void handleDisplayDetails(MessageRecord message) {
     long dateReceived = message.getDateReceived();
     long dateSent     = message.getDateSent();
