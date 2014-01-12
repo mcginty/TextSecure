@@ -33,6 +33,7 @@ import org.thoughtcrime.securesms.util.DirectoryHelper;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 
 import java.sql.Date;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class ConversationFragment extends SherlockListFragment
@@ -161,7 +162,7 @@ public class ConversationFragment extends SherlockListFragment
     else if (message.isMms())     transport = "mms";
     else                          transport = "sms";
 
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE MMM d, yyyy 'at' hh:mm:ss a zzz");
+    DateFormat dateFormatter = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
     builder.setTitle(R.string.ConversationFragment_message_details);
     builder.setIcon(Dialogs.resolveIcon(getActivity(), R.attr.dialog_info_icon));
