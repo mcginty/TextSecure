@@ -450,6 +450,8 @@
     <string name="conversation_item__play_button_description">Play button</string>
     <string name="conversation_item__secure_message_description">Secure message indicator</string>
 
+    <string name="conversation_activity__thumbnail">Attachment Thumbnail</string>
+    
     <!-- conversation_item_sent -->
     <string name="conversation_item_sent__download">Download</string>
     <string name="conversation_item_sent__downloading">Downloading</string>
@@ -472,7 +474,6 @@
     <string name="create_passphrase_activity__please_choose_a_passphrase_that_will_be_used_to_locally_encrypt_your_data_this_should_be_a_strong_passphrase">Please choose a passphrase if you would like to locally encrypt your data.</string>
     <string name="create_passphrase_activity__passphrase">PASSPHRASE:</string>
     <string name="create_passphrase_activity__repeat">REPEAT:</string>
-    <string name="create_passphrase_activity__continue">Continue</string>
     <string name="create_passphrase_activity__generating_secrets">GENERATING SECRETS</string>
     <string name="create_passphrase_activity__skip">Skip</string>
     <string name="create_passphrase_activity__create">Create</string>
@@ -491,6 +492,7 @@
     <string name="log_submit_activity__thanks">Thanks for your help!</string>
     <string name="log_submit_activity__submitting">Submitting</string>
     <string name="log_submit_activity__posting_logs">Posting logs to pastebin&#8230;</string>
+
 
     <!-- database_migration_activity -->
     <string name="database_migration_activity__would_you_like_to_import_your_existing_text_messages">Would you like to import your existing text messages into TextSecure\'s encrypted database?</string>
@@ -524,6 +526,13 @@
 
     <string name="local_identity__regenerate_key">Regenerate key</string>
 
+    <!-- led_pattern_dialog -->
+    <string name="led_pattern_dialog__on_for">On For:</string>
+    <string name="led_pattern_dialog__off_for">Off For:</string>
+
+    <!-- navigation_drawer_item -->
+    <string name="navigation_drawer_item__image">Navigation Image</string>
+
     <!-- mms_preferences_activity -->
     <string name="mms_preferences_activity__manual_mms_settings_are_required">Manual MMS settings are required for your phone.</string>
 
@@ -552,6 +561,7 @@
     </string>
     <string name="registration_activity__phone_number">PHONE NUMBER</string>
     <string name="registration_activity__register">Register</string>
+    <string name="registration_activity__skip">Skip</string>
     <string name="registration_activity__registration_will_transmit_some_contact_information_to_the_server_temporariliy">Registration will transmit some contact information to the server temporarily.</string>
     <string name="registration_activity__skip">Skip</string>
 
@@ -622,7 +632,10 @@
     <string name="registration_progress_activity__sms_verification_failed">SMS verification
         failed.
     </string>
-    <string name="registration_progress_activity__generating_keys">Generating keys...</string>
+    <string name="registration_progress_activity__generating_keys">Generating keys&#x2026;</string>
+    <string name="registration_progress_activity__alert">Alert</string>
+    <string name="registration_progress_activity__telephone">Telephone</string>
+    <string name="registration_progress_activity__check">Check</string>
 
     <!-- recipients_panel -->
     <string name="recipients_panel__to"><small>Enter a name or number</small></string>
@@ -795,6 +808,8 @@
 
     <!-- conversation_insecure -->
     <string name="conversation_insecure__menu_start_secure_session">Start secure session</string>
+    <string name="conversation_insecure__security">Security</string>
+
 
     <!-- conversation_list_batch -->
     <string name="conversation_list_batch__menu_delete_selected">Delete selected</string>
@@ -804,6 +819,11 @@
     <string name="conversation_list__menu_search">Search</string>
     <string name="conversation_list__drawer_open">Open navigation drawer</string>
     <string name="conversation_list__drawer_close">Close navigation drawer</string>
+
+    <!-- conversation_list_item_view -->
+    <string name="conversation_list_item_view__contact_img">Contact Photo Image</string>
+    <string name="conversation_list_item_view__error">Error Alert</string>
+    <string name="conversation_list_item_view__attach">Attachment Indicator</string>
 
     <!-- conversation_secure_verified -->
     <string name="conversation_secure_verified__menu_security">Security</string>
@@ -841,6 +861,7 @@
 
     <!-- verify_keys -->
     <string name="verify_keys__menu_verified">Verified</string>
+
     <!-- EOF -->
 
 </resources>
