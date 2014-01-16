@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -175,8 +176,11 @@ public class ConversationItem extends LinearLayout {
   /// MessageRecord Attribute Parsers
 
   private void setBodyText(MessageRecord messageRecord) {
-    bodyText.setText(Emoji.getInstance(context).emojify(messageRecord.getDisplayBody(), Emoji.EMOJI_LARGE),
-        TextView.BufferType.SPANNABLE);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+      bodyText.setText(messageRecord.getDisplayBody());
+    else
+      bodyText.setText(Emoji.getInstance(context).emojify(messageRecord.getDisplayBody(), Emoji.EMOJI_LARGE),
+          TextView.BufferType.SPANNABLE);
   }
 
   private void setContactPhoto(MessageRecord messageRecord) {
