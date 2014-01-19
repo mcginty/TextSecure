@@ -71,17 +71,14 @@
                </LinearLayout>
             </ScrollView>
 
-            <View android:background="?conversation_editor_background"
-                  android:layout_width="match_parent"
-                  android:layout_height="1dp" />
-
             <LinearLayout
                     android:id="@+id/bottom_panel"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:paddingRight="0dp"
-                    android:paddingTop="0dp" >
+                    android:paddingTop="0dp"
+                    android:background="?conversation_sent_text_primary_color">
 
                 <org.thoughtcrime.securesms.components.EmojiToggle
                         android:id="@+id/emoji_toggle"
