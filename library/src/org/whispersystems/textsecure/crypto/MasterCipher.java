@@ -29,6 +29,9 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.Security;
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
@@ -60,10 +63,29 @@ public class MasterCipher {
 	
   public MasterCipher(MasterSecret masterSecret) {
     try {
-      this.masterSecret = masterSecret;		
-      this.encryptingCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-      this.decryptingCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-      this.hmac             = Mac.getInstance("HmacSHA1");
+      this.masterSecret = masterSecret;
+      Provider[] providers = Security.getProviders();
+
+      Cipher encryptingCipherTemp = null;
+      Cipher decryptingCipherTemp = null;
+      try {
+        encryptingCipherTemp = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+        decryptingCipherTemp = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+      } catch (NoSuchProviderException e) {
+        encryptingCipherTemp = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        decryptingCipherTemp = Cipher.getInstance("AES/CBC/PKCS5Padding");
+      }
+      this.encryptingCipher = encryptingCipherTemp;
+      this.decryptingCipher = decryptingCipherTemp;
+
+      Mac hmacTemp = null;
+      try {
+        hmacTemp = Mac.getInstance("HmacSHA1", "BC");
+      } catch (NoSuchProviderException e) {
+        hmacTemp = Mac.getInstance("HmacSHA1");
+      }
+      this.hmac = hmacTemp;
+
     } catch (NoSuchPaddingException nspe) {
       throw new AssertionError(nspe);
     } catch (NoSuchAlgorithmException e) {

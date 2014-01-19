@@ -33,10 +33,14 @@ import org.whispersystems.textsecure.crypto.ecc.ECPublicKey;
 import org.whispersystems.textsecure.util.Base64;
 import org.whispersystems.textsecure.util.Util;
 
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
@@ -227,18 +231,14 @@ public class MasterSecretUtil {
 
   private static void save(Context context, String key, byte[] value) {
     SharedPreferences settings = context.getSharedPreferences(PREFERENCES_NAME, 0);
-    Editor editor              = settings.edit();
 
-    editor.putString(key, Base64.encodeBytes(value));
-    editor.commit();
+    settings.edit().putString(key, Base64.encodeBytes(value)).commit();
   }
 
   private static void save(Context context, String key, boolean value) {
     SharedPreferences settings = context.getSharedPreferences(PREFERENCES_NAME, 0);
-    Editor editor              = settings.edit();
 
-    editor.putBoolean(key, value);
-    editor.commit();
+    settings.edit().putBoolean(key, value).commit();
   }
 
   private static byte[] retrieve(Context context, String key) throws IOException {
@@ -273,7 +273,7 @@ public class MasterSecretUtil {
   }
 
   private static byte[] generateSalt() throws NoSuchAlgorithmException {
-    SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+    SecureRandom random = SecureRandom.getInstance("SHA1PRNG", new PRNGFixes.LinuxPRNGSecureRandomProvider());
     byte[] salt         = new byte[8];
     random.nextBytes(salt);
 
@@ -282,14 +282,26 @@ public class MasterSecretUtil {
 
   private static SecretKey getKeyFromPassphrase(String passphrase, byte[] salt) throws GeneralSecurityException {
     PBEKeySpec keyspec    = new PBEKeySpec(passphrase.toCharArray(), salt, 100);
-    SecretKeyFactory skf  = SecretKeyFactory.getInstance("PBEWITHSHA1AND128BITAES-CBC-BC");
+    SecretKeyFactory skf  = null;
+
+    try {
+      skf = SecretKeyFactory.getInstance("PBEWITHSHA1AND128BITAES-CBC-BC", "BC");
+    } catch (NoSuchProviderException e) {
+      skf = SecretKeyFactory.getInstance("PBEWITHSHA1AND128BITAES-CBC-BC");
+    }
     return skf.generateSecret(keyspec);
   }
 
   private static Cipher getCipherFromPassphrase(String passphrase, byte[] salt, int opMode) throws GeneralSecurityException {
-    SecretKey key              = getKeyFromPassphrase(passphrase, salt);
-    Cipher cipher              = Cipher.getInstance(key.getAlgorithm());
-    cipher.init(opMode, key, new PBEParameterSpec(salt, 100));
+    SecretKey key = getKeyFromPassphrase(passphrase, salt);
+    Cipher cipher = null;
+
+    try {
+      cipher = Cipher.getInstance(key.getAlgorithm(), "BC");
+    } catch (NoSuchProviderException e) {
+      cipher = Cipher.getInstance(key.getAlgorithm());
+    }
+    cipher.init(opMode, key, new PBEParameterSpec(salt, 100), SecureRandom.getInstance("SHA1PRNG", new PRNGFixes.LinuxPRNGSecureRandomProvider()));
 
     return cipher;
   }
@@ -313,7 +325,12 @@ public class MasterSecretUtil {
     SecretKey key              = getKeyFromPassphrase(passphrase, salt);
     byte[] pbkdf2              = key.getEncoded();
     SecretKeySpec hmacKey      = new SecretKeySpec(pbkdf2, "HmacSHA1");
-    Mac hmac                   = Mac.getInstance("HmacSHA1");
+    Mac hmac                   = null;
+    try {
+      hmac = Mac.getInstance("HmacSHA1", "BC");
+    } catch (NoSuchProviderException e) {
+      hmac = Mac.getInstance("HmacSHA1");
+    }
     hmac.init(hmacKey);
 
     return hmac;

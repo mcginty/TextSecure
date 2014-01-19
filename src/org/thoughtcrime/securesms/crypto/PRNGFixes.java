@@ -153,7 +153,7 @@ public final class PRNGFixes {
    * {@code Provider} of {@code SecureRandom} engines which pass through
    * all requests to the Linux PRNG.
    */
-  private static class LinuxPRNGSecureRandomProvider extends Provider {
+  public static class LinuxPRNGSecureRandomProvider extends Provider {
 
     public LinuxPRNGSecureRandomProvider() {
       super("LinuxPRNG",
