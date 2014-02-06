@@ -2,6 +2,7 @@ package org.thoughtcrime.securesms;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -21,23 +22,37 @@ public class RoutingActivity extends PassphraseRequiredSherlockActivity {
   private static final int STATE_UPGRADE_DATABASE         = 5;
   private static final int STATE_PROMPT_PUSH_REGISTRATION = 6;
 
-  private MasterSecret masterSecret = null;
-  private boolean      isVisible    = false;
+  private static final String TAG = "RoutingActivity";
+
+  private MasterSecret masterSecret    = null;
+  private boolean      isVisible       = false;
+  private boolean      cancelledResult = false;
+  private boolean      newIntent       = false;
 
   @Override
   public void onNewIntent(Intent intent) {
+    Log.d(TAG, "onNewIntent");
     super.onNewIntent(intent);
     setIntent(intent);
+    newIntent = true;
   }
 
   @Override
   public void onResume() {
+    Log.d(TAG, "onResume");
+    if (cancelledResult && !newIntent) {
+      Log.d(TAG, "passing through a child activity's cancel result");
+      finish();
+    }
+    newIntent = false;
+    cancelledResult = false;
     this.isVisible = true;
     super.onResume();
   }
 
   @Override
   public void onPause() {
+    Log.d(TAG, "onPause");
     this.isVisible = false;
     super.onPause();
   }
@@ -62,8 +77,8 @@ public class RoutingActivity extends PassphraseRequiredSherlockActivity {
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (resultCode == RESULT_CANCELED)
-      finish();
+    Log.d(TAG, "onActivityResult");
+    if (resultCode == RESULT_CANCELED) cancelledResult = true;
   }
 
   private void routeApplicationState() {
