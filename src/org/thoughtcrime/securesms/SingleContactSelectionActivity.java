@@ -61,10 +61,14 @@ import static org.thoughtcrime.securesms.contacts.ContactAccessor.ContactData;
  */
 public class SingleContactSelectionActivity extends PassphraseRequiredSherlockFragmentActivity {
   private final static String TAG                 = "SingleContactSelectionActivity";
+
   public final static  String MASTER_SECRET_EXTRA = "master_secret";
+  public final static  String FORWARDED_MESSAGE_EXTRA = "forwarded_message";
 
   private final DynamicTheme dynamicTheme = new DynamicTheme();
   private MasterSecret masterSecret;
+  private String forwardedMessage;
+
   @Override
   protected void onCreate(Bundle icicle) {
     dynamicTheme.onCreate(this);
@@ -79,7 +83,8 @@ public class SingleContactSelectionActivity extends PassphraseRequiredSherlockFr
   }
 
   private void initializeResources() {
-    masterSecret = getIntent().getParcelableExtra(MASTER_SECRET_EXTRA);
+    masterSecret     = getIntent().getParcelableExtra(MASTER_SECRET_EXTRA);
+    forwardedMessage = getIntent().getStringExtra(FORWARDED_MESSAGE_EXTRA);
     final SingleRecipientPanel recipientsPanel = (SingleRecipientPanel) findViewById(R.id.recipients);
 
     final SingleContactSelectionListFragment listFragment = (SingleContactSelectionListFragment)getSupportFragmentManager().findFragmentById(R.id.contact_selection_list_fragment);
@@ -124,6 +129,7 @@ public class SingleContactSelectionActivity extends PassphraseRequiredSherlockFr
       Intent intent = new Intent(SingleContactSelectionActivity.this, ConversationActivity.class);
       intent.putExtra(ConversationActivity.RECIPIENTS_EXTRA, recipients.toIdString());
       intent.putExtra(ConversationActivity.MASTER_SECRET_EXTRA, masterSecret);
+      intent.putExtra(ConversationActivity.FORWARDED_MESSAGE_EXTRA, forwardedMessage);
       long existingThread = DatabaseFactory.getThreadDatabase(SingleContactSelectionActivity.this).getThreadIdIfExistsFor(recipients);
       intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, existingThread);
       intent.putExtra(ConversationActivity.DISTRIBUTION_TYPE_EXTRA, ThreadDatabase.DistributionTypes.DEFAULT);

@@ -140,6 +140,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   public static final String DRAFT_AUDIO_EXTRA       = "draft_audio";
   public static final String DRAFT_VIDEO_EXTRA       = "draft_video";
   public static final String DISTRIBUTION_TYPE_EXTRA = "distribution_type";
+  public static final String FORWARDED_MESSAGE_EXTRA = "forwarded_message";
 
   private static final int PICK_CONTACT      = 1;
   private static final int PICK_IMAGE        = 2;
@@ -763,9 +764,9 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
       getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
     }
 
-    if (getIntent().getStringExtra("forwarded_message") != null) {
+    if (getIntent().getStringExtra(FORWARDED_MESSAGE_EXTRA) != null) {
       composeText.setText(getString(R.string.ConversationActivity_forward_message_prefix) + ": " +
-                          getIntent().getStringExtra("forwarded_message"));
+                          getIntent().getStringExtra(FORWARDED_MESSAGE_EXTRA));
     }
   }
 

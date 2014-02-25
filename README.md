@@ -1,12 +1,10 @@
 TextSecure
 =================
 
-A secure text messaging application for Android.
-
-TextSecure is a replacement for the standard text messaging application, allowing you to send and receive text messages as normal.  Additionally, TextSecure provides:
+A private messaging application for Android. Simple, powerful, and secure.
 
 1. *Local Encryption* -- All text messages, regardless of destination, that are sent or received with TextSecure are stored in an encrypted database on your phone.
-2. *Wire Encryption* -- When communicating with a recipient who is also using TextSecure, text messages are encrypted during transmission.
+2. *Wire Encryption* -- When communicating with a recipient who is also using TextSecure, messages are encrypted during transmission.
 
 Current BitHub Payment For Commit:
 =================
