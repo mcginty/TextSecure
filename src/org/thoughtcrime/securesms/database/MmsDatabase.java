@@ -387,7 +387,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
       throws MmsException
   {
     MmsAddressDatabase addr         = DatabaseFactory.getMmsAddressDatabase(context);
-    PartDatabase       partDatabase = getPartDatabase(masterSecret);
+    PartDatabase       partDatabase = DatabaseFactory.getPartDatabase(context);
     SQLiteDatabase     database     = databaseHelper.getReadableDatabase();
     MasterCipher       masterCipher = masterSecret == null ? null : new MasterCipher(masterSecret);
     Cursor             cursor       = null;
@@ -421,7 +421,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
         PduHeaders headers     = getHeadersFromCursor(cursor);
         addr.getAddressesForId(messageId, headers);
 
-        PduBody body = getPartsAsBody(partDatabase.getParts(messageId, true));
+        PduBody body = getPartsAsBody(partDatabase.getParts(masterSecret, messageId, false));
 
         try {
           if (!Util.isEmpty(messageText) && Types.isSymmetricEncryption(outboxType)) {
@@ -626,8 +626,8 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
                                   ContentValues contentValues)
       throws MmsException
   {
-    SQLiteDatabase db                  = databaseHelper.getWritableDatabase();
-    PartDatabase partsDatabase         = getPartDatabase(masterSecret);
+    SQLiteDatabase     db              = databaseHelper.getWritableDatabase();
+    PartDatabase       partsDatabase   = DatabaseFactory.getPartDatabase(context);
     MmsAddressDatabase addressDatabase = DatabaseFactory.getMmsAddressDatabase(context);
 
     if (Types.isSymmetricEncryption(contentValues.getAsLong(MESSAGE_BOX))) {
@@ -644,7 +644,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
     long messageId = db.insert(TABLE_NAME, null, contentValues);
 
     addressDatabase.insertAddressesForId(messageId, headers);
-    partsDatabase.insertParts(messageId, body);
+    partsDatabase.insertParts(masterSecret, messageId, body);
 
     notifyConversationListeners(contentValues.getAsLong(THREAD_ID));
     DatabaseFactory.getThreadDatabase(context).update(contentValues.getAsLong(THREAD_ID));
@@ -811,14 +811,6 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
       cvb.add(ADDRESS, null);
 
     return cvb.getContentValues();
-  }
-
-
-  protected PartDatabase getPartDatabase(MasterSecret masterSecret) {
-    if (masterSecret == null)
-      return DatabaseFactory.getPartDatabase(context);
-    else
-      return DatabaseFactory.getEncryptingPartDatabase(context, masterSecret);
   }
 
   public Reader readerFor(MasterSecret masterSecret, Cursor cursor) {
@@ -990,8 +982,9 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
           if (masterSecret == null)
             return null;
 
-          PduBody   body      = getPartsAsBody(getPartDatabase(masterSecret).getParts(id, false));
-          SlideDeck slideDeck = new SlideDeck(context, masterSecret, body);
+          PartDatabase partDatabase = DatabaseFactory.getPartDatabase(context);
+          PduBody      body         = getPartsAsBody(partDatabase.getParts(masterSecret, id, false));
+          SlideDeck    slideDeck    = new SlideDeck(context, masterSecret, body);
 
           if (!body.containsPushInProgress()) {
             slideCache.put(id, new SoftReference<SlideDeck>(slideDeck));

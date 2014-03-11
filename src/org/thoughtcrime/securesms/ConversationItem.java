@@ -51,6 +51,7 @@ import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.util.Emoji;
 import org.whispersystems.textsecure.crypto.MasterSecret;
+import org.whispersystems.textsecure.storage.Session;
 import org.whispersystems.textsecure.util.FutureTaskListener;
 import org.whispersystems.textsecure.util.ListenableFutureTask;
 
@@ -439,6 +440,128 @@ public class ConversationItem extends LinearLayout {
     context.startActivity(intent);
   }
 
+  private class ThumbnailSaveListener extends Handler implements View.OnLongClickListener, Runnable, MediaScannerConnection.MediaScannerConnectionClient {
+    private static final int SUCCESS              = 0;
+    private static final int FAILURE              = 1;
+    private static final int WRITE_ACCESS_FAILURE = 2;
+
+    private final Slide                  slide;
+    private       ProgressDialog         progressDialog;
+    private       MediaScannerConnection mediaScannerConnection;
+    private       File                   mediaFile;
+
+    public ThumbnailSaveListener(Slide slide) {
+      this.slide = slide;
+    }
+
+    public void run() {
+      if (!Environment.getExternalStorageDirectory().canWrite()) {
+        this.obtainMessage(WRITE_ACCESS_FAILURE).sendToTarget();
+        return;
+      }
+
+      try {
+        mediaFile                 = constructOutputFile();
+        InputStream inputStream   = slide.getPartDataInputStream();
+        OutputStream outputStream = new FileOutputStream(mediaFile);
+
+        byte[] buffer = new byte[4096];
+        int read;
+
+        while ((read = inputStream.read(buffer)) != -1) {
+          outputStream.write(buffer, 0, read);
+        }
+
+        outputStream.close();
+        inputStream.close();
+
+        mediaScannerConnection = new MediaScannerConnection(context, this);
+        mediaScannerConnection.connect();
+      } catch (IOException ioe) {
+        Log.w(TAG, ioe);
+        this.obtainMessage(FAILURE).sendToTarget();
+      }
+    }
+
+    private File constructOutputFile() throws IOException {
+      File outputDirectory;
+
+      if (slide.hasVideo()) {
+        outputDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), "TextSecure");
+      } else if (slide.hasAudio()) {
+        outputDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "TextSecure");
+      } else {
+        outputDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "TextSecure");
+      }
+
+      outputDirectory.mkdirs();
+
+      MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+      String extension = mimeTypeMap.getExtensionFromMimeType(slide.getContentType());
+      if (extension == null)
+          extension = "attach";
+
+      return File.createTempFile("textsecure", "." + extension, outputDirectory);
+    }
+
+    private void saveToSdCard() {
+      progressDialog = new ProgressDialog(context);
+      progressDialog.setTitle(context.getString(R.string.ConversationItem_saving_attachment));
+      progressDialog.setMessage(context.getString(R.string.ConversationItem_saving_attachment_to_sd_card));
+      progressDialog.setCancelable(false);
+      progressDialog.setIndeterminate(true);
+      progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+      progressDialog.show();
+      new Thread(this).start();
+    }
+
+    public boolean onLongClick(View v) {
+      AlertDialog.Builder builder = new AlertDialog.Builder(context);
+      builder.setTitle(R.string.ConversationItem_save_to_sd_card);
+      builder.setIcon(Dialogs.resolveIcon(context, R.attr.dialog_alert_icon));
+      builder.setCancelable(true);
+      builder.setMessage(R.string.ConversationItem_this_media_has_been_stored_in_an_encrypted_database_warning);
+      builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int which) {
+          saveToSdCard();
+        }
+      });
+      builder.setNegativeButton(R.string.no, null);
+      builder.show();
+
+      return true;
+    }
+
+    @Override
+    public void handleMessage(Message message) {
+      switch (message.what) {
+      case FAILURE:
+        Toast.makeText(context, R.string.ConversationItem_error_while_saving_attachment_to_sd_card,
+                       Toast.LENGTH_LONG).show();
+        break;
+      case SUCCESS:
+        Toast.makeText(context, R.string.ConversationItem_success_exclamation,
+                       Toast.LENGTH_LONG).show();
+        break;
+      case WRITE_ACCESS_FAILURE:
+        Toast.makeText(context, R.string.ConversationItem_unable_to_write_to_sd_card_exclamation,
+                       Toast.LENGTH_LONG).show();
+        break;
+      }
+
+      progressDialog.dismiss();
+    }
+
+    public void onMediaScannerConnected() {
+      mediaScannerConnection.scanFile(mediaFile.getAbsolutePath(), slide.getContentType());
+    }
+
+    public void onScanCompleted(String path, Uri uri) {
+      mediaScannerConnection.disconnect();
+      this.obtainMessage(SUCCESS).sendToTarget();
+    }
+  }
+
   private class ThumbnailClickListener implements View.OnClickListener {
     private final Slide slide;
 
@@ -446,27 +569,16 @@ public class ConversationItem extends LinearLayout {
       this.slide = slide;
     }
 
-    private void fireIntent() {
-      Log.w(TAG, "Clicked: " + slide.getUri() + " , " + slide.getContentType());
-      Intent intent = new Intent(Intent.ACTION_VIEW);
-      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-      intent.setDataAndType(slide.getUri(), slide.getContentType());
-      context.startActivity(intent);
-    }
+//    private void fireIntent() {
+//      Log.w("ConversationItem", "Clicked: " + slide.getUri() + " , " + slide.getContentType());
+//      Intent intent = new Intent(Intent.ACTION_VIEW);
+//      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//      intent.setDataAndType(slide.getUri(), slide.getContentType());
+//      context.startActivity(intent);
+//    }
 
     public void onClick(View v) {
-      AlertDialog.Builder builder = new AlertDialog.Builder(context);
-      builder.setTitle(R.string.ConversationItem_view_secure_media_question);
-      builder.setIcon(Dialogs.resolveIcon(context, R.attr.dialog_alert_icon));
-      builder.setCancelable(true);
-      builder.setMessage(R.string.ConversationItem_this_media_has_been_stored_in_an_encrypted_database_external_viewer_warning);
-      builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int which) {
-          fireIntent();
-        }
-      });
-      builder.setNegativeButton(R.string.no, null);
-      builder.show();
+      Toast.makeText(context, "Display something...", Toast.LENGTH_SHORT).show();
     }
   }
 
