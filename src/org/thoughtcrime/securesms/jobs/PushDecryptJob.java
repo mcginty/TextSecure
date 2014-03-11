@@ -83,7 +83,7 @@ public class PushDecryptJob extends MasterSecretJob {
   }
 
   @Override
-  public void onCanceled() {
+  public void onCanceled(MasterSecret masterSecret) {
 
   }
 

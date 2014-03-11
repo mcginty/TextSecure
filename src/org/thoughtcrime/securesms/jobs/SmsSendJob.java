@@ -78,7 +78,7 @@ public class SmsSendJob extends MasterSecretJob {
   }
 
   @Override
-  public void onCanceled() {
+  public void onCanceled(MasterSecret masterSecret) {
     Log.w(TAG, "onCanceled()");
     long       threadId   = DatabaseFactory.getSmsDatabase(context).getThreadIdForMessage(messageId);
     Recipients recipients = DatabaseFactory.getThreadDatabase(context).getRecipientsForThreadId(threadId);

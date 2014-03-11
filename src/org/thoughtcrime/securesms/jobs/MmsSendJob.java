@@ -89,7 +89,7 @@ public class MmsSendJob extends MasterSecretJob {
   }
 
   @Override
-  public void onCanceled() {
+  public void onCanceled(MasterSecret masterSecret) {
     DatabaseFactory.getMmsDatabase(context).markAsSentFailed(messageId);
     notifyMediaMessageDeliveryFailed(context, messageId);
   }

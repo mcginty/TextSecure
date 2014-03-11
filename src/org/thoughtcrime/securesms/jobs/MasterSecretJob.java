@@ -1,12 +1,14 @@
 package org.thoughtcrime.securesms.jobs;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.whispersystems.jobqueue.JobParameters;
 
 public abstract class MasterSecretJob extends ContextJob {
+  private final static String TAG = MasterSecretJob.class.getSimpleName();
 
   public MasterSecretJob(Context context, JobParameters parameters) {
     super(context, parameters);
@@ -19,12 +21,23 @@ public abstract class MasterSecretJob extends ContextJob {
   }
 
   @Override
+  public void onCanceled() {
+    MasterSecret masterSecret = null;
+    try {
+      masterSecret = getMasterSecret();
+    } catch (RequirementNotMetException e) {
+      Log.w(TAG, "Couldn't fetch MasterSecret onCanceled()");
+    }
+    onCanceled(masterSecret);
+  }
+  @Override
   public boolean onShouldRetry(Exception exception) {
     if (exception instanceof RequirementNotMetException) return true;
     return onShouldRetryThrowable(exception);
   }
 
   public abstract void onRun(MasterSecret masterSecret) throws Exception;
+  public abstract void onCanceled(MasterSecret masterSecret);
   public abstract boolean onShouldRetryThrowable(Exception exception);
 
   private MasterSecret getMasterSecret() throws RequirementNotMetException {

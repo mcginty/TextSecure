@@ -35,7 +35,6 @@ import android.widget.Toast;
 
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
-import org.thoughtcrime.securesms.providers.PartProvider;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.DynamicLanguage;
@@ -135,11 +134,7 @@ public class MediaPreviewActivity extends PassphraseRequiredActionBarActivity {
   }
 
   private InputStream getInputStream(Uri uri, MasterSecret masterSecret) throws IOException {
-    if (PartProvider.isAuthority(uri)) {
-      return DatabaseFactory.getEncryptingPartDatabase(this, masterSecret).getPartStream(ContentUris.parseId(uri));
-    } else {
-      throw new AssertionError("Given a URI that is not handled by our app.");
-    }
+    return DatabaseFactory.getPartDatabase(this).getPartStream(masterSecret, ContentUris.parseId(uri));
   }
 
   @Override

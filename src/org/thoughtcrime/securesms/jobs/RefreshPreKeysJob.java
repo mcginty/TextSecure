@@ -82,7 +82,7 @@ public class RefreshPreKeysJob extends MasterSecretJob implements InjectableType
   }
 
   @Override
-  public void onCanceled() {
+  public void onCanceled(MasterSecret masterSecret) {
 
   }
 

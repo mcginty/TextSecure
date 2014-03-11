@@ -88,7 +88,7 @@ public class AvatarDownloadJob extends MasterSecretJob {
   }
 
   @Override
-  public void onCanceled() {}
+  public void onCanceled(MasterSecret masterSecret) {}
 
   @Override
   public boolean onShouldRetryThrowable(Exception exception) {

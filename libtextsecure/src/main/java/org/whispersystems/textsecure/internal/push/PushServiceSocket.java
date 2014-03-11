@@ -386,6 +386,8 @@ public class PushServiceSocket {
     connection.setRequestProperty("Content-Type", "application/octet-stream");
     connection.connect();
 
+    long startTime = System.currentTimeMillis();
+    Log.w("PushServiceSocket", "Estimating: " + AttachmentCipherOutputStream.getCiphertextLength(dataSize));
     try {
       OutputStream                 stream = connection.getOutputStream();
       AttachmentCipherOutputStream out    = new AttachmentCipherOutputStream(key, stream);
@@ -393,6 +395,10 @@ public class PushServiceSocket {
       Util.copy(data, out);
       out.flush();
 
+      Util.copy(data, out);
+      out.flush();
+
+      Log.w("PushServiceSocket", "Finished writing: " + (System.currentTimeMillis() - startTime)); 
       if (connection.getResponseCode() != 200) {
         throw new IOException("Bad response: " + connection.getResponseCode() + " " + connection.getResponseMessage());
       }

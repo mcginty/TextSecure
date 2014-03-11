@@ -91,7 +91,7 @@ public class CleanPreKeysJob extends MasterSecretJob implements InjectableType {
   }
 
   @Override
-  public void onCanceled() {
+  public void onCanceled(MasterSecret masterSecret) {
     Log.w(TAG, "Failed to execute clean signed prekeys task.");
   }
 

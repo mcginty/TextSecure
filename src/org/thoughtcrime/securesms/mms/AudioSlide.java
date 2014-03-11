@@ -31,6 +31,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore.Audio;
+import android.widget.ImageView;
 
 public class AudioSlide extends Slide {
 
@@ -67,21 +68,23 @@ public class AudioSlide extends Slide {
     return context.getResources().getDrawable(R.drawable.ic_menu_add_sound);
   }
 
+  @Override
+  public void setThumbnailOn(ImageView imageView) {
+    imageView.setImageDrawable(getThumbnail(imageView.getWidth(), imageView.getHeight()));
+  }
+
   public static PduPart constructPartFromUri(Context context, Uri uri) throws IOException, MediaTooLargeException {
-    PduPart part = new PduPart();
-		
-    if (getMediaSize(context, uri) > MAX_MESSAGE_SIZE)
-      throw new MediaTooLargeException("Audio track larger than size maximum.");
-		
-    Cursor cursor = null;
+    PduPart part   = new PduPart();
+    Cursor  cursor = null;
 		
     try {
       cursor = context.getContentResolver().query(uri, new String[]{Audio.Media.MIME_TYPE}, null, null, null);
 			
-      if (cursor != null && cursor.moveToFirst())
+      if (cursor != null && cursor.moveToFirst()) {
         part.setContentType(cursor.getString(0).getBytes());
-      else
+      } else {
         throw new IOException("Unable to query content type.");
+      }
     } finally {
       if (cursor != null)
         cursor.close();
