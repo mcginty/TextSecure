@@ -220,6 +220,10 @@ public class PushServiceSocket {
   }
 
   public File retrieveAttachment(String relay, long attachmentId) throws IOException {
+    return retrieveAttachment(relay, attachmentId, null);
+  }
+
+  public File retrieveAttachment(String relay, long attachmentId, TransferProgressListener listener) throws IOException {
     String path = String.format(ATTACHMENT_PATH, String.valueOf(attachmentId));
 
     if (!Util.isEmpty(relay)) {
@@ -234,7 +238,7 @@ public class PushServiceSocket {
     File attachment = File.createTempFile("attachment", ".tmp", context.getFilesDir());
     attachment.deleteOnExit();
 
-    downloadExternalFile(descriptor.getLocation(), attachment);
+    downloadExternalFile(descriptor.getLocation(), attachment, listener);
 
     return attachment;
   }
@@ -261,7 +265,7 @@ public class PushServiceSocket {
     }
   }
 
-  private void downloadExternalFile(String url, File localDestination)
+  private void downloadExternalFile(String url, File localDestination, TransferProgressListener progressListener)
       throws IOException
   {
     URL               downloadUrl = new URL(url);
@@ -275,13 +279,17 @@ public class PushServiceSocket {
         throw new IOException("Bad response: " + connection.getResponseCode());
       }
 
+      int totalBytes      = connection.getContentLength();
       OutputStream output = new FileOutputStream(localDestination);
       InputStream input   = connection.getInputStream();
       byte[] buffer       = new byte[4096];
       int read;
+      long totalRead = 0;
 
       while ((read = input.read(buffer)) != -1) {
         output.write(buffer, 0, read);
+        totalRead += read;
+        if (progressListener != null) progressListener.onProgressUpdate(totalRead, totalBytes);
       }
 
       output.close();
@@ -474,5 +482,9 @@ public class PushServiceSocket {
   public interface TrustStore {
     public InputStream getKeyStoreInputStream();
     public String getKeyStorePassword();
+  }
+
+  public abstract static class TransferProgressListener {
+    public abstract void onProgressUpdate(final long downloadedBytes, final long totalBytes);
   }
 }

@@ -17,9 +17,12 @@
 package org.thoughtcrime.securesms;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -29,15 +32,19 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Contacts.Intents;
 import android.provider.ContactsContract.QuickContact;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.thoughtcrime.securesms.database.DatabaseFactory;
+import org.thoughtcrime.securesms.components.CircularProgressBar;
+import org.thoughtcrime.securesms.components.GifView;
 import org.thoughtcrime.securesms.database.MmsDatabase;
 import org.thoughtcrime.securesms.database.SmsDatabase;
 import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
@@ -51,6 +58,7 @@ import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.util.Emoji;
 import org.whispersystems.textsecure.crypto.MasterSecret;
+import org.whispersystems.textsecure.push.PushServiceSocket;
 import org.whispersystems.textsecure.storage.Session;
 import org.whispersystems.textsecure.util.FutureTaskListener;
 import org.whispersystems.textsecure.util.ListenableFutureTask;
@@ -102,12 +110,16 @@ public class ConversationItem extends LinearLayout {
   private  View      triangleTick;
   private  ImageView pendingIndicator;
 
-  private  View      mmsContainer;
-  private  ImageView mmsThumbnail;
-  private  Button    mmsDownloadButton;
-  private  TextView  mmsDownloadingLabel;
+  private  FrameLayout mmsContainer;
+  private  ImageView   mmsThumbnail;
+  private  GifView     gifView;
+  private  Button      mmsDownloadButton;
+  private  TextView    mmsDownloadingLabel;
   private  ListenableFutureTask<SlideDeck> slideDeck;
   private  TypedArray backgroundDrawables;
+  private  CircularProgressBar mmsDownloadProgress;
+
+  private BroadcastReceiver attachmentDownloadReceiver;
 
   private final FailedIconClickListener failedIconClickListener         = new FailedIconClickListener();
   private final MmsDownloadClickListener mmsDownloadClickListener       = new MmsDownloadClickListener();
@@ -130,22 +142,24 @@ public class ConversationItem extends LinearLayout {
   protected void onFinishInflate() {
     super.onFinishInflate();
 
-    this.bodyText            = (TextView) findViewById(R.id.conversation_item_body);
-    this.dateText            = (TextView) findViewById(R.id.conversation_item_date);
-    this.indicatorText       = (TextView) findViewById(R.id.indicator_text);
-    this.groupStatusText     = (TextView) findViewById(R.id.group_message_status);
-    this.secureImage         = (ImageView)findViewById(R.id.sms_secure_indicator);
-    this.failedImage         = (ImageView)findViewById(R.id.sms_failed_indicator);
-    this.mmsContainer        =            findViewById(R.id.mms_view);
-    this.mmsThumbnail        = (ImageView)findViewById(R.id.image_view);
-    this.mmsDownloadButton   = (Button)   findViewById(R.id.mms_download_button);
-    this.mmsDownloadingLabel = (TextView) findViewById(R.id.mms_label_downloading);
-    this.contactPhoto        = (ImageView)findViewById(R.id.contact_photo);
-    this.deliveredImage      = (ImageView)findViewById(R.id.delivered_indicator);
-    this.conversationParent  =            findViewById(R.id.conversation_item_parent);
-    this.triangleTick        =            findViewById(R.id.triangle_tick);
-    this.pendingIndicator    = (ImageView)findViewById(R.id.pending_approval_indicator);
+    this.bodyText            = (TextView)    findViewById(R.id.conversation_item_body);
+    this.dateText            = (TextView)    findViewById(R.id.conversation_item_date);
+    this.indicatorText       = (TextView)    findViewById(R.id.indicator_text);
+    this.groupStatusText     = (TextView)    findViewById(R.id.group_message_status);
+    this.secureImage         = (ImageView)   findViewById(R.id.sms_secure_indicator);
+    this.failedImage         = (ImageView)   findViewById(R.id.sms_failed_indicator);
+    this.mmsContainer        = (FrameLayout) findViewById(R.id.mms_view);
+    this.mmsThumbnail        = (ImageView)   findViewById(R.id.image_view);
+    this.mmsDownloadButton   = (Button)      findViewById(R.id.mms_download_button);
+    this.mmsDownloadingLabel = (TextView)    findViewById(R.id.mms_label_downloading);
+    this.contactPhoto        = (ImageView)   findViewById(R.id.contact_photo);
+    this.deliveredImage      = (ImageView)   findViewById(R.id.delivered_indicator);
+    this.conversationParent  =               findViewById(R.id.conversation_item_parent);
+    this.triangleTick        =               findViewById(R.id.triangle_tick);
+    this.pendingIndicator    = (ImageView)   findViewById(R.id.pending_approval_indicator);
+    this.mmsDownloadProgress = (CircularProgressBar) findViewById(R.id.mms_progress);
     this.backgroundDrawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
+
 
     setOnClickListener(clickListener);
     if (failedImage != null)       failedImage.setOnClickListener(failedIconClickListener);
@@ -177,12 +191,32 @@ public class ConversationItem extends LinearLayout {
       } else if (messageRecord.isMms()) {
         setMediaMmsAttributes((MediaMmsMessageRecord)messageRecord);
       }
+
+      attachmentDownloadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          final long message         = intent.getLongExtra("message_id", -1);
+          if (message != ConversationItem.this.messageRecord.getId()) return;
+
+          final long downloadedBytes = intent.getLongExtra("downloaded_bytes", -1);
+          final long totalBytes      = intent.getLongExtra("total_bytes", -1);
+
+          final int percentDone;
+          if (totalBytes > 0)  percentDone = (int) (100 * downloadedBytes / totalBytes);
+          else                 percentDone = 0;
+
+          if ( percentDone >= 100) LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+
+          Log.i(TAG, "progress update for " + message + ", new percentage: " + percentDone + "%, " + downloadedBytes + "/" + totalBytes);
+          mmsDownloadProgress.setProgress(percentDone);
+        }
+      };
     }
   }
 
   public void unbind() {
-    if (slideDeck != null)
-      slideDeck.setListener(null);
+    if (slideDeck != null) slideDeck.setListener(null);
+    LocalBroadcastManager.getInstance(context).unregisterReceiver(attachmentDownloadReceiver);
   }
 
   public MessageRecord getMessageRecord() {
@@ -361,7 +395,17 @@ public class ConversationItem extends LinearLayout {
           public void run() {
             for (Slide slide : result.getSlides()) {
               if (slide.hasImage()) {
-                slide.setThumbnailOn(mmsThumbnail);
+                Log.i(TAG, "Slide's image has content type " + slide.getContentType());
+
+                LocalBroadcastManager.getInstance(context)
+                                     .registerReceiver(attachmentDownloadReceiver,
+                                                       new IntentFilter("attachment-download-progress"));
+
+                if (mmsDownloadProgress != null) {
+                  mmsDownloadProgress.setProgress(0);
+                  mmsDownloadProgress.setIndeterminate(false);
+                }
+                slide.setThumbnailOn(mmsThumbnail, mmsDownloadProgress);
                 mmsThumbnail.setOnClickListener(new ThumbnailClickListener(slide));
                 mmsThumbnail.setOnLongClickListener(new OnLongClickListener() {
                   @Override
@@ -375,6 +419,7 @@ public class ConversationItem extends LinearLayout {
             }
 
             mmsThumbnail.setVisibility(View.GONE);
+            mmsDownloadProgress.setVisibility(GONE);
           }
         });
       }
@@ -569,16 +614,34 @@ public class ConversationItem extends LinearLayout {
       this.slide = slide;
     }
 
-//    private void fireIntent() {
-//      Log.w("ConversationItem", "Clicked: " + slide.getUri() + " , " + slide.getContentType());
-//      Intent intent = new Intent(Intent.ACTION_VIEW);
-//      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//      intent.setDataAndType(slide.getUri(), slide.getContentType());
-//      context.startActivity(intent);
-//    }
+    private void fireIntent() {
+      Log.w("ConversationItem", "Clicked: " + slide.getUri() + " , " + slide.getContentType());
+      Intent intent = new Intent(Intent.ACTION_VIEW);
+      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+      intent.setDataAndType(slide.getUri(), slide.getContentType());
+      context.startActivity(intent);
+    }
 
     public void onClick(View v) {
-      Toast.makeText(context, "Display something...", Toast.LENGTH_SHORT).show();
+      if (MediaPreviewActivity.isContentTypeSupported(slide.getContentType())) {
+        final Intent intent = new Intent(context, MediaPreviewActivity.class);
+        intent.setDataAndType(slide.getUri(), slide.getContentType());
+        intent.putExtra(MediaPreviewActivity.MASTER_SECRET_EXTRA, masterSecret);
+        context.startActivity(intent);
+      } else {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.ConversationItem_view_secure_media_question);
+        builder.setIcon(Dialogs.resolveIcon(context, R.attr.dialog_alert_icon));
+        builder.setCancelable(true);
+        builder.setMessage(R.string.ConversationItem_this_media_has_been_stored_in_an_encrypted_database_external_viewer_warning);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            fireIntent();
+          }
+        });
+        builder.setNegativeButton(R.string.no, null);
+        builder.show();
+      }
     }
   }
 

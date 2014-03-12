@@ -3,6 +3,7 @@ package org.thoughtcrime.securesms.service;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Pair;
 
@@ -60,7 +61,7 @@ public class PushDownloader {
     }
   }
 
-  private void retrievePart(MasterSecret masterSecret, PduPart part, long messageId, long partId) {
+  private void retrievePart(final MasterSecret masterSecret, final PduPart part, final long messageId, final long partId) {
     PartDatabase database       = DatabaseFactory.getPartDatabase(context);
     File         attachmentFile = null;
 
@@ -74,7 +75,19 @@ public class PushDownloader {
         relay = Util.toIsoString(part.getName());
       }
 
-      attachmentFile              = downloadAttachment(relay, contentLocation);
+      PushServiceSocket.TransferProgressListener listener = new PushServiceSocket.TransferProgressListener() {
+        @Override
+        public void onProgressUpdate(long downloadedBytes, long totalBytes) {
+          Intent intent = new Intent("attachment-download-progress");
+          intent.putExtra("message_id", messageId);
+          intent.putExtra("part_id", partId);
+          intent.putExtra("downloaded_bytes", downloadedBytes);
+          intent.putExtra("total_bytes", totalBytes);
+          LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        }
+      };
+
+      attachmentFile              = downloadAttachment(relay, contentLocation, listener);
       InputStream attachmentInput = new AttachmentCipherInputStream(attachmentFile, key);
 
       database.updateDownloadedPart(masterSecret, messageId, partId, part, attachmentInput);
@@ -108,9 +121,11 @@ public class PushDownloader {
     }
   }
 
-  private File downloadAttachment(String relay, long contentLocation) throws IOException {
+  private File downloadAttachment(String relay, long contentLocation, PushServiceSocket.TransferProgressListener listener)
+      throws IOException
+  {
     PushServiceSocket socket = PushServiceSocketFactory.create(context);
-    return socket.retrieveAttachment(relay, contentLocation);
+    return socket.retrieveAttachment(relay, contentLocation, listener);
   }
 
 }

@@ -65,7 +65,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone">
-
+                <org.thoughtcrime.securesms.components.CircularProgressBar
+                    android:id="@+id/mms_progress"
+                    style="@style/Widget.ProgressBar.Holo.CircularProgressBar"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
                 <ImageView android:id="@+id/image_view"
                     android:layout_width="230dip"
                     android:layout_height="174dip"

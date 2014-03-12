@@ -28,7 +28,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore.Audio;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 public class AudioSlide extends Slide {
 
@@ -56,8 +58,9 @@ public class AudioSlide extends Slide {
   }
 
   @Override
-  public void setThumbnailOn(ImageView imageView) {
+  public void setThumbnailOn(ImageView imageView, View pendingIndicator) {
     imageView.setImageDrawable(getThumbnail(imageView.getWidth(), imageView.getHeight()));
+    pendingIndicator.setVisibility(View.GONE);
   }
 
   public static PduPart constructPartFromUri(Context context, Uri uri) throws IOException, MediaTooLargeException {

@@ -109,6 +109,13 @@
               android:windowSoftInputMode="stateUnchanged"
               android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
 
+    <activity android:name=".MediaPreviewActivity"
+              android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+    <activity android:name=".ConversationActivity"
+          android:windowSoftInputMode="stateUnchanged"
+          android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
     <activity android:name=".GroupCreateActivity"
               android:windowSoftInputMode="stateVisible"
               android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
