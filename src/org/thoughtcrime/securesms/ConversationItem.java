@@ -553,7 +553,10 @@ public class ConversationItem extends LinearLayout {
 //    }
 
     public void onClick(View v) {
-      Toast.makeText(context, "Display something...", Toast.LENGTH_SHORT).show();
+      final Intent intent = new Intent(context, MediaPreviewActivity.class);
+      intent.setDataAndType(slide.getUri(), slide.getContentType());
+      intent.putExtra(MediaPreviewActivity.MASTER_SECRET_EXTRA, masterSecret);
+      context.startActivity(intent);
     }
   }
 
