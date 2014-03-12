@@ -73,6 +73,9 @@ public class PartDatabase extends Database {
   private static final String THUMBNAIL               = "_thumbnail";
   private static final String SIZE                    = "data_size";
 
+  public static final int IMAGE_THUMBNAIL_MAX_WIDTH  = 345;
+  public static final int IMAGE_THUMBNAIL_MAX_HEIGHT = 261;
+
   public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" + ID + " INTEGER PRIMARY KEY, "              +
     MMS_ID + " INTEGER, " + SEQUENCE + " INTEGER DEFAULT 0, "                        +
     CONTENT_TYPE + " TEXT, " + NAME + " TEXT, " + CHARSET + " INTEGER, "             +
@@ -556,7 +559,7 @@ public class PartDatabase extends Database {
         InputStream measureStream = getPartStream(masterSecret, partId);
         InputStream dataStream    = getPartStream(masterSecret, partId);
 
-        return BitmapUtil.createScaledBitmap(measureStream, dataStream, 345, 261);
+        return BitmapUtil.createScaledBitmap(measureStream, dataStream, IMAGE_THUMBNAIL_MAX_WIDTH, IMAGE_THUMBNAIL_MAX_HEIGHT);
       } catch (FileNotFoundException e) {
         Log.w("PartDataase", e);
         return null;
