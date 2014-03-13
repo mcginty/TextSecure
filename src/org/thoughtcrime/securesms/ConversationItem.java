@@ -57,6 +57,7 @@ import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.util.Emoji;
 import org.whispersystems.textsecure.crypto.MasterSecret;
+import org.whispersystems.textsecure.push.PushServiceSocket;
 import org.whispersystems.textsecure.storage.Session;
 import org.whispersystems.textsecure.util.FutureTaskListener;
 import org.whispersystems.textsecure.util.ListenableFutureTask;
@@ -189,8 +190,8 @@ public class ConversationItem extends LinearLayout {
   }
 
   public void unbind() {
-    if (slideDeck != null)
-      slideDeck.setListener(null);
+    if (slideDeck != null) slideDeck.setListener(null);
+
   }
 
   public MessageRecord getMessageRecord() {
