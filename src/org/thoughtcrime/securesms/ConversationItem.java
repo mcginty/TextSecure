@@ -37,11 +37,13 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.thoughtcrime.securesms.components.GifView;
 import org.thoughtcrime.securesms.database.MmsDatabase;
 import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
@@ -110,10 +112,11 @@ public class ConversationItem extends LinearLayout {
   private  ImageView contactPhoto;
   private  ImageView deliveredImage;
 
-  private  View      mmsContainer;
-  private  ImageView mmsThumbnail;
-  private  Button    mmsDownloadButton;
-  private  TextView  mmsDownloadingLabel;
+  private  FrameLayout mmsContainer;
+  private  ImageView   mmsThumbnail;
+  private  GifView     gifView;
+  private  Button      mmsDownloadButton;
+  private  TextView    mmsDownloadingLabel;
   private  ListenableFutureTask<SlideDeck> slideDeck;
   private  TypedArray backgroundDrawables;
 
@@ -138,19 +141,19 @@ public class ConversationItem extends LinearLayout {
   protected void onFinishInflate() {
     super.onFinishInflate();
 
-    this.bodyText            = (TextView) findViewById(R.id.conversation_item_body);
-    this.dateText            = (TextView) findViewById(R.id.conversation_item_date);
-    this.groupStatusText     = (TextView) findViewById(R.id.group_message_status);
-    this.secureImage         = (ImageView)findViewById(R.id.sms_secure_indicator);
-    this.failedImage         = (ImageView)findViewById(R.id.sms_failed_indicator);
-    this.keyImage            = (ImageView)findViewById(R.id.key_exchange_indicator);
-    this.mmsContainer        =            findViewById(R.id.mms_view);
-    this.mmsThumbnail        = (ImageView)findViewById(R.id.image_view);
-    this.mmsDownloadButton   = (Button)   findViewById(R.id.mms_download_button);
-    this.mmsDownloadingLabel = (TextView) findViewById(R.id.mms_label_downloading);
-    this.contactPhoto        = (ImageView)findViewById(R.id.contact_photo);
-    this.deliveredImage      = (ImageView)findViewById(R.id.delivered_indicator);
-    this.conversationParent  = (View)     findViewById(R.id.conversation_item_parent);
+    this.bodyText            = (TextView)    findViewById(R.id.conversation_item_body);
+    this.dateText            = (TextView)    findViewById(R.id.conversation_item_date);
+    this.groupStatusText     = (TextView)    findViewById(R.id.group_message_status);
+    this.secureImage         = (ImageView)   findViewById(R.id.sms_secure_indicator);
+    this.failedImage         = (ImageView)   findViewById(R.id.sms_failed_indicator);
+    this.keyImage            = (ImageView)   findViewById(R.id.key_exchange_indicator);
+    this.mmsContainer        = (FrameLayout) findViewById(R.id.mms_view);
+    this.mmsThumbnail        = (ImageView)   findViewById(R.id.image_view);
+    this.mmsDownloadButton   = (Button)      findViewById(R.id.mms_download_button);
+    this.mmsDownloadingLabel = (TextView)    findViewById(R.id.mms_label_downloading);
+    this.contactPhoto        = (ImageView)   findViewById(R.id.contact_photo);
+    this.deliveredImage      = (ImageView)   findViewById(R.id.delivered_indicator);
+    this.conversationParent  =               findViewById(R.id.conversation_item_parent);
     this.backgroundDrawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
 
     setOnClickListener(clickListener);
@@ -343,12 +346,17 @@ public class ConversationItem extends LinearLayout {
           public void run() {
             for (Slide slide : result.getSlides()) {
               if (slide.hasImage()) {
-                slide.setThumbnailOn(mmsThumbnail);
+                Log.i(TAG, "Slide's image has content type " + slide.getContentType());
+                if ("image/gif".equals(slide.getContentType())) {
+                  slide.setGifOn(mmsContainer);
+                } else {
+                  slide.setThumbnailOn(mmsThumbnail);
 //                mmsThumbnail.setImageBitmap(slide.getThumbnail());
-                mmsThumbnail.setOnClickListener(new ThumbnailClickListener(slide));
-                mmsThumbnail.setOnLongClickListener(new ThumbnailSaveListener(slide));
-                mmsThumbnail.setVisibility(View.VISIBLE);
-                return;
+                  mmsThumbnail.setOnClickListener(new ThumbnailClickListener(slide));
+                  mmsThumbnail.setOnLongClickListener(new ThumbnailSaveListener(slide));
+                  mmsThumbnail.setVisibility(View.VISIBLE);
+                  return;
+                }
               }
             }
 

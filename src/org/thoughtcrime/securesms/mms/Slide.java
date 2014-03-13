@@ -26,8 +26,10 @@ import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import org.thoughtcrime.securesms.components.GifView;
 import org.thoughtcrime.securesms.database.MmsDatabase;
 import org.thoughtcrime.securesms.util.LRUCache;
 import org.thoughtcrime.securesms.util.Util;
@@ -89,6 +91,14 @@ public abstract class Slide {
 	
   public Drawable getThumbnail(int maxWidth, int maxHeight) {
     throw new AssertionError("getThumbnail() called on non-thumbnail producing slide!");
+  }
+
+  public void setGifOn(FrameLayout layout) {
+    try {
+      layout.addView(new GifView(context, getPartDataInputStream()));
+    } catch (IOException ioe) {
+      Log.w("Slide", ioe);
+    }
   }
 
   public void setThumbnailOn(ImageView imageView) {
