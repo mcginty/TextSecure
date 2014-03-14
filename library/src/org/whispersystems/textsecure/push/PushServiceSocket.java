@@ -252,10 +252,12 @@ public class PushServiceSocket {
       InputStream input   = connection.getInputStream();
       byte[] buffer       = new byte[4096];
       int read;
+      long totalRead = 0;
 
       while ((read = input.read(buffer)) != -1) {
         output.write(buffer, 0, read);
-        if (progressListener != null) progressListener.onProgressUpdate(read, totalBytes);
+        totalRead += read;
+        if (progressListener != null) progressListener.onProgressUpdate(totalRead, totalBytes);
       }
 
       output.close();

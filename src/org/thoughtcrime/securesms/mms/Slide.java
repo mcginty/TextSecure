@@ -26,8 +26,12 @@ import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import org.thoughtcrime.securesms.components.GifView;
 import org.thoughtcrime.securesms.database.MmsDatabase;
@@ -101,13 +105,13 @@ public abstract class Slide {
     }
   }
 
-  public void setThumbnailOn(ImageView imageView) {
+  public void setThumbnailOn(ImageView imageView, final View pendingIndicator) {
     final long setBegin = System.currentTimeMillis();
     Drawable thumbnail = getCachedThumbnail();
 
     if (thumbnail != null) {
       Log.w("ImageSlide", "Setting cached thumbnail...");
-      setThumbnailOn(imageView, thumbnail, true);
+      setThumbnailOn(imageView, thumbnail, true, pendingIndicator);
       return;
     }
 
@@ -117,6 +121,7 @@ public abstract class Slide {
     final int                      maxWidth          = imageView.getWidth();
     final int                      maxHeight         = imageView.getHeight();
 
+    if (pendingIndicator != null) pendingIndicator.setVisibility(View.VISIBLE);
     imageView.setImageDrawable(temporaryDrawable);
 
     if (maxWidth == 0 || maxHeight == 0)
@@ -133,7 +138,7 @@ public abstract class Slide {
           handler.post(new Runnable() {
             @Override
             public void run() {
-              setThumbnailOn(destination, bitmap, false);
+              setThumbnailOn(destination, bitmap, false, pendingIndicator);
               long endThumb = System.currentTimeMillis();
               Log.w("Slide", "Thumbnail generation: " + (endThumb - startThumb) + " millis.");
               Log.w("Slide", "Full process: " + (endThumb - setBegin) + " millis.");
@@ -174,14 +179,32 @@ public abstract class Slide {
     return part;
   }
 
-  private void setThumbnailOn(ImageView imageView, Drawable thumbnail, boolean fromMemory) {
+  private void setThumbnailOn(ImageView imageView, Drawable thumbnail, boolean fromMemory, final View pendingIndicator) {
     if (fromMemory) {
       imageView.setImageDrawable(thumbnail);
     } else if (thumbnail instanceof AnimationDrawable) {
       imageView.setImageDrawable(thumbnail);
       ((AnimationDrawable)imageView.getDrawable()).start();
     } else {
-      TransitionDrawable fadingResult = new TransitionDrawable(new Drawable[]{new ColorDrawable(Color.TRANSPARENT), thumbnail});
+      TransitionDrawable fadingResult    = new TransitionDrawable(new Drawable[]{new ColorDrawable(Color.TRANSPARENT), thumbnail});
+      if (pendingIndicator != null && pendingIndicator.getVisibility() == View.VISIBLE) {
+        AlphaAnimation fadingIndicator = new AlphaAnimation(1.0f, 0.0f);
+        fadingIndicator.setAnimationListener(new Animation.AnimationListener() {
+          @Override
+          public void onAnimationStart(Animation animation) {
+          }
+
+          @Override
+          public void onAnimationEnd(Animation animation) {
+            pendingIndicator.setVisibility(View.GONE);
+          }
+
+          @Override
+          public void onAnimationRepeat(Animation animation) {
+          }
+        });
+        pendingIndicator.startAnimation(fadingIndicator);
+      }
       imageView.setImageDrawable(fadingResult);
       fadingResult.startTransition(300);
     }

@@ -18,9 +18,11 @@ package org.thoughtcrime.securesms;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -32,6 +34,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Contacts.Intents;
 import android.provider.ContactsContract.QuickContact;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -43,6 +46,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.thoughtcrime.securesms.components.CircularProgressBar;
 import org.thoughtcrime.securesms.components.GifView;
 import org.thoughtcrime.securesms.database.MmsDatabase;
 import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
@@ -120,6 +124,7 @@ public class ConversationItem extends LinearLayout {
   private  TextView    mmsDownloadingLabel;
   private  ListenableFutureTask<SlideDeck> slideDeck;
   private  TypedArray backgroundDrawables;
+  private  CircularProgressBar mmsDownloadProgress;
 
   private final FailedIconClickListener failedIconClickListener         = new FailedIconClickListener();
   private final MmsDownloadClickListener mmsDownloadClickListener       = new MmsDownloadClickListener();
@@ -152,10 +157,12 @@ public class ConversationItem extends LinearLayout {
     this.mmsThumbnail        = (ImageView)   findViewById(R.id.image_view);
     this.mmsDownloadButton   = (Button)      findViewById(R.id.mms_download_button);
     this.mmsDownloadingLabel = (TextView)    findViewById(R.id.mms_label_downloading);
+    this.mmsDownloadProgress = (CircularProgressBar) findViewById(R.id.mms_progress);
     this.contactPhoto        = (ImageView)   findViewById(R.id.contact_photo);
     this.deliveredImage      = (ImageView)   findViewById(R.id.delivered_indicator);
     this.conversationParent  =               findViewById(R.id.conversation_item_parent);
     this.backgroundDrawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
+
 
     setOnClickListener(clickListener);
     if (failedImage != null)       failedImage.setOnClickListener(failedIconClickListener);
@@ -348,20 +355,43 @@ public class ConversationItem extends LinearLayout {
             for (Slide slide : result.getSlides()) {
               if (slide.hasImage()) {
                 Log.i(TAG, "Slide's image has content type " + slide.getContentType());
-                if ("image/gif".equals(slide.getContentType())) {
-                  slide.setGifOn(mmsContainer);
-                } else {
-                  slide.setThumbnailOn(mmsThumbnail);
-//                mmsThumbnail.setImageBitmap(slide.getThumbnail());
-                  mmsThumbnail.setOnClickListener(new ThumbnailClickListener(slide));
-                  mmsThumbnail.setOnLongClickListener(new ThumbnailSaveListener(slide));
-                  mmsThumbnail.setVisibility(View.VISIBLE);
-                  return;
+                BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+                  @Override
+                  public void onReceive(Context context, Intent intent) {
+                    // Get extra data included in the Intent
+                    long message = intent.getLongExtra("message_id", -1);
+                    final long downloadedBytes = intent.getLongExtra("downloaded_bytes", -1);
+                    final long totalBytes      = intent.getLongExtra("total_bytes", -1);
+
+                    final int percentDone;
+                    if (totalBytes > 0) {
+                      percentDone = (int) (100 * downloadedBytes / totalBytes);
+                    } else {
+                      percentDone = 0;
+                    }
+                    Log.i(TAG, "progress update for " + message + ", new percentage: " + percentDone + "%, " + downloadedBytes + "/" + totalBytes);
+                    mmsDownloadProgress.setProgress(percentDone);
+                  }
+                };
+
+                LocalBroadcastManager.getInstance(context)
+                                     .registerReceiver(mMessageReceiver,
+                                                       new IntentFilter("attachment-download-progress"));
+
+                if (mmsDownloadProgress != null) {
+                  mmsDownloadProgress.setProgress(0);
+                  mmsDownloadProgress.setIndeterminate(false);
                 }
+                slide.setThumbnailOn(mmsThumbnail, mmsDownloadProgress);
+                mmsThumbnail.setOnClickListener(new ThumbnailClickListener(slide));
+                mmsThumbnail.setOnLongClickListener(new ThumbnailSaveListener(slide));
+                mmsThumbnail.setVisibility(View.VISIBLE);
+                return;
               }
             }
 
             mmsThumbnail.setVisibility(View.GONE);
+            mmsDownloadProgress.setVisibility(GONE);
           }
         });
       }

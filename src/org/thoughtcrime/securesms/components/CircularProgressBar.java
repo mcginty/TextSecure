@@ -35,7 +35,6 @@ import android.graphics.Typeface;
 import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ProgressBar;
@@ -220,7 +219,6 @@ public class CircularProgressBar extends ProgressBar{
       public void onAnimationUpdate(final ValueAnimator animation) {
         int progress = ((Float) animation.getAnimatedValue()).intValue();
         if(progress!=CircularProgressBar.this.getProgress()){
-          Log.d(TAG, progress + "");
           CircularProgressBar.this.setProgress(progress);
           if(listener!=null)
             listener.onAnimationProgress(progress);

@@ -19,7 +19,9 @@ package org.thoughtcrime.securesms.mms;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.util.LRUCache;
@@ -48,8 +50,9 @@ public class TextSlide extends Slide {
   }
 
   @Override
-  public void setThumbnailOn(ImageView imageView) {
+  public void setThumbnailOn(ImageView imageView, View pendingIndicator) {
     imageView.setImageDrawable(getThumbnail(imageView.getWidth(), imageView.getHeight()));
+    pendingIndicator.setVisibility(View.GONE);
   }
 
   @Override
