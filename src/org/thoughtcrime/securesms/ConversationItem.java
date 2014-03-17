@@ -126,6 +126,8 @@ public class ConversationItem extends LinearLayout {
   private  TypedArray backgroundDrawables;
   private  CircularProgressBar mmsDownloadProgress;
 
+  private BroadcastReceiver attachmentDownloadReceiver;
+
   private final FailedIconClickListener failedIconClickListener         = new FailedIconClickListener();
   private final MmsDownloadClickListener mmsDownloadClickListener       = new MmsDownloadClickListener();
   private final MmsPreferencesClickListener mmsPreferencesClickListener = new MmsPreferencesClickListener();
@@ -193,12 +195,32 @@ public class ConversationItem extends LinearLayout {
       } else if (messageRecord instanceof MediaMmsMessageRecord) {
         setMediaMmsAttributes((MediaMmsMessageRecord)messageRecord);
       }
+
+      attachmentDownloadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          final long message         = intent.getLongExtra("message_id", -1);
+          if (message != ConversationItem.this.messageRecord.getId()) return;
+
+          final long downloadedBytes = intent.getLongExtra("downloaded_bytes", -1);
+          final long totalBytes      = intent.getLongExtra("total_bytes", -1);
+
+          final int percentDone;
+          if (totalBytes > 0)  percentDone = (int) (100 * downloadedBytes / totalBytes);
+          else                 percentDone = 0;
+
+          if ( percentDone >= 100) LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+
+          Log.i(TAG, "progress update for " + message + ", new percentage: " + percentDone + "%, " + downloadedBytes + "/" + totalBytes);
+          mmsDownloadProgress.setProgress(percentDone);
+        }
+      };
     }
   }
 
   public void unbind() {
     if (slideDeck != null) slideDeck.setListener(null);
-
+    LocalBroadcastManager.getInstance(context).unregisterReceiver(attachmentDownloadReceiver);
   }
 
   public MessageRecord getMessageRecord() {
@@ -355,27 +377,9 @@ public class ConversationItem extends LinearLayout {
             for (Slide slide : result.getSlides()) {
               if (slide.hasImage()) {
                 Log.i(TAG, "Slide's image has content type " + slide.getContentType());
-                BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-                  @Override
-                  public void onReceive(Context context, Intent intent) {
-                    // Get extra data included in the Intent
-                    long message = intent.getLongExtra("message_id", -1);
-                    final long downloadedBytes = intent.getLongExtra("downloaded_bytes", -1);
-                    final long totalBytes      = intent.getLongExtra("total_bytes", -1);
-
-                    final int percentDone;
-                    if (totalBytes > 0) {
-                      percentDone = (int) (100 * downloadedBytes / totalBytes);
-                    } else {
-                      percentDone = 0;
-                    }
-                    Log.i(TAG, "progress update for " + message + ", new percentage: " + percentDone + "%, " + downloadedBytes + "/" + totalBytes);
-                    mmsDownloadProgress.setProgress(percentDone);
-                  }
-                };
 
                 LocalBroadcastManager.getInstance(context)
-                                     .registerReceiver(mMessageReceiver,
+                                     .registerReceiver(attachmentDownloadReceiver,
                                                        new IntentFilter("attachment-download-progress"));
 
                 if (mmsDownloadProgress != null) {
