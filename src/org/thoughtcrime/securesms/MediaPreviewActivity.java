@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -29,14 +30,21 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import org.apache.http.conn.util.InetAddressUtils;
 import org.thoughtcrime.securesms.components.TouchImageView;
 import org.thoughtcrime.securesms.mms.PartAuthority;
 import org.thoughtcrime.securesms.util.ActionBarUtil;
 import org.thoughtcrime.securesms.util.DynamicTheme;
+import org.thoughtcrime.securesms.util.MediaServer;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+import java.util.Properties;
 
 /**
  * Activity for initiating/receiving key QR code scans.
@@ -77,7 +85,7 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
       final InputStream is = PartAuthority.getPartStream(this, masterSecret, uri);
       if (type != null) {
         if (type.startsWith("image/")) displayImage(is);
-        //else if (type.startsWith("video/")) displayVideo(is);
+        else if (type.startsWith("video/")) displayVideo(is);
         else throw new UnsupportedOperationException("Type not supported.");
       }
     } catch (IOException ioe) {
@@ -89,7 +97,6 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
       Toast.makeText(getApplicationContext(), "Unsupported media type", Toast.LENGTH_LONG).show();
       finish();
     }
-
   }
 
   private void initializeResources() {
@@ -103,7 +110,8 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
   }
 
   private void displayVideo(final InputStream is) {
-    //TODO
+    video.setVideoPath("rtsp://192.168.0.11:5544/stream.sdp");
+    video.setMediaController(new MediaController(this));
   }
 
   private void saveToDisk() {
@@ -134,4 +142,47 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
 
     return false;
   }
+
+  private boolean initWebServer(final InputStream is) {
+    String ipAddr = getLocalIpAddress();
+    MediaServer.CommonGatewayInterface doCapture = new MediaServer.CommonGatewayInterface() {
+      @Override
+      public String run(Properties parms) {
+        return null;
+      }
+      @Override
+      public InputStream streaming(Properties parms) {
+        return is;
+      }
+    };
+
+    if (ipAddr != null) {
+      try {
+        MediaServer webServer = new MediaServer(8080, this);
+        webServer.registerCGI("/stream/media.mp4", doCapture);
+      } catch (IOException e) {
+        Log.w(TAG, e);
+      }
+    }
+    return true;
+  }
+
+  public String getLocalIpAddress() {
+    try {
+      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+        NetworkInterface intf = en.nextElement();
+        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+          InetAddress inetAddress = enumIpAddr.nextElement();
+          if (!inetAddress.isLoopbackAddress() && InetAddressUtils.isIPv4Address(inetAddress.getHostAddress())) {
+            String ipAddr = inetAddress.getHostAddress();
+            return ipAddr;
+          }
+        }
+      }
+    } catch (SocketException ex) {
+      Log.d(TAG, ex.toString());
+    }
+    return null;
+  }
+
 }

@@ -1,7 +1,5 @@
 package org.thoughtcrime.securesms.components;
 
-import java.io.InputStream;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,18 +7,19 @@ import android.graphics.Movie;
 import android.os.SystemClock;
 import android.view.View;
 
-/*
- * from https://code.google.com/p/animated-gifs-in-android/source/browse/trunk/AnimatedGifs/src/eu/andlabs/tutorial/animatedgifs/views/GifView.java
- */
-public class GifView extends View {
+import java.io.InputStream;
+
+public class MovieView extends View {
 
   private Movie movie;
 
   private long movieStart;
 
-  public GifView(Context context, InputStream stream) {
+  public MovieView(Context context) {
     super(context);
+  }
 
+  public void setMovie(InputStream stream) {
     movie = Movie.decodeStream(stream);
   }
 
@@ -33,6 +32,7 @@ public class GifView extends View {
     if (movieStart == 0) {
       movieStart = now;
     }
+
     final int relTime = (int)((now - movieStart) % movie.duration());
     movie.setTime(relTime);
     movie.draw(canvas, 10, 10);
