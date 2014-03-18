@@ -131,7 +131,7 @@ public class ConversationListItem extends RelativeLayout
   private void setContactPhoto(final Recipient recipient) {
     if (recipient == null) return;
 
-    contactPhotoImage.setImageBitmap(BitmapUtil.getCircleCroppedBitmap(recipient.getContactPhoto()));
+    contactPhotoImage.setImageBitmap(recipient.getContactPhoto());
     if (!recipient.isGroupRecipient()) {
       contactPhotoImage.setOnClickListener(new View.OnClickListener() {
         @Override

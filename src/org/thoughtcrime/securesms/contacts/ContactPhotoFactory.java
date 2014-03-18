@@ -10,6 +10,7 @@ import android.provider.ContactsContract.Contacts;
 
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.recipients.Recipient;
+import org.thoughtcrime.securesms.util.BitmapUtil;
 import org.thoughtcrime.securesms.util.LRUCache;
 
 import java.io.InputStream;
@@ -38,7 +39,7 @@ public class ContactPhotoFactory {
       if (defaultContactPhoto == null)
         defaultContactPhoto =  BitmapFactory.decodeResource(context.getResources(),
                                                             R.drawable.ic_contact_picture);
-      return defaultContactPhoto;
+      return BitmapUtil.getCircleCroppedBitmap(defaultContactPhoto);
     }
   }
 
@@ -47,7 +48,7 @@ public class ContactPhotoFactory {
       if (defaultGroupContactPhoto == null)
         defaultGroupContactPhoto =  BitmapFactory.decodeResource(context.getResources(),
                                                                  R.drawable.ic_group_photo);
-      return defaultGroupContactPhoto;
+      return BitmapUtil.getCircleCroppedBitmap(defaultGroupContactPhoto);
     }
   }
 
@@ -82,10 +83,10 @@ public class ContactPhotoFactory {
     localUserContactPhotoCache.remove(recipient.getContactUri());
   }
 
-  private static Bitmap getContactPhoto(Context context, Uri uri) {
+  public static Bitmap getContactPhoto(Context context, Uri uri) {
     InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(), uri);
 
-    if (inputStream == null) return ContactPhotoFactory.getDefaultContactPhoto(context);
-    else                     return BitmapFactory.decodeStream(inputStream);
+    if (inputStream == null) return BitmapUtil.getCircleCroppedBitmap(ContactPhotoFactory.getDefaultContactPhoto(context));
+    else                     return BitmapUtil.getCircleCroppedBitmap(BitmapFactory.decodeStream(inputStream));
   }
 }

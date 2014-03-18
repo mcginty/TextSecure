@@ -402,6 +402,7 @@ public class GroupCreateActivity extends PassphraseRequiredSherlockFragmentActiv
     @Override
     public void onClick(View v) {
       Intent intent = new Intent(GroupCreateActivity.this, PushContactSelectionActivity.class);
+      intent.putExtra(PushContactSelectionActivity.MULTI_SELECT_EXTRA, true);
       startActivityForResult(intent, PICK_CONTACT);
     }
   }

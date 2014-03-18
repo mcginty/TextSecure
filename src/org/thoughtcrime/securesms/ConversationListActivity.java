@@ -170,8 +170,9 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
   }
 
   private void openSingleContactSelection() {
-    Intent intent = new Intent(this, SingleContactSelectionActivity.class);
-    intent.putExtra(SingleContactSelectionActivity.MASTER_SECRET_EXTRA, masterSecret);
+    Intent intent = new Intent(this, PushContactSelectionActivity.class);
+    intent.putExtra(PushContactSelectionActivity.MASTER_SECRET_EXTRA, masterSecret);
+    intent.putExtra(PushContactSelectionActivity.MULTI_SELECT_EXTRA, false);
     startActivity(intent);
   }
 

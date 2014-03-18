@@ -90,7 +90,7 @@
               android:windowSoftInputMode="stateUnchanged"              
               android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
 
-     <activity android:name=".MmsPreferencesActivity"
+    <activity android:name=".MmsPreferencesActivity"
                android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
 
     <activity android:name=".ConversationListActivity"
@@ -132,11 +132,6 @@
 
     <activity android:name=".ContactSelectionActivity"
               android:label="@string/AndroidManifest__select_contacts"
-              android:windowSoftInputMode="stateHidden"
-              android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
-
-    <activity android:name=".SingleContactSelectionActivity"
-              android:label="@string/AndroidManifest__select_contact"
               android:windowSoftInputMode="stateHidden"
               android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
 
