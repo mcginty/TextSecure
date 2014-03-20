@@ -17,13 +17,13 @@
 package org.thoughtcrime.securesms.mms;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import org.thoughtcrime.securesms.ConversationActivity;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.util.BitmapDecodingException;
 
@@ -31,18 +31,18 @@ import java.io.IOException;
 
 public class AttachmentManager {
 
-  private final Context context;
-  private final View attachmentView;
-  private final ImageView thumbnail;
-  private final Button removeButton;
-  private final SlideDeck slideDeck;
+  private final ConversationActivity conversation;
+  private final View                 attachmentView;
+  private final ImageView            thumbnail;
+  private final Button               removeButton;
+  private final SlideDeck            slideDeck;
 
-  public AttachmentManager(Activity view) {
-    this.attachmentView = (View)view.findViewById(R.id.attachment_editor);
-    this.thumbnail      = (ImageView)view.findViewById(R.id.attachment_thumbnail);
-    this.removeButton   = (Button)view.findViewById(R.id.remove_image_button);
+  public AttachmentManager(ConversationActivity conversation) {
+    this.attachmentView =             conversation.findViewById(R.id.attachment_editor);
+    this.thumbnail      = (ImageView) conversation.findViewById(R.id.attachment_thumbnail);
+    this.removeButton   = (Button)    conversation.findViewById(R.id.remove_image_button);
     this.slideDeck      = new SlideDeck();
-    this.context        = view;
+    this.conversation   = conversation;
 
     this.removeButton.setOnClickListener(new RemoveButtonListener());
   }
@@ -50,27 +50,33 @@ public class AttachmentManager {
   public void clear() {
     slideDeck.clear();
     attachmentView.setVisibility(View.GONE);
+    conversation.updateSendButtonState();
+  }
+
+  private void show() {
+    attachmentView.setVisibility(View.VISIBLE);
+    conversation.updateSendButtonState();
   }
 
   public void setImage(Uri image) throws IOException, BitmapDecodingException {
-    ImageSlide slide = new ImageSlide(context, image);
+    ImageSlide slide = new ImageSlide(conversation, image);
     slideDeck.addSlide(slide);
     thumbnail.setImageDrawable(slide.getThumbnail(345, 261));
-    attachmentView.setVisibility(View.VISIBLE);
+    show();
   }
 
   public void setVideo(Uri video) throws IOException, MediaTooLargeException {
-    VideoSlide slide = new VideoSlide(context, video);
+    VideoSlide slide = new VideoSlide(conversation, video);
     slideDeck.addSlide(slide);
     thumbnail.setImageDrawable(slide.getThumbnail(thumbnail.getWidth(), thumbnail.getHeight()));
-    attachmentView.setVisibility(View.VISIBLE);
+    show();
   }
 
   public void setAudio(Uri audio)throws IOException, MediaTooLargeException {
-    AudioSlide slide = new AudioSlide(context, audio);
+    AudioSlide slide = new AudioSlide(conversation, audio);
     slideDeck.addSlide(slide);
     thumbnail.setImageDrawable(slide.getThumbnail(thumbnail.getWidth(), thumbnail.getHeight()));
-    attachmentView.setVisibility(View.VISIBLE);
+    show();
   }
 
   public boolean isAttachmentPresent() {

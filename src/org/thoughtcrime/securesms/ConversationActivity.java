@@ -25,6 +25,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -148,6 +150,10 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   private static final int PICK_CONTACT_INFO = 5;
   private static final int GROUP_EDIT        = 6;
 
+  private static final int SEND_ATTRIBUTES[] = new int[]{R.attr.conversation_send_button_push,
+                                                         R.attr.conversation_send_button_sms_secure,
+                                                         R.attr.conversation_send_button_sms_insecure};
+
   private MasterSecret    masterSecret;
   private RecipientsPanel recipientsPanel;
   private EditText        composeText;
@@ -210,6 +216,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     initializeIme();
     initializeCharactersLeftViewEnabledCheck();
     calculateCharactersRemaining();
+    updateSendButtonState();
 
     MessageNotifier.setVisibleThread(threadId);
     markThreadAsRead();
@@ -244,15 +251,19 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
       break;
     case PICK_IMAGE:
       addAttachmentImage(data.getData());
+      updateSendButtonState();
       break;
     case PICK_VIDEO:
       addAttachmentVideo(data.getData());
+      updateSendButtonState();
       break;
     case PICK_AUDIO:
       addAttachmentAudio(data.getData());
+      updateSendButtonState();
       break;
     case PICK_CONTACT_INFO:
       addContactInfo(data.getData());
+      updateSendButtonState();
       break;
     case GROUP_EDIT:
       this.recipients = data.getParcelableExtra(GroupCreateActivity.GROUP_RECIPIENT_EXTRA);
@@ -671,26 +682,29 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   }
 
   private void initializeSecurity() {
-    int        attributes[] = new int[]{R.attr.conversation_send_button,
-                                        R.attr.conversation_send_secure_button};
-    TypedArray drawables    = obtainStyledAttributes(attributes);
 
-    if ((getRecipients() != null && getRecipients().isGroupRecipient()) ||
+    TypedArray drawables = obtainStyledAttributes(SEND_ATTRIBUTES);
+    if (isPushDestination() || (getRecipients() != null && getRecipients().isGroupRecipient()) ||
         (isSingleConversation() && Session.hasSession(this, masterSecret, getRecipients().getPrimaryRecipient())))
     {
-      sendButton.setImageDrawable(drawables.getDrawable(1));
+      if (isPushDestination()) {
+        sendButton.setImageDrawable(drawables.getDrawable(0));
+      } else {
+        sendButton.setImageDrawable(drawables.getDrawable(1));
+      }
       this.isEncryptedConversation     = true;
       this.isAuthenticatedConversation = Session.hasRemoteIdentityKey(this, masterSecret, getRecipients().getPrimaryRecipient());
       this.characterCalculator         = new EncryptedCharacterCalculator();
     } else {
-      sendButton.setImageDrawable(drawables.getDrawable(0));
+      sendButton.setImageDrawable(drawables.getDrawable(2));
       this.isEncryptedConversation     = false;
       this.isAuthenticatedConversation = false;
       this.characterCalculator         = new CharacterCalculator();
     }
 
-    calculateCharactersRemaining();
     drawables.recycle();
+
+    calculateCharactersRemaining();
   }
 
   private void initializeMmsEnabledCheck() {
@@ -767,6 +781,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
       composeText.setText(getString(R.string.ConversationActivity_forward_message_prefix) + ": " +
                           getIntent().getStringExtra("forwarded_message"));
     }
+
   }
 
   private void initializeRecipientsInput() {
@@ -1129,6 +1144,26 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     }
   }
 
+  public void updateSendButtonState() {
+    if (Util.isEmpty(composeText.getText()) && !attachmentManager.isAttachmentPresent()) {
+      disableSendButton();
+    } else {
+      enableSendButton();
+    }
+  }
+
+  private void enableSendButton() {
+    sendButton.setClickable(true);
+    sendButton.setEnabled(true);
+    sendButton.setColorFilter(null);
+  }
+
+  private void disableSendButton() {
+    sendButton.setClickable(false);
+    sendButton.setEnabled(false);
+    sendButton.setColorFilter(new PorterDuffColorFilter(0x99999999, PorterDuff.Mode.SRC_IN));
+  }
+
   // Listeners
 
   private class AddRecipientButtonListener implements OnClickListener {
@@ -1199,7 +1234,6 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
           }
         }
       }
-
       return false;
     }
 
@@ -1213,15 +1247,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     @Override
     public void afterTextChanged(Editable s) {
       calculateCharactersRemaining();
-//      if (s == null || s.length() == 0) {
-//        sendButton.setClickable(false);
-//        sendButton.setEnabled(false);
-//        sendButton.setColorFilter(0x66FFFFFF);
-//      } else {
-//        sendButton.setClickable(true);
-//        sendButton.setEnabled(true);
-//        sendButton.setColorFilter(null);
-//      }
+      updateSendButtonState();
     }
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
