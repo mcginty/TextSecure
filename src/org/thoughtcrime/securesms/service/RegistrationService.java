@@ -223,8 +223,7 @@ public class RegistrationService extends Service {
       socket.createAccount(false);
 
       setState(new RegistrationState(RegistrationState.STATE_VERIFYING, number));
-      String challenge = waitForChallenge();
-      socket.verifyAccount(challenge, signalingKey, true, registrationId);
+      socket.verifyAccount("111111", signalingKey, true, registrationId);
 
       handleCommonRegistration(masterSecret, socket, number);
       markAsVerified(number, password, signalingKey);
@@ -238,10 +237,6 @@ public class RegistrationService extends Service {
     } catch (UnsupportedOperationException uoe) {
       Log.w("RegistrationService", uoe);
       setState(new RegistrationState(RegistrationState.STATE_GCM_UNSUPPORTED, number));
-      broadcastComplete(false);
-    } catch (AccountVerificationTimeoutException avte) {
-      Log.w("RegistrationService", avte);
-      setState(new RegistrationState(RegistrationState.STATE_TIMEOUT, number));
       broadcastComplete(false);
     } catch (IOException e) {
       Log.w("RegistrationService", e);
@@ -281,7 +276,7 @@ public class RegistrationService extends Service {
 
     if (this.challenge == null) {
       try {
-        wait(REGISTRATION_TIMEOUT_MILLIS);
+        wait(1500);
       } catch (InterruptedException e) {
         throw new IllegalArgumentException(e);
       }
