@@ -9,6 +9,7 @@ import android.util.Log;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.Recipients;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.GroupUtil;
 
 import java.io.IOException;

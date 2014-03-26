@@ -19,7 +19,7 @@ package org.thoughtcrime.securesms.database.model;
 import android.content.Context;
 import android.text.SpannableString;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.database.MmsDatabase;
 import org.thoughtcrime.securesms.database.SmsDatabase;
 import org.thoughtcrime.securesms.mms.SlideDeck;

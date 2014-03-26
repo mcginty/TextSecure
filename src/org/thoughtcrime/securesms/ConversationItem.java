@@ -52,6 +52,7 @@ import org.thoughtcrime.securesms.mms.Slide;
 import org.thoughtcrime.securesms.mms.SlideDeck;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.service.SendReceiveService;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.BitmapUtil;
 import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.Emoji;
@@ -77,22 +78,22 @@ import java.io.OutputStream;
 public class ConversationItem extends LinearLayout {
   private final static String TAG = ConversationItem.class.getSimpleName();
 
-  private final int    STYLE_ATTRIBUTES[] = new int[]{R.attr.conversation_item_sent_push_background,
-                                                      R.attr.conversation_item_sent_push_triangle_background,
-                                                      R.attr.conversation_item_sent_background,
-                                                      R.attr.conversation_item_sent_triangle_background,
-                                                      R.attr.conversation_item_sent_pending_background,
-                                                      R.attr.conversation_item_sent_pending_triangle_background,
-                                                      R.attr.conversation_item_sent_push_pending_background,
-                                                      R.attr.conversation_item_sent_push_pending_triangle_background};
+  private final int STYLE_ATTRIBUTES[] = new int[]{R.attr.conversation_item_sent_push_background,
+      R.attr.conversation_item_sent_push_triangle_background,
+      R.attr.conversation_item_sent_background,
+      R.attr.conversation_item_sent_triangle_background,
+      R.attr.conversation_item_sent_pending_background,
+      R.attr.conversation_item_sent_pending_triangle_background,
+      R.attr.conversation_item_sent_push_pending_background,
+      R.attr.conversation_item_sent_push_pending_triangle_background};
 
-  private final static int SENT_PUSH = 0;
-  private final static int SENT_PUSH_TRIANGLE = 1;
-  private final static int SENT_SMS = 2;
-  private final static int SENT_SMS_TRIANGLE = 3;
-  private final static int SENT_SMS_PENDING = 4;
-  private final static int SENT_SMS_PENDING_TRIANGLE = 5;
-  private final static int SENT_PUSH_PENDING = 6;
+  private final static int SENT_PUSH                  = 0;
+  private final static int SENT_PUSH_TRIANGLE         = 1;
+  private final static int SENT_SMS                   = 2;
+  private final static int SENT_SMS_TRIANGLE          = 3;
+  private final static int SENT_SMS_PENDING           = 4;
+  private final static int SENT_SMS_PENDING_TRIANGLE  = 5;
+  private final static int SENT_PUSH_PENDING          = 6;
   private final static int SENT_PUSH_PENDING_TRIANGLE = 7;
 
   private Handler       failedIconHandler;
@@ -123,14 +124,14 @@ public class ConversationItem extends LinearLayout {
   private final FailedIconClickListener failedIconClickListener         = new FailedIconClickListener();
   private final MmsDownloadClickListener mmsDownloadClickListener       = new MmsDownloadClickListener();
   private final MmsPreferencesClickListener mmsPreferencesClickListener = new MmsPreferencesClickListener();
-  private final ClickListener clickListener                             = new ClickListener();
-  private final Handler handler                                         = new Handler();
+  private final ClickListener               clickListener               = new ClickListener();
+  private final Handler                     handler                     = new Handler();
   private final Context context;
 
   public ConversationItem(Context context) {
     super(context);
     this.context = context;
-   }
+  }
 
   public ConversationItem(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -159,19 +160,18 @@ public class ConversationItem extends LinearLayout {
     this.backgroundDrawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
 
     setOnClickListener(clickListener);
-    if (failedImage != null)       failedImage.setOnClickListener(failedIconClickListener);
+    if (failedImage != null) failedImage.setOnClickListener(failedIconClickListener);
     if (mmsDownloadButton != null) mmsDownloadButton.setOnClickListener(mmsDownloadClickListener);
   }
 
   public void set(MasterSecret masterSecret, MessageRecord messageRecord,
-                  Handler failedIconHandler, boolean groupThread, boolean pushDestination)
-  {
+                  Handler failedIconHandler, boolean groupThread, boolean pushDestination) {
 
-    this.messageRecord     = messageRecord;
-    this.masterSecret      = masterSecret;
+    this.messageRecord = messageRecord;
+    this.masterSecret = masterSecret;
     this.failedIconHandler = failedIconHandler;
-    this.groupThread       = groupThread;
-    this.pushDestination   = pushDestination;
+    this.groupThread = groupThread;
+    this.pushDestination = pushDestination;
 
     setBackgroundDrawables(messageRecord);
     setBodyText(messageRecord);
@@ -184,9 +184,9 @@ public class ConversationItem extends LinearLayout {
       setMinimumWidth();
 
       if (messageRecord instanceof NotificationMmsMessageRecord) {
-        setNotificationMmsAttributes((NotificationMmsMessageRecord)messageRecord);
+        setNotificationMmsAttributes((NotificationMmsMessageRecord) messageRecord);
       } else if (messageRecord instanceof MediaMmsMessageRecord) {
-        setMediaMmsAttributes((MediaMmsMessageRecord)messageRecord);
+        setMediaMmsAttributes((MediaMmsMessageRecord) messageRecord);
       }
     }
   }

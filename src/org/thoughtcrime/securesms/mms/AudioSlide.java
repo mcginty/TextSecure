@@ -18,7 +18,7 @@ package org.thoughtcrime.securesms.mms;
 
 import java.io.IOException;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 
 import ws.com.google.android.mms.pdu.PduPart;
 import android.content.Context;

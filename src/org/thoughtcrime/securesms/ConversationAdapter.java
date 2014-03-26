@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.CursorAdapter;
 
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.GroupUtil;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;

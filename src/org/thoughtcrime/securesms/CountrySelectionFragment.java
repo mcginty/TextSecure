@@ -16,6 +16,7 @@ import android.widget.SimpleAdapter;
 import com.actionbarsherlock.app.SherlockListFragment;
 
 import org.thoughtcrime.securesms.database.loaders.CountryListLoader;
+import org.thoughtcrime.securesms.testing.R;
 
 import java.util.ArrayList;
 import java.util.Map;

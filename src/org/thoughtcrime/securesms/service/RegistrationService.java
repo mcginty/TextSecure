@@ -12,7 +12,7 @@ import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.gcm.GcmIntentService;
 import org.thoughtcrime.securesms.gcm.GcmRegistrationTimeoutException;
@@ -54,14 +54,14 @@ import java.util.concurrent.Executors;
 
 public class RegistrationService extends Service {
 
-  public static final String REGISTER_NUMBER_ACTION = "org.thoughtcrime.securesms.RegistrationService.REGISTER_NUMBER";
-  public static final String VOICE_REQUESTED_ACTION = "org.thoughtcrime.securesms.RegistrationService.VOICE_REQUESTED";
-  public static final String VOICE_REGISTER_ACTION  = "org.thoughtcrime.securesms.RegistrationService.VOICE_REGISTER";
+  public static final String REGISTER_NUMBER_ACTION = "org.thoughtcrime.securesms.testing.RegistrationService.REGISTER_NUMBER";
+  public static final String VOICE_REQUESTED_ACTION = "org.thoughtcrime.securesms.testing.RegistrationService.VOICE_REQUESTED";
+  public static final String VOICE_REGISTER_ACTION  = "org.thoughtcrime.securesms.testing.RegistrationService.VOICE_REGISTER";
 
   public static final String NOTIFICATION_TITLE     = "org.thoughtcrime.securesms.NOTIFICATION_TITLE";
   public static final String NOTIFICATION_TEXT      = "org.thoughtcrime.securesms.NOTIFICATION_TEXT";
   public static final String CHALLENGE_EVENT        = "org.thoughtcrime.securesms.CHALLENGE_EVENT";
-  public static final String REGISTRATION_EVENT     = "org.thoughtcrime.securesms.REGISTRATION_EVENT";
+  public static final String REGISTRATION_EVENT     = "org.thoughtcrime.securesms.testing.REGISTRATION_EVENT";
   public static final String GCM_REGISTRATION_EVENT = "org.thoughtcrime.securesms.GCM_REGISTRATION_EVENT";
 
   public static final String CHALLENGE_EXTRA        = "CAAChallenge";

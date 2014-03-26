@@ -88,6 +88,7 @@ import org.thoughtcrime.securesms.sms.MessageSender;
 import org.thoughtcrime.securesms.sms.OutgoingEncryptedMessage;
 import org.thoughtcrime.securesms.sms.OutgoingEndSessionMessage;
 import org.thoughtcrime.securesms.sms.OutgoingTextMessage;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.ActionBarUtil;
 import org.thoughtcrime.securesms.util.BitmapDecodingException;
 import org.thoughtcrime.securesms.util.BitmapUtil;
@@ -409,13 +410,12 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
       @Override
       public void onClick(DialogInterface dialog, int which) {
         if (isSingleConversation()) {
-          ConversationActivity self      = ConversationActivity.this;
-          Recipient            recipient = getRecipients().getPrimaryRecipient();
+          ConversationActivity self = ConversationActivity.this;
+          Recipient recipient = getRecipients().getPrimaryRecipient();
 
           if (SessionRecordV2.hasSession(self, masterSecret,
                                          recipient.getRecipientId(),
-                                         RecipientDevice.DEFAULT_DEVICE_ID))
-          {
+                                         RecipientDevice.DEFAULT_DEVICE_ID)) {
             OutgoingEndSessionMessage endSessionMessage =
                 new OutgoingEndSessionMessage(new OutgoingTextMessage(getRecipients(), "TERMINATE"));
 

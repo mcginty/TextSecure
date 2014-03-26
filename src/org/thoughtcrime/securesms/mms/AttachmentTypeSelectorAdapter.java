@@ -25,7 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 
 import java.util.ArrayList;
 import java.util.List;

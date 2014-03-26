@@ -16,7 +16,7 @@ import android.util.Log;
 import com.google.thoughtcrimegson.Gson;
 import com.google.thoughtcrimegson.reflect.TypeToken;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 
 import java.io.File;
 import java.io.IOException;

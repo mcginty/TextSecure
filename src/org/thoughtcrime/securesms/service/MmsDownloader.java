@@ -22,7 +22,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.crypto.DecryptingQueue;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;

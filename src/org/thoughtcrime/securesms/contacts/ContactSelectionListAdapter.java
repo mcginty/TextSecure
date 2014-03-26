@@ -33,7 +33,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.BitmapUtil;
 import org.thoughtcrime.securesms.util.BitmapWorkerRunnable;
 import org.thoughtcrime.securesms.util.BitmapWorkerRunnable.AsyncDrawable;

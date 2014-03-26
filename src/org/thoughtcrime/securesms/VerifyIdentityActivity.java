@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.recipients.Recipient;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.ActionBarUtil;
 import org.thoughtcrime.securesms.util.MemoryCleaner;
 import org.whispersystems.textsecure.crypto.IdentityKey;

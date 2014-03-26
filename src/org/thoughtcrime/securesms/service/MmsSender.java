@@ -22,7 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MmsDatabase;
 import org.thoughtcrime.securesms.database.ThreadDatabase;

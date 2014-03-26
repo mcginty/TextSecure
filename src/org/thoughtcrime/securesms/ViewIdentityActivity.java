@@ -19,6 +19,7 @@ package org.thoughtcrime.securesms;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import org.thoughtcrime.securesms.testing.R;
 import org.whispersystems.textsecure.crypto.IdentityKey;
 
 /**

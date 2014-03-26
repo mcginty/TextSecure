@@ -37,7 +37,7 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.RoutingActivity;
 import org.thoughtcrime.securesms.contacts.ContactPhotoFactory;
 import org.thoughtcrime.securesms.database.PushDatabase;

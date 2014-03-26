@@ -29,7 +29,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.thoughtcrime.securesms.ApplicationPreferencesActivity;
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 
 /**

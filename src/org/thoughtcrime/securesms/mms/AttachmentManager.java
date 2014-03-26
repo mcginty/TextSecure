@@ -24,7 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.BitmapDecodingException;
 
 import java.io.IOException;

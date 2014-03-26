@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 
 public class CountrySelectionActivity extends SherlockFragmentActivity

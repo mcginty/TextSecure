@@ -19,6 +19,7 @@ import android.widget.TextView;
 import org.thoughtcrime.securesms.database.SmsMigrator.ProgressDescription;
 import org.thoughtcrime.securesms.service.ApplicationMigrationService;
 import org.thoughtcrime.securesms.service.ApplicationMigrationService.ImportState;
+import org.thoughtcrime.securesms.testing.R;
 
 public class DatabaseMigrationActivity extends PassphraseRequiredSherlockActivity {
 

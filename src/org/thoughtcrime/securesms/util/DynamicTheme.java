@@ -8,7 +8,7 @@ import android.preference.PreferenceManager;
 import org.thoughtcrime.securesms.ApplicationPreferencesActivity;
 import org.thoughtcrime.securesms.ConversationActivity;
 import org.thoughtcrime.securesms.ConversationListActivity;
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 
 public class DynamicTheme {
 

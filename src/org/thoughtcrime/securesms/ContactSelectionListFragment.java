@@ -44,6 +44,7 @@ import org.thoughtcrime.securesms.contacts.ContactAccessor.ContactData;
 import org.thoughtcrime.securesms.contacts.ContactAccessor.NumberData;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.Recipients;
+import org.thoughtcrime.securesms.testing.R;
 
 import java.util.Collection;
 import java.util.HashMap;

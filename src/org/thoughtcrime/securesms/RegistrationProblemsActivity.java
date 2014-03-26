@@ -6,6 +6,8 @@ import android.widget.Button;
 
 import com.actionbarsherlock.app.SherlockActivity;
 
+import org.thoughtcrime.securesms.testing.R;
+
 public class RegistrationProblemsActivity extends SherlockActivity {
 
   @Override

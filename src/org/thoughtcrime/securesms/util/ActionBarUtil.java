@@ -6,7 +6,7 @@ import android.util.TypedValue;
 
 import com.actionbarsherlock.app.ActionBar;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 
 public class ActionBarUtil {
 

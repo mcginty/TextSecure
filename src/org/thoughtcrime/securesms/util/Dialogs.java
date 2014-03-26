@@ -21,7 +21,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 
 public class Dialogs {
   public static void showAlertDialog(Context context, String title, String message) {

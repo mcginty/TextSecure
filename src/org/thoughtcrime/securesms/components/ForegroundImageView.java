@@ -25,7 +25,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.widget.ImageView;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 
 /**
  * https://gist.github.com/chrisbanes/9091754

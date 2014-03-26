@@ -22,7 +22,7 @@ import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
 
-import org.thoughtcrime.securesms.R;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.database.MmsSmsColumns;
 import org.thoughtcrime.securesms.database.SmsDatabase;
 import org.thoughtcrime.securesms.recipients.Recipient;

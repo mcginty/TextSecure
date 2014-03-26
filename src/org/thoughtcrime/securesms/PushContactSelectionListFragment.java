@@ -36,6 +36,7 @@ import org.thoughtcrime.securesms.contacts.ContactAccessor.ContactData;
 import org.thoughtcrime.securesms.contacts.ContactSelectionListAdapter;
 import org.thoughtcrime.securesms.contacts.ContactSelectionListAdapter.ViewHolder;
 import org.thoughtcrime.securesms.contacts.ContactSelectionListAdapter.DataHolder;
+import org.thoughtcrime.securesms.testing.R;
 
 import java.util.LinkedList;
 import java.util.List;

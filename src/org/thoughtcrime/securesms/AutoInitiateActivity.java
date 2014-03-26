@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.Button;
 
 import org.thoughtcrime.securesms.crypto.KeyExchangeInitiator;
+import org.thoughtcrime.securesms.testing.R;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.whispersystems.textsecure.storage.LocalKeyRecord;

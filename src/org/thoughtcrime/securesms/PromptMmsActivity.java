@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import org.thoughtcrime.securesms.testing.R;
+
 public class PromptMmsActivity extends PassphraseRequiredSherlockActivity {
 
   private Button okButton;
