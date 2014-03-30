@@ -185,4 +185,7 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
     return null;
   }
 
+  public static boolean isContentTypeSupported(final String contentType) {
+    return contentType.startsWith("image/");
+  }
 }

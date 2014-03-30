@@ -154,23 +154,23 @@ public class ConversationItem extends LinearLayout {
   protected void onFinishInflate() {
     super.onFinishInflate();
 
-    this.bodyText            = (TextView) findViewById(R.id.conversation_item_body);
-    this.dateText            = (TextView) findViewById(R.id.conversation_item_date);
-    this.indicatorText       = (TextView) findViewById(R.id.indicator_text);
-    this.groupStatusText     = (TextView) findViewById(R.id.group_message_status);
-    this.secureImage         = (ImageView)findViewById(R.id.sms_secure_indicator);
-    this.failedImage         = (ImageView)findViewById(R.id.sms_failed_indicator);
-    this.keyImage            = (ImageView)findViewById(R.id.key_exchange_indicator);
+    this.bodyText            = (TextView)    findViewById(R.id.conversation_item_body);
+    this.dateText            = (TextView)    findViewById(R.id.conversation_item_date);
+    this.indicatorText       = (TextView)    findViewById(R.id.indicator_text);
+    this.groupStatusText     = (TextView)    findViewById(R.id.group_message_status);
+    this.secureImage         = (ImageView)   findViewById(R.id.sms_secure_indicator);
+    this.failedImage         = (ImageView)   findViewById(R.id.sms_failed_indicator);
+    this.keyImage            = (ImageView)   findViewById(R.id.key_exchange_indicator);
     this.mmsContainer        = (FrameLayout) findViewById(R.id.mms_view);
-    this.mmsThumbnail        = (ImageView)findViewById(R.id.image_view);
-    this.mmsDownloadButton   = (Button)   findViewById(R.id.mms_download_button);
-    this.mmsDownloadingLabel = (TextView) findViewById(R.id.mms_label_downloading);
+    this.mmsThumbnail        = (ImageView)   findViewById(R.id.image_view);
+    this.mmsDownloadButton   = (Button)      findViewById(R.id.mms_download_button);
+    this.mmsDownloadingLabel = (TextView)    findViewById(R.id.mms_label_downloading);
+    this.contactPhoto        = (ImageView)   findViewById(R.id.contact_photo);
+    this.deliveredImage      = (ImageView)   findViewById(R.id.delivered_indicator);
+    this.conversationParent  =               findViewById(R.id.conversation_item_parent);
+    this.triangleTick        =               findViewById(R.id.triangle_tick);
+    this.pendingIndicator    = (ImageView)   findViewById(R.id.pending_approval_indicator);
     this.mmsDownloadProgress = (CircularProgressBar) findViewById(R.id.mms_progress);
-    this.contactPhoto        = (ImageView)findViewById(R.id.contact_photo);
-    this.deliveredImage      = (ImageView)findViewById(R.id.delivered_indicator);
-    this.conversationParent  = (View)     findViewById(R.id.conversation_item_parent);
-    this.triangleTick        =            findViewById(R.id.triangle_tick);
-    this.pendingIndicator    = (ImageView)findViewById(R.id.pending_approval_indicator);
     this.backgroundDrawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
 
 
@@ -612,19 +612,34 @@ public class ConversationItem extends LinearLayout {
       this.slide = slide;
     }
 
-//    private void fireIntent() {
-//      Log.w("ConversationItem", "Clicked: " + slide.getUri() + " , " + slide.getContentType());
-//      Intent intent = new Intent(Intent.ACTION_VIEW);
-//      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//      intent.setDataAndType(slide.getUri(), slide.getContentType());
-//      context.startActivity(intent);
-//    }
+    private void fireIntent() {
+      Log.w("ConversationItem", "Clicked: " + slide.getUri() + " , " + slide.getContentType());
+      Intent intent = new Intent(Intent.ACTION_VIEW);
+      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+      intent.setDataAndType(slide.getUri(), slide.getContentType());
+      context.startActivity(intent);
+    }
 
     public void onClick(View v) {
-      final Intent intent = new Intent(context, MediaPreviewActivity.class);
-      intent.setDataAndType(slide.getUri(), slide.getContentType());
-      intent.putExtra(MediaPreviewActivity.MASTER_SECRET_EXTRA, masterSecret);
-      context.startActivity(intent);
+      if (MediaPreviewActivity.isContentTypeSupported(slide.getContentType())) {
+        final Intent intent = new Intent(context, MediaPreviewActivity.class);
+        intent.setDataAndType(slide.getUri(), slide.getContentType());
+        intent.putExtra(MediaPreviewActivity.MASTER_SECRET_EXTRA, masterSecret);
+        context.startActivity(intent);
+      } else {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.ConversationItem_view_secure_media_question);
+        builder.setIcon(Dialogs.resolveIcon(context, R.attr.dialog_alert_icon));
+        builder.setCancelable(true);
+        builder.setMessage(R.string.ConversationItem_this_media_has_been_stored_in_an_encrypted_database_external_viewer_warning);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            fireIntent();
+          }
+        });
+        builder.setNegativeButton(R.string.no, null);
+        builder.show();
+      }
     }
   }
 
