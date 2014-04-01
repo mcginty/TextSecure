@@ -81,13 +81,18 @@ public class UniversalTransport {
           Log.w("UniversalTransport", "Using GCM as transport...");
           pushTransport.deliver(message);
         } catch (UnregisteredUserException uue) {
+          Log.w("UniversalTransport", "UnregisteredUserException");
           Log.w("UniversalTransport", uue);
           if (isSmsFallbackSupported) fallbackOrAskApproval(message, number);
           else                        throw new UndeliverableMessageException(uue);
         } catch (IOException ioe) {
+          Log.w("UniversalTransport", "IOException");
           Log.w("UniversalTransport", ioe);
           if (isSmsFallbackSupported) fallbackOrAskApproval(message, number);
           else                        throw new RetryLaterException(ioe);
+        } catch (Exception e) {
+          Log.w("UniversalTransport", "some other exception");
+          Log.w("UniversalTransport", e);
         }
       } else if (!message.isForcedSms() && !TextSecurePreferences.isSmsNonDataOutEnabled(context)) {
         throw new UndeliverableMessageException("User disallows non-push outgoing SMS");

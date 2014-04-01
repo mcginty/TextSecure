@@ -57,7 +57,11 @@ import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.Emoji;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.whispersystems.textsecure.crypto.MasterSecret;
+import org.whispersystems.textsecure.directory.Directory;
+import org.whispersystems.textsecure.directory.NotInDirectoryException;
+import org.whispersystems.textsecure.storage.RecipientDevice;
 import org.whispersystems.textsecure.storage.Session;
+import org.whispersystems.textsecure.storage.SessionRecordV2;
 import org.whispersystems.textsecure.util.FutureTaskListener;
 import org.whispersystems.textsecure.util.ListenableFutureTask;
 
@@ -682,10 +686,17 @@ public class ConversationItem extends LinearLayout {
       @Override
       public void onClick(DialogInterface dialogInterface, int i) {
         if (messageRecord.isMms()) {
-          DatabaseFactory.getMmsDatabase(context).markAsSentFailed(messageRecord.getId());
+          MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
+          database.markAsOutbox(messageRecord.getId());
+          database.markAsPush(messageRecord.getId());
+          database.markAsForcedPush(messageRecord.getId());
         } else {
-          DatabaseFactory.getSmsDatabase(context).markAsSentFailed(messageRecord.getId());
+          SmsDatabase database = DatabaseFactory.getSmsDatabase(context);
+          database.markAsOutbox(messageRecord.getId());
+          database.markAsPush(messageRecord.getId());
+          database.markAsForcedPush(messageRecord.getId());
         }
+        sendOutgoingMessages();
       }
     });
     builder.show();

@@ -281,8 +281,12 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
     notifyConversationListeners(getThreadIdForMessage(messageId));
   }
 
+  public void markAsForcedPush(long id) {
+    updateMailboxBitmask(id, Types.OUTGOING_MESSAGE_ATTRIBUTE_MASK, Types.OUTGOING_MESSAGE_FORCED_SMS_TYPE);
+  }
+
   public void markAsForcedSms(long id) {
-    updateMailboxBitmask(id, 0, Types.MESSAGE_FORCE_SMS_BIT);
+    updateMailboxBitmask(id, Types.OUTGOING_MESSAGE_ATTRIBUTE_MASK, Types.OUTGOING_MESSAGE_FORCED_SMS_TYPE);
   }
 
   public void markAsPendingApproval(long messageId) {

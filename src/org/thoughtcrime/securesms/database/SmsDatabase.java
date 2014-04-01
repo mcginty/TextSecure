@@ -178,8 +178,12 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
     updateTypeBitmask(id, 0, Types.PUSH_MESSAGE_BIT);
   }
 
+  public void markAsForcedPush(long id) {
+    updateTypeBitmask(id, Types.OUTGOING_MESSAGE_ATTRIBUTE_MASK, Types.OUTGOING_MESSAGE_FORCED_SMS_TYPE);
+  }
+
   public void markAsForcedSms(long id) {
-    updateTypeBitmask(id, 0, Types.MESSAGE_FORCE_SMS_BIT);
+    updateTypeBitmask(id, Types.OUTGOING_MESSAGE_ATTRIBUTE_MASK, Types.OUTGOING_MESSAGE_FORCED_SMS_TYPE);
   }
 
   public void markAsDecryptFailed(long id) {

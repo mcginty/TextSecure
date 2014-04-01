@@ -29,8 +29,9 @@ public interface MmsSmsColumns {
                                                             BASE_PENDING_FALLBACK_APPROVAL};
 
     // Message attributes
-    protected static final long MESSAGE_ATTRIBUTE_MASK = 0xE0;
-    protected static final long MESSAGE_FORCE_SMS_BIT  = 0x40;
+    protected static final long OUTGOING_MESSAGE_ATTRIBUTE_MASK   = 0xE0;
+    protected static final long OUTGOING_MESSAGE_FORCED_PUSH_TYPE = 1 << 5;
+    protected static final long OUTGOING_MESSAGE_FORCED_SMS_TYPE  = 2 << 5;
 
     // Key Exchange Information
     protected static final long KEY_EXCHANGE_BIT                 = 0x8000;
@@ -72,8 +73,12 @@ public interface MmsSmsColumns {
       return false;
     }
 
+    public static boolean isForcedPush(long type) {
+      return (type & OUTGOING_MESSAGE_ATTRIBUTE_MASK) == OUTGOING_MESSAGE_FORCED_PUSH_TYPE;
+    }
+
     public static boolean isForcedSms(long type) {
-      return (type & MESSAGE_FORCE_SMS_BIT) != 0;
+      return (type & OUTGOING_MESSAGE_ATTRIBUTE_MASK) == OUTGOING_MESSAGE_FORCED_SMS_TYPE;
     }
 
     public static boolean isPendingMessageType(long type) {
