@@ -25,8 +25,6 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -59,8 +57,6 @@ import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.Emoji;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.whispersystems.textsecure.crypto.MasterSecret;
-import org.whispersystems.textsecure.directory.Directory;
-import org.whispersystems.textsecure.directory.NotInDirectoryException;
 import org.whispersystems.textsecure.storage.Session;
 import org.whispersystems.textsecure.util.FutureTaskListener;
 import org.whispersystems.textsecure.util.ListenableFutureTask;
@@ -280,7 +276,8 @@ public class ConversationItem extends LinearLayout {
       dateText.setText(R.string.ConversationItem_error_sending_message);
     } else if (messageRecord.isPendingFallbackApproval() && indicatorText != null) {
       dateText.setText("");
-      indicatorText.setText(R.string.ConversationItem_click_to_approve);
+      if (messageRecord.isSecure()) indicatorText.setText(R.string.ConversationItem_click_to_approve);
+      else                          indicatorText.setText(R.string.ConversationItem_click_to_approve_unencrypted);
     } else if (messageRecord.isPending()) {
       dateText.setText(" ··· ");
     } else {
@@ -294,7 +291,7 @@ public class ConversationItem extends LinearLayout {
 
   private void setMinimumWidth() {
     if (indicatorText != null && indicatorText.getVisibility() == View.VISIBLE && indicatorText.getText() != null) {
-      conversationParent.setMinimumWidth(indicatorText.getText().length() * 20);
+      conversationParent.setMinimumWidth(indicatorText.getText().length() * 15);
     } else {
       conversationParent.setMinimumWidth(0);
     }
@@ -645,9 +642,27 @@ public class ConversationItem extends LinearLayout {
     }
   }
 
+  private void sendOutgoingMessages() {
+    Intent intent = new Intent(context, SendReceiveService.class);
+    intent.setAction(SendReceiveService.SEND_SMS_ACTION);
+    intent.putExtra(SendReceiveService.MASTER_SECRET_EXTRA, masterSecret);
+    context.startService(intent);
+  }
+
   private void handleMessageApproval() {
+    final int title;
+    final int message;
+    if (messageRecord.isSecure()) {
+      title = R.string.ConversationItem_click_to_approve_dialog_title;
+      message = -1;
+    } else {
+      title = R.string.ConversationItem_click_to_approve_unencrypted_dialog_title;
+      message = R.string.ConversationItem_click_to_approve_unencrypted_dialog_message;
+    }
+
     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setTitle(R.string.ConversationItem_click_to_approve_dialog_title);
+    builder.setTitle(title);
+    if (message > -1) builder.setMessage(message);
     builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialogInterface, int i) {
@@ -660,17 +675,17 @@ public class ConversationItem extends LinearLayout {
           database.markAsOutbox(messageRecord.getId());
           database.markAsForcedSms(messageRecord.getId());
         }
-        Intent intent = new Intent(context, SendReceiveService.class);
-        intent.setAction(SendReceiveService.SEND_SMS_ACTION);
-        intent.putExtra(SendReceiveService.MASTER_SECRET_EXTRA, masterSecret);
-        context.startService(intent);
+        sendOutgoingMessages();
       }
     });
     builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialogInterface, int i) {
-        if (messageRecord.isMms()) DatabaseFactory.getMmsDatabase(context).markAsSentFailed(messageRecord.getId());
-        else                       DatabaseFactory.getSmsDatabase(context).markAsSentFailed(messageRecord.getId());
+        if (messageRecord.isMms()) {
+          DatabaseFactory.getMmsDatabase(context).markAsSentFailed(messageRecord.getId());
+        } else {
+          DatabaseFactory.getSmsDatabase(context).markAsSentFailed(messageRecord.getId());
+        }
       }
     });
     builder.show();

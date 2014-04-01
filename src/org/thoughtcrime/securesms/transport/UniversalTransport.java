@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.Log;
 
 import org.thoughtcrime.securesms.database.DatabaseFactory;
+import org.thoughtcrime.securesms.database.MmsDatabase;
 import org.thoughtcrime.securesms.database.model.SmsMessageRecord;
 import org.thoughtcrime.securesms.mms.MmsSendResult;
 import org.thoughtcrime.securesms.push.PushServiceSocketFactory;
@@ -36,6 +37,8 @@ import org.whispersystems.textsecure.directory.NotInDirectoryException;
 import org.whispersystems.textsecure.push.ContactTokenDetails;
 import org.whispersystems.textsecure.push.PushServiceSocket;
 import org.whispersystems.textsecure.push.UnregisteredUserException;
+import org.whispersystems.textsecure.storage.RecipientDevice;
+import org.whispersystems.textsecure.storage.SessionRecordV2;
 import org.whispersystems.textsecure.util.DirectoryUtil;
 import org.whispersystems.textsecure.util.InvalidNumberException;
 
@@ -157,12 +160,13 @@ public class UniversalTransport {
   private MmsSendResult fallbackOrAskApproval(SendReq mediaMessage, String destination)
       throws UserInterventionRequiredException, UndeliverableMessageException
   {
-    boolean isSmsFallbackApprovalRequired = isSmsFallbackApprovalRequired(destination);
+    boolean isSmsFallbackApprovalRequired = isSmsFallbackApprovalRequired(destination) ||
+                                            !MmsDatabase.Types.isSecureType(mediaMessage.getDatabaseMessageBox());
     if (!isSmsFallbackApprovalRequired) {
       Log.i("UniversalTransport", "Falling back to MMS without user intervention");
       return mmsTransport.deliver(mediaMessage);
     } else {
-      Log.i("UniversalTransport", "Marking message as pending user approval per their settings");
+      Log.i("UniversalTransport", "Marking message as pending approval because of their settings or unencrypted fallback");
       throw new UserInterventionRequiredException("Pending user approval for fallback to SMS");
     }
   }
@@ -170,12 +174,13 @@ public class UniversalTransport {
   private void fallbackOrAskApproval(SmsMessageRecord smsMessage, String destination)
       throws UserInterventionRequiredException, UndeliverableMessageException
   {
-    boolean isSmsFallbackApprovalRequired = isSmsFallbackApprovalRequired(destination);
+    boolean isSmsFallbackApprovalRequired = isSmsFallbackApprovalRequired(destination) ||
+                                            !smsMessage.isSecure();
     if (!isSmsFallbackApprovalRequired) {
       Log.i("UniversalTransport", "Falling back to SMS without user intervention");
       smsTransport.deliver(smsMessage);
     } else {
-      Log.i("UniversalTransport", "Marking message as pending user approval per their settings");
+      Log.i("UniversalTransport", "Marking message as pending approval because of their settings or unencrypted fallback");
       throw new UserInterventionRequiredException("Pending user approval for fallback to SMS");
     }
   }
