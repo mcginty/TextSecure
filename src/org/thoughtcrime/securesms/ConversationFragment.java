@@ -5,12 +5,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.ClipboardManager;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -102,7 +104,7 @@ public class ConversationFragment extends SherlockListFragment
     this.recipients = recipients;
     this.threadId   = threadId;
 
-    initializeListAdapter();
+    //initializeListAdapter();
   }
 
   public void scrollToBottom() {
@@ -223,6 +225,7 @@ public class ConversationFragment extends SherlockListFragment
 
   @Override
   public void onLoadFinished(Loader<Cursor> arg0, Cursor cursor) {
+    Log.d("ConversationFragment", "load finished for cursor");
     ((CursorAdapter)getListAdapter()).changeCursor(cursor);
   }
 

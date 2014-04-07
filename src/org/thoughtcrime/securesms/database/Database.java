@@ -20,13 +20,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.util.Log;
 
 import java.util.Set;
 
 public abstract class Database {
 
   protected static final String ID_WHERE            = "_id = ?";
-  private static final String CONVERSATION_URI      = "content://textsecure/thread/";
+  public  static final String CONVERSATION_URI      = "content://textsecure/thread/";
   private static final String CONVERSATION_LIST_URI = "content://textsecure/conversation-list";
 
   protected       SQLiteOpenHelper databaseHelper;
@@ -43,6 +44,7 @@ public abstract class Database {
   }
 
   protected void notifyConversationListeners(long threadId) {
+    Log.d("Database", "notifying conversation listeners of change in " + Uri.parse(CONVERSATION_URI + threadId));
     context.getContentResolver().notifyChange(Uri.parse(CONVERSATION_URI + threadId), null);
   }
 
@@ -51,6 +53,7 @@ public abstract class Database {
   }
 
   protected void setNotifyConverationListeners(Cursor cursor, long threadId) {
+    Log.d("Database", "setting conversation listeners for " + Uri.parse(CONVERSATION_URI + threadId));
     cursor.setNotificationUri(context.getContentResolver(), Uri.parse(CONVERSATION_URI + threadId));
   }
 

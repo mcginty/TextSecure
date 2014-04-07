@@ -19,6 +19,7 @@ package org.thoughtcrime.securesms;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,7 +66,7 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
   public ConversationAdapter(Context context, MasterSecret masterSecret,
                              Handler failedIconClickHandler, boolean groupThread, boolean pushDestination)
   {
-    super(context, null, true);
+    super(context, null, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
     this.context                = context;
     this.masterSecret           = masterSecret;
     this.failedIconClickHandler = failedIconClickHandler;
@@ -151,7 +152,9 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
   @Override
   protected void onContentChanged() {
     super.onContentChanged();
+    Log.d("ConversationAdapter", "onContentChanged() received.");
     messageRecordCache.clear();
+    notifyDataSetChanged();
   }
 
   public void close() {
