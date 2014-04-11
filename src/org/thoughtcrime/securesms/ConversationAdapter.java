@@ -65,25 +65,25 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
    * The minimum SDK version for animation support. ICS is required for the >= Honeycomb animation
    * framework and View.animate() helper.
    */
-  public static final int ANIMATION_TARGET_API = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
-  public static final boolean ANIMATION_SUPPORTED = Build.VERSION.SDK_INT >= ANIMATION_TARGET_API;
-  public static final int ANIMATION_START_DELAY = 500;
-  public static final int ANIMATION_DURATION = 250;
-  public static final float ANIMATION_OVERSHOOT_AMOUNT = 1.1f;
+  public static final int     ANIMATION_TARGET_API       = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+  public static final boolean ANIMATION_SUPPORTED        = Build.VERSION.SDK_INT >= ANIMATION_TARGET_API;
+  public static final int     ANIMATION_START_DELAY      = 500;
+  public static final int     ANIMATION_DURATION         = 250;
+  public static final float   ANIMATION_OVERSHOOT_AMOUNT = 1.1f;
 
   private final Handler failedIconClickHandler;
   /**
    * A handler for posting view animations. Used to let the view layout and measure itself.
    */
-  private final Handler animationHandler = new Handler();
-  private final Context context;
-  private final MasterSecret masterSecret;
-  private final boolean groupThread;
-  private final boolean pushDestination;
-  private final LayoutInflater inflater;
-  private boolean animateNext = false;
-  private final Set<Long> seenRows = new HashSet<Long>();
-  private final Set<Long> animatingRows = new HashSet<Long>();
+  private final   Handler animationHandler = new Handler();
+  private final   Context context;
+  private final   MasterSecret masterSecret;
+  private final   boolean groupThread;
+  private final   boolean pushDestination;
+  private final   LayoutInflater inflater;
+  private boolean animateNext              = false;
+  private final   Set<Long> seenRows       = new HashSet<Long>();
+  private final   Set<Long> animatingRows  = new HashSet<Long>();
 
   public ConversationAdapter(Context context, MasterSecret masterSecret,
                              Handler failedIconClickHandler, boolean groupThread, boolean pushDestination)
@@ -169,6 +169,38 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
       view.animate().cancel();
     }
   }
+
+  @TargetApi(ANIMATION_TARGET_API)
+  private void queueSlideForView(final View view) {
+    if (ANIMATION_SUPPORTED) {
+      view.setScaleX(0.f);
+      view.setScaleY(0.f);
+
+      animationHandler.post(new Runnable() {
+        @Override
+        public void run() {
+          startSlideAnimationForView(view);
+        }
+      });
+    }
+  }
+
+  @TargetApi(ANIMATION_TARGET_API)
+  private void startSlideAnimationForView(final View view) {
+    if (ANIMATION_SUPPORTED) {
+      view.setPivotX(view.getWidth());
+      view.setPivotY(view.getHeight());
+
+      view.animate()
+          .scaleX(1.f)
+          .scaleY(1.f)
+          .setStartDelay(ANIMATION_START_DELAY)
+          .setDuration(ANIMATION_DURATION)
+          .setInterpolator(new OvershootInterpolator(ANIMATION_OVERSHOOT_AMOUNT))
+          .start();
+    }
+  }
+
 
   @TargetApi(ANIMATION_TARGET_API)
   private void queueAnimationForView(final View view) {
