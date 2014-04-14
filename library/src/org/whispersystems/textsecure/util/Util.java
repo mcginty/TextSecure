@@ -10,6 +10,8 @@ import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.EditText;
 
+import org.whispersystems.textsecure.push.PushServiceSocket;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -141,7 +143,6 @@ public class Util {
     }
   }
 
-
   public static long copy(InputStream in, OutputStream out) throws IOException {
     byte[] buffer = new byte[102400];
     int   copied  = 0;
@@ -150,6 +151,23 @@ public class Util {
     while ((read = in.read(buffer)) != -1) {
       out.write(buffer, 0, read);
       copied += read;
+    }
+
+    in.close();
+    out.close();
+
+    return copied;
+  }
+
+  public static long copy(InputStream in, OutputStream out, long totalBytes, PushServiceSocket.TransferProgressListener listener) throws IOException {
+    byte[] buffer = new byte[102400];
+    int   copied  = 0;
+    int read;
+
+    while ((read = in.read(buffer)) != -1) {
+      out.write(buffer, 0, read);
+      copied += read;
+      if (listener != null) listener.onProgressUpdate(copied, totalBytes);
     }
 
     in.close();

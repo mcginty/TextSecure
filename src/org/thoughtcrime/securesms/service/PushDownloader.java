@@ -78,7 +78,7 @@ public class PushDownloader {
       PushServiceSocket.TransferProgressListener listener = new PushServiceSocket.TransferProgressListener() {
         @Override
         public void onProgressUpdate(long downloadedBytes, long totalBytes) {
-          Intent intent = new Intent("attachment-download-progress");
+          Intent intent = new Intent("attachment-transfer-progress");
           intent.putExtra("message_id", messageId);
           intent.putExtra("part_id", partId);
           intent.putExtra("downloaded_bytes", downloadedBytes);

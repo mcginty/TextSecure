@@ -89,6 +89,13 @@
                     android:visibility="gone"
                     android:contentDescription="@string/conversation_item__play_button_description"/>
 
+                <org.thoughtcrime.securesms.components.CircularProgressBar
+                    android:id="@+id/mms_progress"
+                    style="@style/Widget.ProgressBar.Holo.CircularProgressBar"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
             </FrameLayout>
 
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

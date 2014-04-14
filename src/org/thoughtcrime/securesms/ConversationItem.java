@@ -117,7 +117,7 @@ public class ConversationItem extends LinearLayout {
   private  TextView    mmsDownloadingLabel;
   private  ListenableFutureTask<SlideDeck> slideDeck;
   private  TypedArray backgroundDrawables;
-  private  CircularProgressBar mmsDownloadProgress;
+  private  CircularProgressBar mmsTransferProgress;
 
   private BroadcastReceiver attachmentDownloadReceiver;
 
@@ -157,7 +157,7 @@ public class ConversationItem extends LinearLayout {
     this.conversationParent  =               findViewById(R.id.conversation_item_parent);
     this.triangleTick        =               findViewById(R.id.triangle_tick);
     this.pendingIndicator    = (ImageView)   findViewById(R.id.pending_approval_indicator);
-    this.mmsDownloadProgress = (CircularProgressBar) findViewById(R.id.mms_progress);
+    this.mmsTransferProgress = (CircularProgressBar) findViewById(R.id.mms_progress);
     this.backgroundDrawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
 
 
@@ -208,7 +208,7 @@ public class ConversationItem extends LinearLayout {
           if ( percentDone >= 100) LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
 
           Log.i(TAG, "progress update for " + message + ", new percentage: " + percentDone + "%, " + downloadedBytes + "/" + totalBytes);
-          mmsDownloadProgress.setProgress(percentDone);
+          mmsTransferProgress.setProgress(percentDone);
         }
       };
     }
@@ -373,7 +373,7 @@ public class ConversationItem extends LinearLayout {
     }
   }
 
-  private void setMediaMmsAttributes(MediaMmsMessageRecord messageRecord) {
+  private void setMediaMmsAttributes(final MediaMmsMessageRecord messageRecord) {
     if (messageRecord.getPartCount() > 0) {
       mmsThumbnail.setVisibility(View.VISIBLE);
       mmsContainer.setVisibility(View.VISIBLE);
@@ -399,13 +399,17 @@ public class ConversationItem extends LinearLayout {
 
                 LocalBroadcastManager.getInstance(context)
                                      .registerReceiver(attachmentDownloadReceiver,
-                                                       new IntentFilter("attachment-download-progress"));
+                                                       new IntentFilter("attachment-transfer-progress"));
 
-                if (mmsDownloadProgress != null) {
-                  mmsDownloadProgress.setProgress(0);
-                  mmsDownloadProgress.setIndeterminate(false);
+                if (mmsTransferProgress != null) {
                 }
-                slide.setThumbnailOn(mmsThumbnail, mmsDownloadProgress);
+                if (messageRecord.isOutgoing() && messageRecord.isPending() && mmsTransferProgress != null) {
+                  mmsTransferProgress.setProgress(0);
+                  mmsTransferProgress.setIndeterminate(false);
+                  mmsTransferProgress.setVisibility(View.VISIBLE);
+                } else {
+                  slide.setThumbnailOn(mmsThumbnail, mmsTransferProgress);
+                }
                 mmsThumbnail.setOnClickListener(new ThumbnailClickListener(slide));
                 mmsThumbnail.setOnLongClickListener(new OnLongClickListener() {
                   @Override
@@ -419,7 +423,7 @@ public class ConversationItem extends LinearLayout {
             }
 
             mmsThumbnail.setVisibility(View.GONE);
-            mmsDownloadProgress.setVisibility(GONE);
+            mmsTransferProgress.setVisibility(GONE);
           }
         });
       }

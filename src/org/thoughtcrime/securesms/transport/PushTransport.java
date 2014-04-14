@@ -19,6 +19,8 @@ package org.thoughtcrime.securesms.transport;
 
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
@@ -165,9 +167,10 @@ public class PushTransport extends BaseTransport {
     }
   }
 
-  private List<PushAttachmentPointer> getPushAttachmentPointers(PushServiceSocket socket, PduBody body)
+  private List<PushAttachmentPointer> getPushAttachmentPointers(final PushServiceSocket socket, final SendReq message)
       throws IOException
   {
+    PduBody                     body         = message.getBody();
     PartDatabase                partDatabase = DatabaseFactory.getPartDatabase(context);
     List<PushAttachmentPointer> attachments  = new LinkedList<PushAttachmentPointer>();
 
@@ -177,11 +180,23 @@ public class PushTransport extends BaseTransport {
           ContentType.isAudioType(contentType) ||
           ContentType.isVideoType(contentType))
       {
-        long        partId     = ContentUris.parseId(body.getPart(i).getDataUri());
-        long        dataSize   = partDatabase.getPartSize(masterSecret, partId);
-        InputStream dataStream = partDatabase.getPartStream(masterSecret, partId);
+        final long        partId     = ContentUris.parseId(body.getPart(i).getDataUri());
+        final long        dataSize   = partDatabase.getPartSize(masterSecret, partId);
+        final InputStream dataStream = partDatabase.getPartStream(masterSecret, partId);
 
-        attachments.add(getPushAttachmentPointer(socket, contentType, dataStream, dataSize));
+        PushServiceSocket.TransferProgressListener listener = new PushServiceSocket.TransferProgressListener() {
+          @Override
+          public void onProgressUpdate(long downloadedBytes, long totalBytes) {
+            Intent intent = new Intent("attachment-transfer-progress");
+            intent.putExtra("message_id", message.getDatabaseMessageId());
+            intent.putExtra("part_id", partId);
+            intent.putExtra("downloaded_bytes", downloadedBytes);
+            intent.putExtra("total_bytes", totalBytes);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+          }
+        };
+
+        attachments.add(getPushAttachmentPointer(socket, contentType, dataStream, dataSize, listener));
         dataStream.close();
       }
     }
@@ -192,12 +207,13 @@ public class PushTransport extends BaseTransport {
   private PushAttachmentPointer getPushAttachmentPointer(PushServiceSocket socket,
                                                          String contentType,
                                                          InputStream data,
-                                                         long dataSize)
+                                                         long dataSize,
+                                                         PushServiceSocket.TransferProgressListener listener)
       throws IOException
   {
     byte[]             key            = org.whispersystems.textsecure.util.Util.getKey(64);
     PushAttachmentData attachmentData = new PushAttachmentData(contentType, data, dataSize, key);
-    long               attachmentId   = socket.sendAttachment(attachmentData);
+    long               attachmentId   = socket.sendAttachment(attachmentData, listener);
 
     return new PushAttachmentPointer(contentType, attachmentId, key);
   }
@@ -250,7 +266,7 @@ public class PushTransport extends BaseTransport {
 
   private byte[] getPlaintextMessage(PushServiceSocket socket, SendReq message) throws IOException {
     String                      messageBody = PartParser.getMessageText(message.getBody());
-    List<PushAttachmentPointer> attachments = getPushAttachmentPointers(socket, message.getBody());
+    List<PushAttachmentPointer> attachments = getPushAttachmentPointers(socket, message);
 
     PushMessageContent.Builder builder = PushMessageContent.newBuilder();
 
