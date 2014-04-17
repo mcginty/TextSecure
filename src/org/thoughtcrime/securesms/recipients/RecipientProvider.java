@@ -42,6 +42,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 public class RecipientProvider {
+  private static final String TAG = RecipientProvider.class.getSimpleName();
 
   private static final Map<Long,Recipient> recipientCache         = Collections.synchronizedMap(new LRUCache<Long,Recipient>(1000));
   private static final ExecutorService     asyncRecipientResolver = Util.newSingleThreadedLifoExecutor();
@@ -61,7 +62,7 @@ public class RecipientProvider {
   }
 
   private Recipient getSynchronousRecipient(Context context, long recipientId) {
-    Log.w("RecipientProvider", "Cache miss [SYNC]!");
+    Log.d(TAG, "Cache miss [SYNC]!");
 
     Recipient recipient;
     RecipientDetails details;
@@ -85,7 +86,7 @@ public class RecipientProvider {
   }
 
   private Recipient getAsynchronousRecipient(final Context context, final long recipientId) {
-    Log.w("RecipientProvider", "Cache miss [ASYNC]!");
+    Log.d(TAG, "Cache miss [ASYNC]!");
 
     final String number = CanonicalAddressDatabase.getInstance(context).getAddressFromId(String.valueOf(recipientId));
     final boolean isGroupRecipient = GroupUtil.isEncodedGroup(number);
@@ -167,7 +168,7 @@ public class RecipientProvider {
 
       return null;
     } catch (IOException e) {
-      Log.w("RecipientProvider", e);
+      Log.w(TAG, e);
       return null;
     }
   }
