@@ -25,7 +25,6 @@ import com.actionbarsherlock.view.MenuItem;
 
 import org.thoughtcrime.securesms.service.DirectoryRefreshListener;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
-import org.thoughtcrime.securesms.database.ThreadDatabase;
 import org.thoughtcrime.securesms.notifications.MessageNotifier;
 import org.thoughtcrime.securesms.recipients.RecipientFactory;
 import org.thoughtcrime.securesms.recipients.Recipients;
@@ -46,14 +45,17 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
     implements ConversationListFragment.ConversationSelectedListener,
                ListView.OnItemClickListener
   {
+  private static final String TAG = ConversationListActivity.class.getSimpleName();
+
   private final DynamicTheme    dynamicTheme    = new DynamicTheme   ();
   private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
   private ConversationListFragment fragment;
-  private MasterSecret masterSecret;
-  private DrawerLayout drawerLayout;
-  private DrawerToggle drawerToggle;
-  private ListView     drawerList;
+  private MasterSecret    masterSecret;
+  private DrawerLayout    drawerLayout;
+  private DrawerToggle    drawerToggle;
+  private ListView        drawerList;
+  private ContentObserver observer;
 
   @Override
   public void onCreate(Bundle icicle) {
@@ -91,8 +93,9 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
 
   @Override
   public void onDestroy() {
-    Log.w("ConversationListActivity", "onDestroy...");
+    Log.w(TAG, "onDestroy...");
     MemoryCleaner.clean(masterSecret);
+    getContentResolver().unregisterContentObserver(observer);
     super.onDestroy();
   }
 
@@ -143,8 +146,6 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     super.onOptionsItemSelected(item);
-
-    int defaultType = ThreadDatabase.DistributionTypes.DEFAULT;
 
     switch (item.getItemId()) {
     case R.id.menu_new_message:       openSingleContactSelection();   return true;
@@ -238,7 +239,7 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
       items.add(item);
     }
 
-    DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+    drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
     drawerToggle = new DrawerToggle(this, drawerLayout,
                                     R.drawable.ic_drawer,
                                     R.string.conversation_list__drawer_open,
@@ -258,11 +259,19 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
   }
 
   private void initializeContactUpdatesReceiver() {
-    ContentObserver observer = new ContentObserver(null) {
+    observer = new ContentObserver(null) {
       @Override
       public void onChange(boolean selfChange) {
         super.onChange(selfChange);
+        Log.i(TAG, "detected android contact data changed, refreshing cache");
+        // TODO only clear updated recipients from cache
         RecipientFactory.clearCache();
+        ConversationListActivity.this.runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            ((ConversationListAdapter)fragment.getListAdapter()).notifyDataSetChanged();
+          }
+        });
       }
     };
 
@@ -281,6 +290,11 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
 
   private void initializeResources() {
     this.drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && TextSecurePreferences.isScreenSecurityEnabled(this)) {
+      getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
+                           WindowManager.LayoutParams.FLAG_SECURE);
+    }
+
     this.drawerList   = (ListView)findViewById(R.id.left_drawer);
     this.masterSecret = getIntent().getParcelableExtra("master_secret");
 

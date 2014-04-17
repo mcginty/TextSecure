@@ -9,8 +9,12 @@ import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.EncryptingSmsDatabase;
 import org.thoughtcrime.securesms.database.GroupDatabase;
 import org.thoughtcrime.securesms.notifications.MessageNotifier;
+import org.thoughtcrime.securesms.recipients.Recipient;
+import org.thoughtcrime.securesms.recipients.RecipientFactory;
+import org.thoughtcrime.securesms.recipients.RecipientFormattingException;
 import org.thoughtcrime.securesms.sms.IncomingGroupMessage;
 import org.thoughtcrime.securesms.sms.IncomingTextMessage;
+import org.thoughtcrime.securesms.util.GroupUtil;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.whispersystems.textsecure.push.IncomingPushMessage;
 import org.whispersystems.textsecure.util.Base64;
@@ -25,6 +29,7 @@ import static org.whispersystems.textsecure.push.PushMessageProtos.PushMessageCo
 import static org.whispersystems.textsecure.push.PushMessageProtos.PushMessageContent.GroupContext;
 
 public class GroupReceiver {
+  private static final String TAG = GroupReceiver.class.getSimpleName();
 
   private static final String TAG =  GroupReceiver.class.getSimpleName();;
   private final Context context;
@@ -83,7 +88,6 @@ public class GroupReceiver {
                                  GroupContext group,
                                  GroupRecord groupRecord)
   {
-
     GroupDatabase database = DatabaseFactory.getGroupDatabase(context);
     byte[]        id       = group.getId().toByteArray();
 
@@ -111,11 +115,19 @@ public class GroupReceiver {
     }
 
     if (group.hasName() || group.hasAvatar()) {
-      database.update(id, group.getName(), group.getAvatar());
+      database.update(id, group.getName(), group.hasAvatar() ? group.getAvatar() : null);
     }
 
     if (group.hasName() && group.getName() != null && group.getName().equals(groupRecord.getTitle())) {
       group = group.toBuilder().clearName().build();
+    } else {
+      try {
+        Recipient groupRecipient = RecipientFactory.getRecipientsFromString(context, GroupUtil.getEncodedId(id), true)
+                                                   .getPrimaryRecipient();
+        groupRecipient.setName(group.getName());
+      } catch (RecipientFormattingException e) {
+        Log.w(TAG, e);
+      }
     }
 
     if (!groupRecord.isActive()) database.setActive(id, true);
@@ -140,12 +152,10 @@ public class GroupReceiver {
 
 
   private void storeMessage(MasterSecret masterSecret, IncomingPushMessage message, GroupContext group) {
-    if (group.hasAvatar()) {
-      Intent intent = new Intent(context, SendReceiveService.class);
-      intent.setAction(SendReceiveService.DOWNLOAD_AVATAR_ACTION);
-      intent.putExtra("group_id", group.getId().toByteArray());
-      context.startService(intent);
-    }
+    Intent intent = new Intent(context, SendReceiveService.class);
+    intent.setAction(SendReceiveService.DOWNLOAD_AVATAR_ACTION);
+    intent.putExtra("group_id", group.getId().toByteArray());
+    context.startService(intent);
 
     EncryptingSmsDatabase smsDatabase  = DatabaseFactory.getEncryptingSmsDatabase(context);
     String                body         = Base64.encodeBytes(group.toByteArray());
@@ -157,5 +167,4 @@ public class GroupReceiver {
 
     MessageNotifier.updateNotification(context, masterSecret, messageAndThreadId.second);
   }
-
 }
