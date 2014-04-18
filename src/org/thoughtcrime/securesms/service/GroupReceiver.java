@@ -27,6 +27,7 @@ import java.util.Set;
 import static org.thoughtcrime.securesms.database.GroupDatabase.GroupRecord;
 import static org.whispersystems.textsecure.push.PushMessageProtos.PushMessageContent;
 import static org.whispersystems.textsecure.push.PushMessageProtos.PushMessageContent.GroupContext;
+import static org.whispersystems.textsecure.push.PushMessageProtos.PushMessageContent.AttachmentPointer;
 
 public class GroupReceiver {
   private static final String TAG = GroupReceiver.class.getSimpleName();
@@ -114,8 +115,13 @@ public class GroupReceiver {
       // TODO We should tell added and missing about each-other.
     }
 
-    if (group.hasName() || group.hasAvatar()) {
-      database.update(id, group.getName(), group.hasAvatar() ? group.getAvatar() : null);
+    if ((!group.hasAvatar() && groupRecord.getAvatarId() < 0) ||
+        (group.hasAvatar() && group.getAvatar().getId() == groupRecord.getAvatarId()))
+    {
+      group = group.toBuilder().clearAvatar().build();
+    } else if (!group.hasAvatar()) {
+      AttachmentPointer blankAvatar = AttachmentPointer.newBuilder().setId(-1).build();
+      group = group.toBuilder().setAvatar(blankAvatar).build();
     }
 
     if (group.hasName() && group.getName() != null && group.getName().equals(groupRecord.getTitle())) {
@@ -131,6 +137,10 @@ public class GroupReceiver {
     }
 
     if (!groupRecord.isActive()) database.setActive(id, true);
+    if (group.hasName() || group.hasAvatar()) {
+      database.update(id, group.getName(), group.hasAvatar() ? group.getAvatar() : null);
+    }
+
     storeMessage(masterSecret, message, group);
   }
 
