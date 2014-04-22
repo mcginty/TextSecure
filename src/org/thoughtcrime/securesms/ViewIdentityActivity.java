@@ -19,6 +19,7 @@ package org.thoughtcrime.securesms;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -26,8 +27,11 @@ import android.widget.TextView;
 import org.whispersystems.textsecure.crypto.IdentityKey;
 import org.thoughtcrime.securesms.util.Mnemonic;
 import org.whispersystems.textsecure.util.FutureTaskListener;
-import java.util.ArrayList;
-import java.util.List;
+import org.whispersystems.textsecure.util.Hex;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 /**
  * Activity for displaying an identity key.
@@ -58,29 +62,34 @@ public class ViewIdentityActivity extends KeyScanningActivity {
   }
 
   private void initializeFingerprint() {
-    identityFingerprintMnemonic.setText("");
+    try {
+      identityFingerprintMnemonic.setText("");
 
-    if (identityKey == null) {
-      identityFingerprintMnemonic.setText(R.string.ViewIdentityActivity_you_do_not_have_an_identity_key);
-    } else {
-      byte[] fingerprintBytes = identityKey.serialize();
+      if (identityKey == null) {
+        identityFingerprintMnemonic.setText(R.string.ViewIdentityActivity_you_do_not_have_an_identity_key);
+      } else {
+        byte[] identityBytes = identityKey.serialize();
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] fingerprintBytes = Arrays.copyOfRange(md.digest(identityBytes), 0, 10);
 
-      identityFingerprint.setText(identityKey.getFingerprint());
+        identityFingerprint.setText(Hex.toString(fingerprintBytes));
+        mnemonic.fromBytes(fingerprintBytes, new FutureTaskListener<String>() {
+          @Override
+          public void onSuccess(String result) {
+            identityFingerprintMnemonic.setText(result);
+          }
 
-      mnemonic.fromBytes(fingerprintBytes, new FutureTaskListener<String>() {
-        @Override
-        public void onSuccess(String result) {
-          identityFingerprintMnemonic.setText(result);
-        }
-
-        @Override
-        public void onFailure(Throwable error) {
-          findViewById(R.id.mnemonic_fingerprint_title).setVisibility(View.GONE);
-          findViewById(R.id.identity_fingerprint_mnemonic).setVisibility(View.GONE);
-          findViewById(R.id.fingerprint_or_separator).setVisibility(View.GONE);
-          findViewById(R.id.mnemonic_help_button).setVisibility(View.GONE);
-        }
-      });
+          @Override
+          public void onFailure(Throwable error) {
+            findViewById(R.id.mnemonic_fingerprint_title).setVisibility(View.GONE);
+            findViewById(R.id.identity_fingerprint_mnemonic).setVisibility(View.GONE);
+            findViewById(R.id.fingerprint_or_separator).setVisibility(View.GONE);
+            findViewById(R.id.mnemonic_help_button).setVisibility(View.GONE);
+          }
+        });
+      }
+    } catch (NoSuchAlgorithmException nsae) {
+      Log.w("ViewIdentityActivity", nsae);
     }
   }
 
