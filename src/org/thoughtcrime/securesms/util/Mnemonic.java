@@ -71,9 +71,8 @@ public class Mnemonic {
         while (bin.available() > 0) {
           try {
             final int bits = bin.readBits((short)(bin.available() < 11 ? bin.available() : 11));
-            mnemonicBuilder
-                .append(mnemonicDict.get(bits))
-                .append(" ");
+            mnemonicBuilder.append(mnemonicDict.get(bits))
+                           .append(" ");
           } catch (IOException e) {
             Log.e(TAG, "hit IOException when creating the mnemonic sentence");
             throw e;
