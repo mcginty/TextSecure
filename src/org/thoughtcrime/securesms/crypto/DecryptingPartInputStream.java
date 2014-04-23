@@ -65,7 +65,7 @@ public class DecryptingPartInputStream extends FileInputStream {
     try {
       if (file.length() <= IV_LENGTH + MAC_LENGTH)
         throw new FileNotFoundException("Part shorter than crypto overhead!");
-			
+
       done          = false;
       mac           = initializeMac(masterSecret.getMacKey());
       cipher        = initializeCipher(masterSecret.getEncryptionKey());
@@ -120,7 +120,7 @@ public class DecryptingPartInputStream extends FileInputStream {
   }
 	
   private int readFinal(byte[] buffer, int offset, int length) throws IOException {
-    try {	
+    try {
       int flourish = cipher.doFinal(buffer, offset);
       //			mac.update(buffer, offset, flourish);
 

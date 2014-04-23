@@ -64,6 +64,7 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
   private MasterSecret   masterSecret;
   private TouchImageView image;
   private VideoView      video;
+  private MediaServer    mediaServer;
 
   @Override
   protected void onCreate(Bundle bundle) {
@@ -88,7 +89,7 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
       final InputStream is = PartAuthority.getPartStream(this, masterSecret, uri);
       if (type != null) {
         if (type.startsWith("image/")) displayImage(is);
-        else if (type.startsWith("video/")) displayVideo(is);
+        else if (type.startsWith("video/")) displayVideo(is, type);
         else throw new UnsupportedOperationException("Type not supported.");
       }
     } catch (IOException ioe) {
@@ -102,6 +103,12 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
     }
   }
 
+  @Override
+  public void onPause() {
+    super.onPause();
+    stopMediaServer();
+  }
+
   private void initializeResources() {
     image = (TouchImageView) findViewById(R.id.image);
     video = (VideoView) findViewById(R.id.video);
@@ -112,9 +119,16 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
     image.setVisibility(View.VISIBLE);
   }
 
-  private void displayVideo(final InputStream is) {
-    video.setVideoPath("rtsp://192.168.0.11:5544/stream.sdp");
-    video.setMediaController(new MediaController(this));
+  private void displayVideo(final InputStream is, final String type) {
+    startMediaServer(is, type);
+    video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+      @Override
+      public void onPrepared(MediaPlayer mediaPlayer) {
+        mediaPlayer.start();
+      }
+    });
+    video.setMediaController(null);
+    video.setVideoPath("http://127.0.0.1:" + MediaServer.PORT + "/");
   }
 
   private void saveToDisk() {
@@ -146,28 +160,23 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
     return false;
   }
 
-  private boolean initWebServer(final InputStream is) {
-    String ipAddr = getLocalIpAddress();
-    MediaServer.CommonGatewayInterface doCapture = new MediaServer.CommonGatewayInterface() {
-      @Override
-      public String run(Properties parms) {
-        return null;
-      }
-      @Override
-      public InputStream streaming(Properties parms) {
-        return is;
-      }
-    };
-
-    if (ipAddr != null) {
+  private void startMediaServer(final InputStream is, final String type) {
+    if (mediaServer == null) {
+      mediaServer = new MediaServer("127.0.0.1", is, type);
+    }
+    if (!mediaServer.isAlive()) {
       try {
-        MediaServer webServer = new MediaServer(8080, this);
-        webServer.registerCGI("/stream/media.mp4", doCapture);
-      } catch (IOException e) {
-        Log.w(TAG, e);
+        mediaServer.start();
+      } catch (IOException ioe) {
+        Log.w(TAG, "couldn't start web server...");
       }
     }
-    return true;
+  }
+
+  private void stopMediaServer() {
+    if (mediaServer != null && mediaServer.isAlive()) {
+      mediaServer.stop();
+    }
   }
 
   public String getLocalIpAddress() {
@@ -189,6 +198,7 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
   }
 
   public static boolean isContentTypeSupported(final String contentType) {
-    return contentType.startsWith("image/");
+    return contentType.startsWith("image/") ||
+           contentType.startsWith("video/");
   }
 }
