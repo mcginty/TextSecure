@@ -19,11 +19,13 @@ public class MediaServer extends NanoHTTPD {
 
   private final InputStream is;
   private final String      mimeType;
+  private final String      nonce;
 
-  public MediaServer(String hostname, InputStream is, String mimeType) {
+  public MediaServer(String hostname, InputStream is, String mimeType, String nonce) {
     super(hostname, PORT);
     this.is       = is;
     this.mimeType = mimeType;
+    this.nonce    = nonce;
   }
 
   @Override
@@ -31,6 +33,9 @@ public class MediaServer extends NanoHTTPD {
     Map<String, String> header = session.getHeaders();
     Map<String, String> parms = session.getParms();
     String uri = session.getUri();
+    if (!("/" + nonce).equals(uri)) {
+      return new Response(Response.Status.FORBIDDEN, NanoHTTPD.MIME_PLAINTEXT, "Access denied");
+    }
 
     Log.w(TAG, session.getMethod() + " '" + uri + "' ");
 

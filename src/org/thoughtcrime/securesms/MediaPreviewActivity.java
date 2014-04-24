@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -29,6 +30,7 @@ import android.widget.VideoView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 import org.apache.http.conn.util.InetAddressUtils;
 import org.thoughtcrime.securesms.components.TouchImageView;
@@ -37,12 +39,15 @@ import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.MediaServer;
 import org.whispersystems.textsecure.crypto.MasterSecret;
+import org.whispersystems.textsecure.util.Hex;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -68,10 +73,12 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
 
   @Override
   protected void onCreate(Bundle bundle) {
+    requestWindowFeature(Window.FEATURE_NO_TITLE);
+    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                         WindowManager.LayoutParams.FLAG_FULLSCREEN);
     dynamicTheme.onCreate(this);
     dynamicLanguage.onCreate(this);
     super.onCreate(bundle);
-    getSupportActionBar().setTitle("Preview");
     setContentView(R.layout.media_preview_activity);
     initializeResources();
   }
@@ -109,9 +116,20 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
     stopMediaServer();
   }
 
+  final protected static char[] hexArray = "0123456789abcdef".toCharArray();
+  public static String bytesToHex(byte[] bytes) {
+    char[] hexChars = new char[bytes.length * 2];
+    for ( int j = 0; j < bytes.length; j++ ) {
+      int v = bytes[j] & 0xFF;
+      hexChars[j * 2] = hexArray[v >>> 4];
+      hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+    }
+    return new String(hexChars);
+  }
+
   private void initializeResources() {
     image = (TouchImageView) findViewById(R.id.image);
-    video = (VideoView) findViewById(R.id.video);
+    video = (VideoView)      findViewById(R.id.video);
   }
 
   private void displayImage(final InputStream is) {
@@ -120,7 +138,17 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
   }
 
   private void displayVideo(final InputStream is, final String type) {
-    startMediaServer(is, type);
+    final byte[] nonceBytes = new byte[16];
+    final String nonce;
+    try {
+      SecureRandom.getInstance("SHA1PRNG").nextBytes(nonceBytes);
+      nonce = Hex.toStringCondensed(nonceBytes);
+    } catch (NoSuchAlgorithmException e) {
+      throw new AssertionError(e);
+    }
+
+    startMediaServer(is, type, nonce);
+    video.setVisibility(View.VISIBLE);
     video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mediaPlayer) {
@@ -128,7 +156,7 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
       }
     });
     video.setMediaController(null);
-    video.setVideoPath("http://127.0.0.1:" + MediaServer.PORT + "/");
+    video.setVideoPath("http://127.0.0.1:" + MediaServer.PORT + "/" + nonce);
   }
 
   private void saveToDisk() {
@@ -160,9 +188,9 @@ public class MediaPreviewActivity extends PassphraseRequiredSherlockActivity {
     return false;
   }
 
-  private void startMediaServer(final InputStream is, final String type) {
+  private void startMediaServer(final InputStream is, final String type, final String nonce) {
     if (mediaServer == null) {
-      mediaServer = new MediaServer("127.0.0.1", is, type);
+      mediaServer = new MediaServer("127.0.0.1", is, type, nonce);
     }
     if (!mediaServer.isAlive()) {
       try {
