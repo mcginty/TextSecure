@@ -53,7 +53,7 @@ public class BitInputStream {
      * @return integer value containing the bits read from the stream.
      * @throws IOException
      */
-    synchronized public int readBits(final short aNumberOfBits)
+    synchronized public int readBits(final int aNumberOfBits)
             throws IOException
     {
         int value = 0;
@@ -66,7 +66,7 @@ public class BitInputStream {
 
     synchronized public int available() {
         try {
-            return iIs.available() * 8; // bytestream to bitstream available
+            return (8 - iNextBit) + iIs.available() * 8; // bytestream to bitstream available
         } catch (Exception e) {
             return 0;
         }

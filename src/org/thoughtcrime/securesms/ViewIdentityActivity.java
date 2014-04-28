@@ -24,11 +24,13 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import org.thoughtcrime.securesms.util.BasicEnglish;
 import org.whispersystems.textsecure.crypto.IdentityKey;
 import org.thoughtcrime.securesms.util.Mnemonic;
 import org.whispersystems.textsecure.util.FutureTaskListener;
 import org.whispersystems.textsecure.util.Hex;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -44,7 +46,6 @@ public class ViewIdentityActivity extends KeyScanningActivity {
   private TextView    identityFingerprint;
   private IdentityKey identityKey;
   private ImageButton mnemonicHelpButton;
-  private Mnemonic    mnemonic;
 
   @Override
   public void onCreate(Bundle state) {
@@ -57,7 +58,6 @@ public class ViewIdentityActivity extends KeyScanningActivity {
 
   protected void initialize() {
     initializeResources();
-    initializeMnemonicDictionary();
     initializeFingerprint();
   }
 
@@ -70,31 +70,22 @@ public class ViewIdentityActivity extends KeyScanningActivity {
       } else {
         byte[] identityBytes = identityKey.serialize();
         MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte[] fingerprintBytes = Arrays.copyOfRange(md.digest(identityBytes), 0, 10);
+        byte[] fingerprintBytes = md.digest(identityBytes);
+
+        String mnemomic;
+        try {
+          mnemomic = new BasicEnglish(this).fromBytes(fingerprintBytes, 10);
+        } catch (IOException ioe) {
+          mnemomic = "Oops, some shit went down.";
+        }
+
+        identityFingerprintMnemonic.setText(mnemomic);
 
         identityFingerprint.setText(Hex.toString(fingerprintBytes));
-        mnemonic.fromBytes(fingerprintBytes, new FutureTaskListener<String>() {
-          @Override
-          public void onSuccess(String result) {
-            identityFingerprintMnemonic.setText(result);
-          }
-
-          @Override
-          public void onFailure(Throwable error) {
-            findViewById(R.id.mnemonic_fingerprint_title).setVisibility(View.GONE);
-            findViewById(R.id.identity_fingerprint_mnemonic).setVisibility(View.GONE);
-            findViewById(R.id.fingerprint_or_separator).setVisibility(View.GONE);
-            findViewById(R.id.mnemonic_help_button).setVisibility(View.GONE);
-          }
-        });
       }
     } catch (NoSuchAlgorithmException nsae) {
       Log.w("ViewIdentityActivity", nsae);
     }
-  }
-
-  private void initializeMnemonicDictionary() {
-    mnemonic = new Mnemonic(this);
   }
 
   private void initializeResources() {
