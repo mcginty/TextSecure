@@ -35,10 +35,12 @@ import android.provider.ContactsContract.QuickContact;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,7 +76,7 @@ import java.io.OutputStream;
  *
  */
 
-public class ConversationItem extends LinearLayout {
+public class ConversationItem extends RelativeLayout {
   private final static String TAG = ConversationItem.class.getSimpleName();
 
   private final int    STYLE_ATTRIBUTES[] = new int[]{R.attr.conversation_item_sent_push_background,
@@ -100,13 +102,13 @@ public class ConversationItem extends LinearLayout {
   private MasterSecret  masterSecret;
   private boolean       groupThread;
   private boolean       pushDestination;
+  private boolean       squashedDate;
 
   private  View      conversationParent;
   private  TextView  bodyText;
   private  TextView  dateText;
   private  TextView  indicatorText;
   private  TextView  groupStatusText;
-  private  ImageView secureImage;
   private  ImageView failedImage;
   private  ImageView contactPhoto;
   private  ImageView deliveredImage;
@@ -145,7 +147,6 @@ public class ConversationItem extends LinearLayout {
     this.dateText            = (TextView) findViewById(R.id.conversation_item_date);
     this.indicatorText       = (TextView) findViewById(R.id.indicator_text);
     this.groupStatusText     = (TextView) findViewById(R.id.group_message_status);
-    this.secureImage         = (ImageView)findViewById(R.id.sms_secure_indicator);
     this.failedImage         = (ImageView)findViewById(R.id.sms_failed_indicator);
     this.mmsContainer        =            findViewById(R.id.mms_view);
     this.mmsThumbnail        = (ImageView)findViewById(R.id.image_view);
@@ -164,7 +165,7 @@ public class ConversationItem extends LinearLayout {
   }
 
   public void set(MasterSecret masterSecret, MessageRecord messageRecord,
-                  Handler failedIconHandler, boolean groupThread, boolean pushDestination)
+                  Handler failedIconHandler, boolean groupThread, boolean pushDestination, boolean squashedDate)
   {
 
     this.messageRecord     = messageRecord;
@@ -172,6 +173,9 @@ public class ConversationItem extends LinearLayout {
     this.failedIconHandler = failedIconHandler;
     this.groupThread       = groupThread;
     this.pushDestination   = pushDestination;
+    this.squashedDate      = squashedDate;
+
+    if (squashedDate) Log.w(TAG, "SQUAAASHHH");
 
     setBackgroundDrawables(messageRecord);
     setBodyText(messageRecord);
@@ -261,8 +265,7 @@ public class ConversationItem extends LinearLayout {
       pendingIndicator.setVisibility(messageRecord.isPendingSmsFallback() ? View.VISIBLE : View.GONE);
       indicatorText.setVisibility(messageRecord.isPendingSmsFallback() ? View.VISIBLE : View.GONE);
     }
-    secureImage.setVisibility(messageRecord.isSecure() ? View.VISIBLE : View.GONE);
-    bodyText.setCompoundDrawablesWithIntrinsicBounds(0, 0, messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0, 0);
+    bodyText.setCompoundDrawablesWithIntrinsicBounds(messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0, 0, messageRecord.isSecure() ? R.drawable.ic_menu_lock_small_holo_light : 0, 0);
     deliveredImage.setVisibility(!messageRecord.isKeyExchange() && messageRecord.isDelivered() ? View.VISIBLE : View.GONE);
 
     mmsThumbnail.setVisibility(View.GONE);
@@ -277,10 +280,26 @@ public class ConversationItem extends LinearLayout {
       else                                            indicatorText.setText(R.string.ConversationItem_click_to_approve_unencrypted);
     } else if (messageRecord.isPending()) {
       dateText.setText(" ··· ");
-    } else {
+    } else if (!squashedDate) {
       final long timestamp = messageRecord.getDateSent();
-
       dateText.setText(DateUtils.getBetterRelativeTimeSpanString(getContext(), timestamp));
+    }
+
+    final float scale = getResources().getDisplayMetrics().density;
+    if (squashedDate) {
+      dateText.setVisibility(View.GONE);
+      triangleTick.setVisibility(View.GONE);
+      this.setPadding(getPaddingLeft(),
+                      getPaddingTop(),
+                      getPaddingRight(),
+                      0);
+    } else {
+      dateText.setVisibility(View.VISIBLE);
+      triangleTick.setVisibility(View.VISIBLE);
+      this.setPadding(getPaddingLeft(),
+                      getPaddingTop(),
+                      getPaddingRight(),
+                      (int)(6.0f * scale));
     }
   }
 
