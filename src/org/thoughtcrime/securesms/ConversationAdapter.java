@@ -62,6 +62,9 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
   private final boolean pushDestination;
   private final LayoutInflater inflater;
 
+  private int ID_COL = -1;
+  private int TRANSPORT_COL = -1;
+
   public ConversationAdapter(Context context, MasterSecret masterSecret,
                              Handler failedIconClickHandler, boolean groupThread, boolean pushDestination)
   {
@@ -74,14 +77,33 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
     this.inflater               = LayoutInflater.from(context);
   }
 
+  private void cacheColumnIndices(final Cursor cursor) {
+    if (ID_COL < 0)        ID_COL        = cursor.getColumnIndexOrThrow(SmsDatabase.ID);
+    if (TRANSPORT_COL < 0) TRANSPORT_COL = cursor.getColumnIndexOrThrow(MmsSmsDatabase.TRANSPORT);
+  }
+
   @Override
   public void bindView(View view, Context context, Cursor cursor) {
-    ConversationItem item       = (ConversationItem)view;
-    long id                     = cursor.getLong(cursor.getColumnIndexOrThrow(SmsDatabase.ID));
-    String type                 = cursor.getString(cursor.getColumnIndexOrThrow(MmsSmsDatabase.TRANSPORT));
+    cacheColumnIndices(cursor);
+    ConversationItem item       = (ConversationItem) view;
+    long id                     = cursor.getLong(ID_COL);
+    String type                 = cursor.getString(TRANSPORT_COL);
     MessageRecord messageRecord = getMessageRecord(id, cursor, type);
-
-    item.set(masterSecret, messageRecord, failedIconClickHandler, groupThread, pushDestination);
+    final boolean squashedDate;
+    if (cursor.moveToNext()) {
+      final MessageRecord next = getMessageRecord(cursor.getLong(ID_COL), cursor, cursor.getString(TRANSPORT_COL));
+      if (messageRecord.isOutgoing() == next.isOutgoing() &&
+          next.getDateSent() - messageRecord.getDateSent() < 120000)
+      {
+        squashedDate = true;
+      } else {
+        squashedDate = false;
+      }
+      cursor.moveToPrevious();
+    } else {
+      squashedDate = false;
+    }
+    item.set(masterSecret, messageRecord, failedIconClickHandler, groupThread, pushDestination, squashedDate);
   }
 
   @Override
@@ -102,8 +124,6 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
         break;
       default: throw new IllegalArgumentException("unsupported item view type given to ConversationAdapter");
     }
-
-    bindView(view, context, cursor);
     return view;
   }
 
