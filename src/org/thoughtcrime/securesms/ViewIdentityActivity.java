@@ -69,8 +69,8 @@ public class ViewIdentityActivity extends KeyScanningActivity {
         identityFingerprintMnemonic.setText(R.string.ViewIdentityActivity_you_do_not_have_an_identity_key);
       } else {
         byte[] identityBytes = identityKey.serialize();
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte[] fingerprintBytes = Arrays.copyOfRange(md.digest(identityBytes), 0, 10);
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] fingerprintBytes = Arrays.copyOfRange(md.digest(identityBytes), 0, 16);
 
         identityFingerprint.setText(Hex.toString(fingerprintBytes));
         mnemonic.fromBytes(fingerprintBytes, new FutureTaskListener<String>() {
