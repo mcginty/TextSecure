@@ -27,7 +27,7 @@
         <item name="lower_right_divet">@drawable/divet_lower_right_dark</item>
 
         <item name="conversation_group_member_name">#99000000</item>
-        <item name="conversation_sent_text_primary_color">#ffeeeeee</item>
+        <item name="conversation_sent_text_primary_color">#ff0e0e0e</item>
         <item name="conversation_sent_text_secondary_color">#44000000</item>
         <item name="conversation_received_text_primary_color">#ff111111</item>
         <item name="conversation_received_text_secondary_color">#33000000</item>
