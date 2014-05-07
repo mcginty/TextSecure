@@ -37,7 +37,7 @@
         <item name="contact_selection_label_text">#66000000</item>
         <item name="conversation_selection_header_text">#44000000</item>
 
-        <item name="conversation_background">#ffffffff</item>
+        <item name="conversation_background">#fffafafa</item>
         <item name="conversation_editor_background">@drawable/textlines</item>
         <item name="conversation_editor_text_color">#ff111111</item>
         <item name="conversation_send_button_push">@drawable/ic_send_push</item>

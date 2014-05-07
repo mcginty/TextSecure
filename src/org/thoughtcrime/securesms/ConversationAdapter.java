@@ -93,6 +93,7 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
     if (cursor.moveToNext()) {
       final MessageRecord next = getMessageRecord(cursor.getLong(ID_COL), cursor, cursor.getString(TRANSPORT_COL));
       if (messageRecord.isOutgoing() == next.isOutgoing() &&
+          messageRecord.isPush() == next.isPush()         &&
           next.getDateSent() - messageRecord.getDateSent() < 120000)
       {
         squashedDate = true;

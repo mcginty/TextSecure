@@ -285,17 +285,17 @@ public class ConversationItem extends RelativeLayout {
     if (squashedDate) {
       dateText.setVisibility(View.GONE);
       triangleTick.setVisibility(View.GONE);
-      this.setPadding(getPaddingLeft(),
-                      getPaddingTop(),
-                      getPaddingRight(),
-                      0);
+//      this.setPadding(getPaddingLeft(),
+//                      getPaddingTop(),
+//                      getPaddingRight(),
+//                      getContext().getResources().getDimensionPixelSize());
     } else {
       dateText.setVisibility(View.VISIBLE);
       triangleTick.setVisibility(View.VISIBLE);
-      this.setPadding(getPaddingLeft(),
-                      getPaddingTop(),
-                      getPaddingRight(),
-                      (int)(6.0f * scale));
+//      this.setPadding(getPaddingLeft(),
+//                      getPaddingTop(),
+//                      getPaddingRight(),
+//                      (int)(6.0f * scale));
     }
   }
 

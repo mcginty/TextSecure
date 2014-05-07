@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="emoji_drawer_size">40dip</dimen>
-    <dimen name="conversation_item_corner_radius">8dp</dimen>
+    <dimen name="conversation_item_corner_radius">4dp</dimen>
     <dimen name="conversation_item_drop_shadow_dist">0dp</dimen>
     <dimen name="contact_selection_photo_size">50dp</dimen>
+    <dimen name="conversation_item_squashed_margin">5dp</dimen>
 </resources>
