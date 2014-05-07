@@ -20,7 +20,7 @@
     <color name="conversation_item_sent_background_light">#ffececec</color>
     <color name="conversation_item_sent_shadow_light">#fffafafa</color>
     <color name="conversation_item_sent_shadow_dark">#ff222222</color>
-    <color name="conversation_item_sent_pending_background_light">#5564A926</color>
+    <color name="conversation_item_sent_pending_background_light">#ffd9eeff</color>
     <color name="conversation_item_sent_pending_background_dark">#55284e0a</color>
     <color name="conversation_item_sent_push_background_light">#ffd9eeff</color>
     <color name="conversation_item_sent_push_background_dark">#ff213b77</color>

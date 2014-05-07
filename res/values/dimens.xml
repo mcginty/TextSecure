@@ -4,5 +4,6 @@
     <dimen name="conversation_item_corner_radius">4dp</dimen>
     <dimen name="conversation_item_drop_shadow_dist">0dp</dimen>
     <dimen name="contact_selection_photo_size">50dp</dimen>
-    <dimen name="conversation_item_squashed_margin">5dp</dimen>
+    <dimen name="conversation_item_normal_margin">6dp</dimen>
+    <dimen name="conversation_item_squashed_margin">3dp</dimen>
 </resources>

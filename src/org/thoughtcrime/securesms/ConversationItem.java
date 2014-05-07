@@ -281,21 +281,20 @@ public class ConversationItem extends RelativeLayout {
       dateText.setText(DateUtils.getBetterRelativeTimeSpanString(getContext(), timestamp));
     }
 
-    final float scale = getResources().getDisplayMetrics().density;
     if (squashedDate) {
       dateText.setVisibility(View.GONE);
       triangleTick.setVisibility(View.GONE);
-//      this.setPadding(getPaddingLeft(),
-//                      getPaddingTop(),
-//                      getPaddingRight(),
-//                      getContext().getResources().getDimensionPixelSize());
+      this.setPadding(getPaddingLeft(),
+                      getPaddingTop(),
+                      getPaddingRight(),
+                      getResources().getDimensionPixelSize(R.dimen.conversation_item_squashed_margin));
     } else {
       dateText.setVisibility(View.VISIBLE);
       triangleTick.setVisibility(View.VISIBLE);
-//      this.setPadding(getPaddingLeft(),
-//                      getPaddingTop(),
-//                      getPaddingRight(),
-//                      (int)(6.0f * scale));
+      this.setPadding(getPaddingLeft(),
+                      getPaddingTop(),
+                      getPaddingRight(),
+                      getResources().getDimensionPixelSize(R.dimen.conversation_item_normal_margin));
     }
   }
 
