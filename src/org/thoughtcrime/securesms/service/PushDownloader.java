@@ -7,6 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Pair;
 
+import org.thoughtcrime.securesms.database.AttachmentTransferDatabase;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.PartDatabase;
 import org.thoughtcrime.securesms.push.PushServiceSocketFactory;
@@ -74,16 +75,13 @@ public class PushDownloader {
       if (part.getName() != null) {
         relay = Util.toIsoString(part.getName());
       }
+      final AttachmentTransferDatabase attachmentDb = AttachmentTransferDatabase.getInstance(context);
+      attachmentDb.add(messageId, partId, 0, -1);
 
       PushServiceSocket.TransferProgressListener listener = new PushServiceSocket.TransferProgressListener() {
         @Override
         public void onProgressUpdate(long downloadedBytes, long totalBytes) {
-          Intent intent = new Intent("attachment-transfer-progress");
-          intent.putExtra("message_id", messageId);
-          intent.putExtra("part_id", partId);
-          intent.putExtra("downloaded_bytes", downloadedBytes);
-          intent.putExtra("total_bytes", totalBytes);
-          LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+          attachmentDb.update(messageId, partId, downloadedBytes, totalBytes);
         }
       };
 

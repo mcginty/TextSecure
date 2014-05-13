@@ -27,6 +27,7 @@ import com.google.protobuf.ByteString;
 
 import org.thoughtcrime.securesms.crypto.KeyExchangeProcessor;
 import org.thoughtcrime.securesms.crypto.KeyExchangeProcessorV2;
+import org.thoughtcrime.securesms.database.AttachmentTransferDatabase;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MmsSmsColumns;
 import org.thoughtcrime.securesms.database.PartDatabase;
@@ -184,15 +185,12 @@ public class PushTransport extends BaseTransport {
         final long        dataSize   = partDatabase.getPartSize(masterSecret, partId);
         final InputStream dataStream = partDatabase.getPartStream(masterSecret, partId);
 
+        final AttachmentTransferDatabase attachmentDb = AttachmentTransferDatabase.getInstance(context);
+        attachmentDb.add(message.getDatabaseMessageId(), partId, 0, -1);
         PushServiceSocket.TransferProgressListener listener = new PushServiceSocket.TransferProgressListener() {
           @Override
           public void onProgressUpdate(long downloadedBytes, long totalBytes) {
-            Intent intent = new Intent("attachment-transfer-progress");
-            intent.putExtra("message_id", message.getDatabaseMessageId());
-            intent.putExtra("part_id", partId);
-            intent.putExtra("downloaded_bytes", downloadedBytes);
-            intent.putExtra("total_bytes", totalBytes);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            attachmentDb.update(message.getDatabaseMessageId(), partId, downloadedBytes, totalBytes);
           }
         };
 

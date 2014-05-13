@@ -39,9 +39,12 @@
 
     <!-- AttachmentTypeSelectorAdapter -->
 
-    <string name="AttachmentTypeSelectorAdapter_picture">Picture</string>
-    <string name="AttachmentTypeSelectorAdapter_video">Video</string>
-    <string name="AttachmentTypeSelectorAdapter_audio">Audio</string>
+    <string name="AttachmentTypeSelectorAdapter_take_picture">Take Picture</string>
+    <string name="AttachmentTypeSelectorAdapter_take_video">Take Video</string>
+    <string name="AttachmentTypeSelectorAdapter_take_audio">Take Audio</string>
+    <string name="AttachmentTypeSelectorAdapter_pick_picture">Pick Picture</string>
+    <string name="AttachmentTypeSelectorAdapter_pick_video">Pick Video</string>
+    <string name="AttachmentTypeSelectorAdapter_pick_audio">Pick Audio</string>
 
     <!-- ConversationItem -->
     <string name="ConversationItem_message_size_d_kb">Message size: %d KB</string>

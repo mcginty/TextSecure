@@ -157,7 +157,6 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   private ImageButton     sendButton;
   private TextView        charactersLeft;
 
-  private AttachmentTypeSelectorAdapter attachmentAdapter;
   private AttachmentManager             attachmentManager;
   private BroadcastReceiver             securityUpdateReceiver;
   private BroadcastReceiver             groupUpdateReceiver;
@@ -263,16 +262,14 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
 
     boolean pushRegistered = TextSecurePreferences.isPushRegistered(this);
 
-    if (isSingleConversation() && isEncryptedConversation) {
-      inflater.inflate(R.menu.conversation_secure_identity, menu);
-      inflater.inflate(R.menu.conversation_secure_sms, menu.findItem(R.id.menu_security).getSubMenu());
-    } else if (isSingleConversation() && !pushRegistered) {
-      inflater.inflate(R.menu.conversation_insecure, menu);
-    }
+//    if (isSingleConversation() && isEncryptedConversation) {
+//      inflater.inflate(R.menu.conversation_secure_identity, menu);
+//      inflater.inflate(R.menu.conversation_secure_sms, menu.findItem(R.id.menu_security).getSubMenu());
+//    } else if (isSingleConversation() && !pushRegistered) {
+//      inflater.inflate(R.menu.conversation_insecure, menu);
+//    }
 
-    if (isSingleConversation()) {
-      inflater.inflate(R.menu.conversation_callable, menu);
-    } else if (isGroupConversation()) {
+    if (isGroupConversation()) {
       inflater.inflate(R.menu.conversation_group_options, menu);
 
       if (!isPushGroupConversation()) {
@@ -288,6 +285,9 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     }
 
     inflater.inflate(R.menu.conversation, menu);
+    if (isSingleConversation()) {
+      inflater.inflate(R.menu.conversation_callable, menu);
+    }
     super.onPrepareOptionsMenu(menu);
     return true;
   }
@@ -298,8 +298,11 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     switch (item.getItemId()) {
     case R.id.menu_call:                      handleDial(getRecipients().getPrimaryRecipient()); return true;
     case R.id.menu_delete_thread:             handleDeleteThread();                              return true;
-    case R.id.menu_add_contact_info:          handleAddContactInfo();                            return true;
-    case R.id.menu_add_attachment:            handleAddAttachment();                             return true;
+//    case R.id.menu_add_contact_info:          handleAddContactInfo();                            return true;
+//    case R.id.menu_add_attachment:            handleAddAttachment();                             return true;
+    case R.id.menu_pick_video:                AttachmentManager.selectVideo(this, PICK_VIDEO);   return true;
+    case R.id.menu_pick_picture:              AttachmentManager.selectVideo(this, PICK_IMAGE);   return true;
+    case R.id.menu_pick_audio:                AttachmentManager.selectVideo(this, PICK_AUDIO);   return true;
     case R.id.menu_start_secure_session:      handleStartSecureSession();                        return true;
     case R.id.menu_abort_session:             handleAbortSecureSession();                        return true;
     case R.id.menu_verify_identity:           handleVerifyIdentity();                            return true;
@@ -573,13 +576,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   }
 
   private void handleAddAttachment() {
-    if (this.isMmsEnabled || DirectoryHelper.isPushDestination(this, getRecipients())) {
-      AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.TextSecure_Light_Dialog));
-      builder.setIcon(R.drawable.ic_dialog_attach);
-      builder.setTitle(R.string.ConversationActivity_add_attachment);
-      builder.setAdapter(attachmentAdapter, new AttachmentTypeListener());
-      builder.show();
-    } else {
+    if (!this.isMmsEnabled && !DirectoryHelper.isPushDestination(this, getRecipients())) {
       handleManualMmsRequired();
     }
   }
@@ -834,14 +831,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
 
   private void addAttachment(int type) {
     Log.w("ComposeMessageActivity", "Selected: " + type);
-    switch (type) {
-    case AttachmentTypeSelectorAdapter.ADD_IMAGE:
-      AttachmentManager.selectImage(this, PICK_IMAGE); break;
-    case AttachmentTypeSelectorAdapter.ADD_VIDEO:
-      AttachmentManager.selectVideo(this, PICK_VIDEO); break;
-    case AttachmentTypeSelectorAdapter.ADD_SOUND:
-      AttachmentManager.selectAudio(this, PICK_AUDIO); break;
-    }
+    // TODO mediatize me captain
   }
 
   private void addAttachmentImage(Uri imageUri) {
@@ -1124,13 +1114,6 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
 
 
   // Listeners
-
-  private class AttachmentTypeListener implements DialogInterface.OnClickListener {
-    @Override
-    public void onClick(DialogInterface dialog, int which) {
-      addAttachment(attachmentAdapter.buttonToCommand(which));
-    }
-  }
 
   private class EmojiToggleListener implements OnClickListener {
     @Override

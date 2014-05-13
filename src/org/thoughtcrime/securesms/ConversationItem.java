@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -42,6 +43,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.thoughtcrime.securesms.database.AttachmentTransferDatabase;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.components.CircularProgressBar;
 import org.thoughtcrime.securesms.components.GifView;
@@ -192,23 +194,11 @@ public class ConversationItem extends LinearLayout {
         setMediaMmsAttributes((MediaMmsMessageRecord)messageRecord);
       }
 
+
       attachmentDownloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-          final long message         = intent.getLongExtra("message_id", -1);
-          if (message != ConversationItem.this.messageRecord.getId()) return;
 
-          final long downloadedBytes = intent.getLongExtra("downloaded_bytes", -1);
-          final long totalBytes      = intent.getLongExtra("total_bytes", -1);
-
-          final int percentDone;
-          if (totalBytes > 0)  percentDone = (int) (100 * downloadedBytes / totalBytes);
-          else                 percentDone = 0;
-
-          if ( percentDone >= 100) LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
-
-          Log.i(TAG, "progress update for " + message + ", new percentage: " + percentDone + "%, " + downloadedBytes + "/" + totalBytes);
-          mmsTransferProgress.setProgress(percentDone);
         }
       };
     }
@@ -396,13 +386,21 @@ public class ConversationItem extends LinearLayout {
             for (Slide slide : result.getSlides()) {
               if (slide.hasImage()) {
                 Log.i(TAG, "Slide's image has content type " + slide.getContentType());
+                context.getContentResolver().registerContentObserver(Uri.parse(AttachmentTransferDatabase.URI + messageRecord.getId()), true, new ContentObserver(handler) {
+                  @Override
+                  public void onChange(boolean selfChange) {
+                    super.onChange(selfChange);
+                    AttachmentTransferDatabase.TransferEntry transfer = AttachmentTransferDatabase.getInstance(context).get(messageRecord.getId());
 
-                LocalBroadcastManager.getInstance(context)
-                                     .registerReceiver(attachmentDownloadReceiver,
-                                                       new IntentFilter("attachment-transfer-progress"));
+                    final int percentDone;
+                    if (transfer.total > 0) percentDone = (int) (100 * transfer.transferred / transfer.total);
+                    else                    percentDone = 0;
 
-                if (mmsTransferProgress != null) {
-                }
+                    Log.i(TAG, "progress update for " + transfer.messageId + ", new percentage: " + percentDone + "%, " + transfer.transferred + "/" + transfer.total);
+                    mmsTransferProgress.setProgress(percentDone);
+                  }
+                });
+
                 if (messageRecord.isOutgoing() && messageRecord.isPending() && mmsTransferProgress != null) {
                   mmsTransferProgress.setProgress(0);
                   mmsTransferProgress.setIndeterminate(false);

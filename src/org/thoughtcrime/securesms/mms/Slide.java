@@ -134,7 +134,7 @@ public abstract class Slide {
     final int                      maxWidth          = imageView.getWidth();
     final int                      maxHeight         = imageView.getHeight();
 
-    if (pendingIndicator != null) pendingIndicator.setVisibility(View.VISIBLE);
+//    if (pendingIndicator != null) pendingIndicator.setVisibility(View.VISIBLE);
     imageView.setImageDrawable(temporaryDrawable);
 
     if (maxWidth == 0 || maxHeight == 0)

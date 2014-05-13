@@ -3,11 +3,29 @@
 
     <item android:title="@string/conversation__menu_add_attachment"
           android:id="@+id/menu_add_attachment"
-          android:icon="@drawable/ic_menu_attach" />
-
-    <item android:title="@string/conversation__menu_add_contact_info"
-          android:id="@+id/menu_add_contact_info"
-          android:icon="@drawable/ic_menu_friendslist" />
+          android:icon="@drawable/ic_menu_attach_holo_light"
+          android:showAsAction="ifRoom">
+        <menu>
+            <item android:title="@string/AttachmentTypeSelectorAdapter_take_picture"
+                  android:id="@+id/menu_take_picture"
+                  android:icon="@drawable/ic_attach_picture_holo_light" />
+            <item android:title="@string/AttachmentTypeSelectorAdapter_take_video"
+                  android:id="@+id/menu_take_video"
+                  android:icon="@drawable/ic_attach_video_holo_light" />
+            <item android:title="@string/AttachmentTypeSelectorAdapter_take_audio"
+                  android:id="@+id/menu_take_audio"
+                  android:icon="@drawable/ic_attach_audio_holo_light" />
+            <item android:title="@string/AttachmentTypeSelectorAdapter_pick_picture"
+                  android:id="@+id/menu_pick_picture"
+                  android:icon="@drawable/ic_attach_picture_holo_light" />
+            <item android:title="@string/AttachmentTypeSelectorAdapter_pick_video"
+                  android:id="@+id/menu_pick_video"
+                  android:icon="@drawable/ic_attach_video_holo_light" />
+            <item android:title="@string/AttachmentTypeSelectorAdapter_pick_audio"
+                  android:id="@+id/menu_pick_audio"
+                  android:icon="@drawable/ic_attach_audio_holo_light" />
+        </menu>
+        </item>
 
     <item android:title="@string/conversation__menu_delete_thread"
           android:id="@+id/menu_delete_thread"
