@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.ClipboardManager;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -35,7 +36,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 public class ConversationFragment extends SherlockListFragment
-  implements LoaderManager.LoaderCallbacks<Cursor>
+  implements LoaderManager.LoaderCallbacks<Cursor>, ConversationAdapter.ScrollToListener
 {
 
   private ConversationFragmentListener listener;
@@ -207,11 +208,11 @@ public class ConversationFragment extends SherlockListFragment
 
   private void initializeListAdapter() {
     if (this.recipients != null && this.threadId != -1) {
-      this.setListAdapter(new ConversationAdapter(getActivity(), masterSecret,
+      this.setListAdapter(new ConversationAdapter(getActivity(), masterSecret, this,
                                                   new FailedIconClickHandler(),
                                                   (!this.recipients.isSingleRecipient()) || this.recipients.isGroupRecipient(),
                                                   DirectoryHelper.isPushDestination(getActivity(), this.recipients)));
-      getListView().setRecyclerListener((ConversationAdapter)getListAdapter());
+      getListView().setRecyclerListener((ConversationAdapter) getListAdapter());
       getLoaderManager().initLoader(0, null, this);
     }
   }
@@ -229,6 +230,20 @@ public class ConversationFragment extends SherlockListFragment
   @Override
   public void onLoaderReset(Loader<Cursor> arg0) {
     ((CursorAdapter)getListAdapter()).changeCursor(null);
+  }
+
+  @Override
+  public void scrollTo(int startPos, int endPos) {
+    getListView().post(new Runnable() {
+      @Override
+      public void run() {
+        int height = getListView().getChildAt(getListView().getChildCount() - 1).getHeight();
+        Log.w("foo", "height to scroll up by is " + height);
+        getListView().scrollListBy(-height);
+//        getListView().setSelection(getListAdapter().getCount() - 2);
+        getListView().smoothScrollToPosition(getListView().getCount() - 1);
+      }
+    });
   }
 
   private class FailedIconClickHandler extends Handler {

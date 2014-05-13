@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.AbsListView;
@@ -67,9 +68,8 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
    */
   public static final int     ANIMATION_TARGET_API       = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
   public static final boolean ANIMATION_SUPPORTED        = Build.VERSION.SDK_INT >= ANIMATION_TARGET_API;
-  public static final int     ANIMATION_START_DELAY      = 500;
-  public static final int     ANIMATION_DURATION         = 250;
-  public static final float   ANIMATION_OVERSHOOT_AMOUNT = 1.1f;
+  public static final int     ANIMATION_START_DELAY      = 100;
+  public static final int     ANIMATION_DURATION         = 200;
 
   private final Handler failedIconClickHandler;
   /**
@@ -81,16 +81,18 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
   private final   boolean groupThread;
   private final   boolean pushDestination;
   private final   LayoutInflater inflater;
+  private final   ScrollToListener listener;
   private boolean animateNext              = false;
   private final   Set<Long> seenRows       = new HashSet<Long>();
   private final   Set<Long> animatingRows  = new HashSet<Long>();
 
-  public ConversationAdapter(Context context, MasterSecret masterSecret,
+  public ConversationAdapter(Context context, MasterSecret masterSecret, ScrollToListener listener,
                              Handler failedIconClickHandler, boolean groupThread, boolean pushDestination)
   {
     super(context, null, true);
     this.context                = context;
     this.masterSecret           = masterSecret;
+    this.listener               = listener;
     this.failedIconClickHandler = failedIconClickHandler;
     this.groupThread            = groupThread;
     this.pushDestination        = pushDestination;
@@ -109,6 +111,7 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
     if (animateNext && !seenRows.contains(id)) {
       animatingRows.add(id);
       queueAnimationForView(view);
+      listener.scrollTo(0, 0);
       animateNext = false;
     } else if (!animatingRows.contains(id)) {
       cancelAnimationForView(view);
@@ -164,8 +167,7 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
   @TargetApi(ANIMATION_TARGET_API)
   private void cancelAnimationForView(View view) {
     if (ANIMATION_SUPPORTED) {
-      view.setScaleX(1.f);
-      view.setScaleY(1.f);
+      view.setTranslationX(0);
       view.animate().cancel();
     }
   }
@@ -173,8 +175,7 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
   @TargetApi(ANIMATION_TARGET_API)
   private void queueSlideForView(final View view) {
     if (ANIMATION_SUPPORTED) {
-      view.setScaleX(0.f);
-      view.setScaleY(0.f);
+      view.setTranslationX(view.getWidth());
 
       animationHandler.post(new Runnable() {
         @Override
@@ -192,21 +193,18 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
       view.setPivotY(view.getHeight());
 
       view.animate()
-          .scaleX(1.f)
-          .scaleY(1.f)
+          .translationX(0)
           .setStartDelay(ANIMATION_START_DELAY)
           .setDuration(ANIMATION_DURATION)
-          .setInterpolator(new OvershootInterpolator(ANIMATION_OVERSHOOT_AMOUNT))
+          .setInterpolator(new AccelerateDecelerateInterpolator())
           .start();
     }
   }
 
-
   @TargetApi(ANIMATION_TARGET_API)
   private void queueAnimationForView(final View view) {
     if (ANIMATION_SUPPORTED) {
-      view.setScaleX(0.f);
-      view.setScaleY(0.f);
+      view.setTranslationX(view.getWidth());
 
       animationHandler.post(new Runnable() {
         @Override
@@ -224,13 +222,12 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
       view.setPivotY(view.getHeight());
 
       view.animate()
-        .scaleX(1.f)
-        .scaleY(1.f)
-        .setStartDelay(ANIMATION_START_DELAY)
-        .setDuration(ANIMATION_DURATION)
-        .setInterpolator(new OvershootInterpolator(ANIMATION_OVERSHOOT_AMOUNT))
-        .start();
-    }
+          .translationX(0)
+          .setStartDelay(ANIMATION_START_DELAY)
+          .setDuration(ANIMATION_DURATION)
+          .setInterpolator(new AccelerateDecelerateInterpolator())
+          .start();
+      }
   }
 
   private MessageRecord getMessageRecord(long messageId, Cursor cursor, String type) {
@@ -273,5 +270,9 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
   @Override
   public void onMovedToScrapHeap(View view) {
     ((ConversationItem)view).unbind();
+  }
+
+  public static interface ScrollToListener {
+    public void scrollTo(int startPos, int endPos);
   }
 }
