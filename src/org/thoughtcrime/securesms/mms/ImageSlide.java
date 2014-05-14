@@ -59,7 +59,7 @@ public class ImageSlide extends Slide {
   public ImageSlide(Context context, Uri uri) throws IOException, BitmapDecodingException {
     super(context, constructPartFromUri(uri));
   }
-		
+
   @Override
   public Drawable getThumbnail(int maxWidth, int maxHeight) {
     Drawable thumbnail = getCachedThumbnail();

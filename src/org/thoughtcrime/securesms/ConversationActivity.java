@@ -299,10 +299,9 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     case R.id.menu_call:                      handleDial(getRecipients().getPrimaryRecipient()); return true;
     case R.id.menu_delete_thread:             handleDeleteThread();                              return true;
 //    case R.id.menu_add_contact_info:          handleAddContactInfo();                            return true;
-//    case R.id.menu_add_attachment:            handleAddAttachment();                             return true;
     case R.id.menu_pick_video:                AttachmentManager.selectVideo(this, PICK_VIDEO);   return true;
-    case R.id.menu_pick_picture:              AttachmentManager.selectVideo(this, PICK_IMAGE);   return true;
-    case R.id.menu_pick_audio:                AttachmentManager.selectVideo(this, PICK_AUDIO);   return true;
+    case R.id.menu_pick_picture:              AttachmentManager.selectImage(this, PICK_IMAGE);   return true;
+    case R.id.menu_pick_audio:                AttachmentManager.selectAudio(this, PICK_AUDIO);   return true;
     case R.id.menu_start_secure_session:      handleStartSecureSession();                        return true;
     case R.id.menu_abort_session:             handleAbortSecureSession();                        return true;
     case R.id.menu_verify_identity:           handleVerifyIdentity();                            return true;

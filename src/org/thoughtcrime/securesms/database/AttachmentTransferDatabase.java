@@ -69,11 +69,13 @@ public class AttachmentTransferDatabase {
     if (db == null) return null;
     final Cursor cursor = db.query(TABLE_NAME, null, MESSAGE_ID_COLUMN + " = ?", new String[]{""+messageId}, null, null, null);
     if (cursor == null || !cursor.moveToNext()) return null;
-    return new TransferEntry(cursor.getLong(cursor.getColumnIndexOrThrow(ID_COLUMN)),
-                             cursor.getLong(cursor.getColumnIndexOrThrow(MESSAGE_ID_COLUMN)),
-                             cursor.getLong(cursor.getColumnIndexOrThrow(PART_ID_COLUMN)),
-                             cursor.getLong(cursor.getColumnIndexOrThrow(TRANSFERRED_COLUMN)),
-                             cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_COLUMN)));
+    TransferEntry entry = new TransferEntry(cursor.getLong(cursor.getColumnIndexOrThrow(ID_COLUMN)),
+                                            cursor.getLong(cursor.getColumnIndexOrThrow(MESSAGE_ID_COLUMN)),
+                                            cursor.getLong(cursor.getColumnIndexOrThrow(PART_ID_COLUMN)),
+                                            cursor.getLong(cursor.getColumnIndexOrThrow(TRANSFERRED_COLUMN)),
+                                            cursor.getLong(cursor.getColumnIndexOrThrow(TOTAL_COLUMN)));
+    cursor.close();
+    return entry;
   }
 
   private void notifyConversationListeners(long messageId) {

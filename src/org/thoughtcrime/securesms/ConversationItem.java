@@ -28,6 +28,7 @@ import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -385,19 +386,27 @@ public class ConversationItem extends LinearLayout {
           public void run() {
             for (Slide slide : result.getSlides()) {
               if (slide.hasImage()) {
-                Log.i(TAG, "Slide's image has content type " + slide.getContentType());
                 context.getContentResolver().registerContentObserver(Uri.parse(AttachmentTransferDatabase.URI + messageRecord.getId()), true, new ContentObserver(handler) {
                   @Override
                   public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
-                    AttachmentTransferDatabase.TransferEntry transfer = AttachmentTransferDatabase.getInstance(context).get(messageRecord.getId());
+                    new AsyncTask<Void,Void,AttachmentTransferDatabase.TransferEntry>() {
 
-                    final int percentDone;
-                    if (transfer.total > 0) percentDone = (int) (100 * transfer.transferred / transfer.total);
-                    else                    percentDone = 0;
+                      @Override
+                      protected AttachmentTransferDatabase.TransferEntry doInBackground(Void... voids) {
+                        return AttachmentTransferDatabase.getInstance(context).get(messageRecord.getId());
+                      }
 
-                    Log.i(TAG, "progress update for " + transfer.messageId + ", new percentage: " + percentDone + "%, " + transfer.transferred + "/" + transfer.total);
-                    mmsTransferProgress.setProgress(percentDone);
+                      @Override
+                      protected void onPostExecute(AttachmentTransferDatabase.TransferEntry transfer) {
+                        final int percentDone;
+                        if (transfer.total > 0) percentDone = (int) (100 * transfer.transferred / transfer.total);
+                        else                    percentDone = 0;
+
+                        Log.i(TAG, "progress update for " + transfer.messageId + ", new percentage: " + percentDone + "%, " + transfer.transferred + "/" + transfer.total);
+                        mmsTransferProgress.setProgress(percentDone);
+                      }
+                    }.execute();
                   }
                 });
 
