@@ -1,53 +1,34 @@
 package org.thoughtcrime.securesms;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.google.android.gcm.GCMRegistrar;
-import com.google.i18n.phonenumbers.AsYouTypeFormatter;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 
-import org.whispersystems.textsecure.crypto.MasterSecret;
+import org.thoughtcrime.securesms.components.StepPagerStrip;
+import org.thoughtcrime.securesms.registration.RegistrationPageFragment;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-import org.thoughtcrime.securesms.util.Dialogs;
-import org.whispersystems.textsecure.util.PhoneNumberFormatter;
-import org.whispersystems.textsecure.util.Util;
+import org.whispersystems.textsecure.crypto.MasterSecret;
 
-/**
- * The register account activity.  Prompts ths user for their registration information
- * and begins the account registration process.
- *
- * @author Moxie Marlinspike
- *
- */
-public class RegistrationActivity extends SherlockActivity {
 
-  private static final int PICK_COUNTRY = 1;
+public class RegistrationActivity extends SherlockFragmentActivity {
+  private static final String TAG = RegistrationActivity.class.getSimpleName();
 
-  private AsYouTypeFormatter   countryFormatter;
-  private ArrayAdapter<String> countrySpinnerAdapter;
-  private Spinner              countrySpinner;
-  private TextView             countryCode;
-  private TextView             number;
-  private Button               createButton;
-  private Button               skipButton;
+  private static final int STATE_CREATE_PASSPHRASE = 0;
+  private static final int STATE_IMPORT_MESSAGES   = 1;
+  private static final int STATE_PUSH_REGISTER     = 2;
 
   private MasterSecret masterSecret;
+
+  private StepPagerStrip strip;
+  private Button         nextButton;
+  private Button         skipButton;
+
+  private int state = 0;
 
   @Override
   public void onCreate(Bundle icicle) {
@@ -55,223 +36,78 @@ public class RegistrationActivity extends SherlockActivity {
     setContentView(R.layout.registration_activity);
 
     getSupportActionBar().setTitle(getString(R.string.RegistrationActivity_connect_with_textsecure));
-
     initializeResources();
-    initializeSpinner();
-    initializeNumber();
-  }
-
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == PICK_COUNTRY && resultCode == RESULT_OK && data != null) {
-      this.countryCode.setText(data.getIntExtra("country_code", 1)+"");
-      setCountryDisplay(data.getStringExtra("country_name"));
-      setCountryFormatter(data.getIntExtra("country_code", 1));
-    }
   }
 
   private void initializeResources() {
-    this.masterSecret   = getIntent().getParcelableExtra("master_secret");
-    this.countrySpinner = (Spinner)findViewById(R.id.country_spinner);
-    this.countryCode    = (TextView)findViewById(R.id.country_code);
-    this.number         = (TextView)findViewById(R.id.number);
-    this.createButton   = (Button)findViewById(R.id.registerButton);
-    this.skipButton     = (Button)findViewById(R.id.skipButton);
+    strip = (StepPagerStrip) findViewById(R.id.step_pager_strip);
+    nextButton = (Button) findViewById(R.id.button_next);
+    skipButton = (Button) findViewById(R.id.button_previous);
 
-    this.countryCode.addTextChangedListener(new CountryCodeChangedListener());
-    this.number.addTextChangedListener(new NumberChangedListener());
-    this.createButton.setOnClickListener(new CreateButtonListener());
-    this.skipButton.setOnClickListener(new CancelButtonListener());
-  }
+    state = TextSecurePreferences.getRegistrationState(this);
+    syncRegistrationState();
 
-  private void initializeSpinner() {
-    this.countrySpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
-    this.countrySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    strip.setPageCount(4);
 
-    setCountryDisplay(getString(R.string.RegistrationActivity_select_your_country));
-
-    this.countrySpinner.setAdapter(this.countrySpinnerAdapter);
-    this.countrySpinner.setOnTouchListener(new View.OnTouchListener() {
+    skipButton.setOnClickListener(new View.OnClickListener() {
       @Override
-      public boolean onTouch(View v, MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-          Intent intent = new Intent(RegistrationActivity.this, CountrySelectionActivity.class);
-          startActivityForResult(intent, PICK_COUNTRY);
-        }
-        return true;
+      public void onClick(View view) {
+        RegistrationPageFragment currentPage = (RegistrationPageFragment) getSupportFragmentManager().findFragmentByTag("current");
+        nextButton.setEnabled(false);
+        currentPage.onSkipPage(new RegistrationPageFragment.CompletionListener() {
+          @Override
+          public void onComplete() {
+            stepState();
+            nextButton.setEnabled(true);
+          }
+
+          @Override
+          public void onCancel() {
+            nextButton.setEnabled(true);
+          }
+        });
+      }
+    });
+
+    nextButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        RegistrationPageFragment currentPage = (RegistrationPageFragment)getSupportFragmentManager().findFragmentByTag("current");
+        nextButton.setEnabled(false);
+        currentPage.onFinishPage(new RegistrationPageFragment.CompletionListener() {
+          @Override
+          public void onComplete() {
+            stepState();
+            nextButton.setEnabled(true);
+          }
+
+          @Override
+          public void onCancel() {
+            nextButton.setEnabled(true);
+          }
+        });
       }
     });
   }
 
-  private void initializeNumber() {
-    String localNumber = org.whispersystems.textsecure.util.Util.getDeviceE164Number(this);
-
-    try {
-      if (!Util.isEmpty(localNumber)) {
-        PhoneNumberUtil numberUtil                = PhoneNumberUtil.getInstance();
-        Phonenumber.PhoneNumber localNumberObject = numberUtil.parse(localNumber, null);
-
-        if (localNumberObject != null) {
-          this.countryCode.setText(localNumberObject.getCountryCode()+"");
-          this.number.setText(localNumberObject.getNationalNumber()+"");
-        }
-      }
-    } catch (NumberParseException npe) {
-      Log.w("CreateAccountActivity", npe);
-    }
+  private void stepState() {
+    state += 1;
+    syncRegistrationState();
   }
 
-  private void setCountryDisplay(String value) {
-    this.countrySpinnerAdapter.clear();
-    this.countrySpinnerAdapter.add(value);
+  private void syncRegistrationState() {
+    switch (state) {
+    case STATE_CREATE_PASSPHRASE: setFragment(new PassphraseCreateActivity()); break; // XXX
+    case STATE_IMPORT_MESSAGES:   setFragment(new PushRegistrationFragment()); break; // XXX
+    case STATE_PUSH_REGISTER:     setFragment(new PushRegistrationFragment()); break;
+    }
+    strip.setCurrentPage(state);
+    TextSecurePreferences.setRegistrationState(this, state);
   }
 
-  private void setCountryFormatter(int countryCode) {
-    PhoneNumberUtil util = PhoneNumberUtil.getInstance();
-    String regionCode    = util.getRegionCodeForCountryCode(countryCode);
-
-    if (regionCode == null) this.countryFormatter = null;
-    else                    this.countryFormatter = util.getAsYouTypeFormatter(regionCode);
-  }
-
-  private String getConfiguredE164Number() {
-    return PhoneNumberFormatter.formatE164(countryCode.getText().toString(),
-                                           number.getText().toString());
-  }
-
-  private class CreateButtonListener implements View.OnClickListener {
-    @Override
-    public void onClick(View v) {
-      final RegistrationActivity self = RegistrationActivity.this;
-
-      TextSecurePreferences.setPromptedPushRegistration(self, true);
-
-      if (Util.isEmpty(countryCode.getText())) {
-        Toast.makeText(self,
-                       getString(R.string.RegistrationActivity_you_must_specify_your_country_code),
-                       Toast.LENGTH_LONG).show();
-        return;
-      }
-
-      if (Util.isEmpty(number.getText())) {
-        Toast.makeText(self,
-                       getString(R.string.RegistrationActivity_you_must_specify_your_phone_number),
-                       Toast.LENGTH_LONG).show();
-        return;
-      }
-
-      final String e164number = getConfiguredE164Number();
-
-      if (!PhoneNumberFormatter.isValidNumber(e164number)) {
-        Dialogs.showAlertDialog(self,
-                             getString(R.string.RegistrationActivity_invalid_number),
-                             String.format(getString(R.string.RegistrationActivity_the_number_you_specified_s_is_invalid),
-                                           e164number));
-        return;
-      }
-
-      try {
-        GCMRegistrar.checkDevice(self);
-      } catch (UnsupportedOperationException uoe) {
-        Dialogs.showAlertDialog(self, getString(R.string.RegistrationActivity_unsupported),
-                             getString(R.string.RegistrationActivity_sorry_this_device_is_not_supported_for_data_messaging));
-        return;
-      }
-
-      AlertDialog.Builder dialog = new AlertDialog.Builder(self);
-      dialog.setMessage(String.format(getString(R.string.RegistrationActivity_we_will_now_verify_that_the_following_number_is_associated_with_your_device_s),
-                                      PhoneNumberFormatter.getInternationalFormatFromE164(e164number)));
-      dialog.setPositiveButton(getString(R.string.RegistrationActivity_continue),
-                               new DialogInterface.OnClickListener() {
-                                 @Override
-                                 public void onClick(DialogInterface dialog, int which) {
-                                   Intent intent = new Intent(self, RegistrationProgressActivity.class);
-                                   intent.putExtra("e164number", e164number);
-                                   intent.putExtra("master_secret", masterSecret);
-                                   startActivity(intent);
-                                   finish();
-                                 }
-                               });
-      dialog.setNegativeButton(getString(R.string.RegistrationActivity_edit), null);
-      dialog.show();
-    }
-  }
-
-  private class CountryCodeChangedListener implements TextWatcher {
-    @Override
-    public void afterTextChanged(Editable s) {
-      if (Util.isEmpty(s)) {
-        setCountryDisplay(getString(R.string.RegistrationActivity_select_your_country));
-        countryFormatter = null;
-        return;
-      }
-
-      int countryCode   = Integer.parseInt(s.toString());
-      String regionCode = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(countryCode);
-
-      setCountryFormatter(countryCode);
-      setCountryDisplay(PhoneNumberFormatter.getRegionDisplayName(regionCode));
-
-      if (!Util.isEmpty(regionCode) && !regionCode.equals("ZZ")) {
-        number.requestFocus();
-      }
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-    }
-  }
-
-  private class NumberChangedListener implements TextWatcher {
-
-    @Override
-    public void afterTextChanged(Editable s) {
-      if (countryFormatter == null)
-        return;
-
-      if (Util.isEmpty(s))
-        return;
-
-      countryFormatter.clear();
-
-      String number          = s.toString().replaceAll("[^\\d.]", "");
-      String formattedNumber = null;
-
-      for (int i=0;i<number.length();i++) {
-        formattedNumber = countryFormatter.inputDigit(number.charAt(i));
-      }
-
-      if (formattedNumber != null && !s.toString().equals(formattedNumber)) {
-        s.replace(0, s.length(), formattedNumber);
-      }
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-    }
-  }
-
-  private class CancelButtonListener implements View.OnClickListener {
-    @Override
-    public void onClick(View v) {
-      TextSecurePreferences.setPromptedPushRegistration(RegistrationActivity.this, true);
-      Intent nextIntent = getIntent().getParcelableExtra("next_intent");
-
-      if (nextIntent == null) {
-        nextIntent = new Intent(RegistrationActivity.this, RoutingActivity.class);
-      }
-
-      startActivity(nextIntent);
-      finish();
-    }
+  private void setFragment(final Fragment fragment) {
+    final FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+    transaction.replace(R.id.fragment_view, fragment, "current");
+    transaction.commit();
   }
 }

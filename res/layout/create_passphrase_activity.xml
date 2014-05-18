@@ -56,21 +56,6 @@
                           android:layout_marginBottom="20dip"
                           android:layout_gravity="right"
                           android:orientation="horizontal">
-
-                <Button android:id="@+id/skip_button"
-                        android:text="@string/create_passphrase_activity__skip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dip"
-                        android:layout_weight="1"
-                        android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-                <Button android:id="@+id/ok_button"
-                        android:text="@string/create_passphrase_activity__create"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textAppearance="?android:attr/textAppearanceMedium"/>
             </LinearLayout>
         </LinearLayout>
         

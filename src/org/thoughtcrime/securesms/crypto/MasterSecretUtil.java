@@ -182,7 +182,9 @@ public class MasterSecretUtil {
     byte[] encryptedMasterSecret        = encryptWithPassphrase(context, masterSecret, passphrase);
     byte[] encryptedAndMacdMasterSecret = macWithPassphrase(context, encryptedMasterSecret, passphrase);
 
+    Log.w("hi", "saving encrypted master secret with context " + context);
     save(context, "master_secret", encryptedAndMacdMasterSecret);
+    Log.w("hi", "saving initialized thingy context " + context);
     save(context, "passphrase_initialized", true);
   }
 

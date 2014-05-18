@@ -51,23 +51,23 @@ public abstract class PassphraseActivity extends SherlockActivity {
   protected abstract void cleanup();
 
   private ServiceConnection serviceConnection = new ServiceConnection() {
-      @Override
-      public void onServiceConnected(ComponentName className, IBinder service) {
-        keyCachingService = ((KeyCachingService.KeyCachingBinder)service).getService();
-        keyCachingService.setMasterSecret(masterSecret);
+    @Override
+    public void onServiceConnected(ComponentName className, IBinder service) {
+      keyCachingService = ((KeyCachingService.KeyCachingBinder) service).getService();
+      keyCachingService.setMasterSecret(masterSecret);
 
-        PassphraseActivity.this.unbindService(PassphraseActivity.this.serviceConnection);
+      PassphraseActivity.this.unbindService(PassphraseActivity.this.serviceConnection);
 
-        MemoryCleaner.clean(masterSecret);
-        cleanup();
+      MemoryCleaner.clean(masterSecret);
+      cleanup();
 
-        PassphraseActivity.this.setResult(RESULT_OK);
-        PassphraseActivity.this.finish();
-      }
+      PassphraseActivity.this.setResult(RESULT_OK);
+      PassphraseActivity.this.finish();
+    }
 
-      @Override
-      public void onServiceDisconnected(ComponentName name) {
-        keyCachingService = null;
-      }
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+      keyCachingService = null;
+    }
   };
 }
