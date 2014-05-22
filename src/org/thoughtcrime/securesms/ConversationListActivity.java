@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ConversationListActivity extends PassphraseRequiredSherlockFragmentActivity
+public class ConversationListActivity extends PassphraseAwareSherlockFragmentActivity
     implements ConversationListFragment.ConversationSelectedListener,
                ListView.OnItemClickListener
   {

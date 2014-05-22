@@ -44,6 +44,7 @@ public class TextSecurePreferences {
   private static final String DIRECTORY_FRESH_TIME_PREF        = "pref_directory_refresh_time";
   private static final String IN_THREAD_NOTIFICATION_PREF      = "pref_key_inthread_notifications";
   private static final String REGISTRATION_STATE_PREF          = "pref_registration_state";
+  private static final String REGISTRATION_STATE_COMPLETE      = "pref_registration_complete";
 
   private static final String LOCAL_REGISTRATION_ID_PREF       = "pref_local_registration_id";
   private static final String ALLOW_SMS_FALLBACK_PREF          = "pref_allow_sms_traffic_out";
@@ -56,6 +57,14 @@ public class TextSecurePreferences {
 
   public static void setRegistrationState(Context context, int state) {
     setIntegerPrefrence(context, REGISTRATION_STATE_PREF, state);
+  }
+
+  public static boolean isRegistrationComplete(Context context) {
+    return getBooleanPreference(context, REGISTRATION_STATE_COMPLETE, false);
+  }
+
+  public static void setRegistrationComplete(Context context, boolean complete) {
+    setBooleanPreference(context, REGISTRATION_STATE_COMPLETE, complete);
   }
 
   public static boolean isSmsFallbackEnabled(Context context) {

@@ -19,16 +19,12 @@ package org.thoughtcrime.securesms;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
-import com.actionbarsherlock.app.SherlockFragment;
 
 import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.registration.RegistrationPageFragment;
@@ -40,6 +36,13 @@ import org.thoughtcrime.securesms.util.MemoryCleaner;
 import org.thoughtcrime.securesms.util.VersionTracker;
 import org.whispersystems.textsecure.util.Util;
 
+import java.util.List;
+
+import butterknife.ButterKnife;
+import butterknife.ButterKnife.Action;
+import butterknife.InjectView;
+import butterknife.InjectViews;
+
 /**
  * Activity for creating a user's local encryption passphrase.
  *
@@ -48,53 +51,52 @@ import org.whispersystems.textsecure.util.Util;
 
 public class PassphraseCreateActivity extends RegistrationPageFragment {
 
-  private LinearLayout createLayout;
-  private LinearLayout progressLayout;
+  @InjectView(R.id.create_layout)   LinearLayout createLayout;
+  @InjectView(R.id.progress_layout) LinearLayout progressLayout;
 
-  private EditText passphraseEdit;
-  private EditText passphraseRepeatEdit;
-  private Button   okButton;
-  private Button   skipButton;
+  @InjectViews({R.id.passphrase_edit, R.id.passphrase_edit_repeat}) List<EditText> passphrases;
+
+  static final ButterKnife.Action<View> CLEAR = new Action<View>() {
+    @Override
+    public void apply(View view, int index) {
+      view.setEnabled(false);
+    }
+  };
+
+  static final ButterKnife.Action<View> ERASE = new Action<View>() {
+    @Override
+    public void apply(View view, int index) {
+      if (view instanceof EditText) {
+        ((EditText)view).setText(null);
+      }
+      view = null;
+    }
+  };
 
   public PassphraseCreateActivity() { }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.create_passphrase_activity, container, false);
-  }
-
-  @Override
-  public void onActivityCreated(Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-    initializeResources();
-  }
-
-  private void initializeResources() {
-    this.createLayout         = (LinearLayout)getView().findViewById(R.id.create_layout);
-    this.progressLayout       = (LinearLayout)getView().findViewById(R.id.progress_layout);
-    this.passphraseEdit       = (EditText)    getView().findViewById(R.id.passphrase_edit);
-    this.passphraseRepeatEdit = (EditText)    getView().findViewById(R.id.passphrase_edit_repeat);
-    this.okButton             = (Button)      getView().findViewById(R.id.ok_button);
-    this.skipButton           = (Button)      getView().findViewById(R.id.skip_button);
+    final View view = inflater.inflate(R.layout.create_passphrase_activity, container, false);
+    ButterKnife.inject(this, view);
+    return view;
   }
 
   private void verifyAndSavePassphrases(CompletionListener listener) {
-    if (Util.isEmpty(this.passphraseEdit) || Util.isEmpty(this.passphraseRepeatEdit)) {
+    if (Util.isEmpty(passphrases.get(0)) || Util.isEmpty(passphrases.get(1))) {
       Toast.makeText(getActivity(), R.string.PassphraseCreateActivity_you_must_specify_a_password, Toast.LENGTH_SHORT).show();
       return;
     }
 
-    String passphrase       = this.passphraseEdit.getText().toString();
-    String passphraseRepeat = this.passphraseRepeatEdit.getText().toString();
+    String passphrase       = passphrases.get(0).getText().toString();
+    String passphraseRepeat = passphrases.get(1).getText().toString();
 
     if (!passphrase.equals(passphraseRepeat)) {
       Toast.makeText(getActivity(), R.string.PassphraseCreateActivity_passphrases_dont_match, Toast.LENGTH_SHORT).show();
-      this.passphraseEdit.setText("");
-      this.passphraseRepeatEdit.setText("");
+      ButterKnife.apply(passphrases, CLEAR);
       return;
     }
 
-    // We do this, but the edit boxes are basically impossible to clean up.
     MemoryCleaner.clean(passphraseRepeat);
     new SecretGenerator(getActivity(), listener).execute(passphrase);
   }
@@ -159,8 +161,7 @@ public class PassphraseCreateActivity extends RegistrationPageFragment {
   }
 
   private void cleanup() {
-    this.passphraseEdit       = null;
-    this.passphraseRepeatEdit = null;
+    ButterKnife.apply(passphrases, ERASE);
     System.gc();
   }
 }

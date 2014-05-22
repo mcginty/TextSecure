@@ -186,15 +186,16 @@ public class RoutingActivity extends PassphraseRequiredSherlockActivity {
     if (masterSecret == null)
       return STATE_PROMPT_PASSPHRASE;
 
-    if (!ApplicationMigrationService.isDatabaseImported(this))
-      return STATE_IMPORT_DATABASE;
+//    if (!ApplicationMigrationService.isDatabaseImported(this))
+//      return STATE_IMPORT_DATABASE;
 
     if (DatabaseUpgradeActivity.isUpdate(this))
       return STATE_UPGRADE_DATABASE;
 
-    return STATE_REGISTER;
+    if (!TextSecurePreferences.isRegistrationComplete(this))
+      return STATE_REGISTER;
 
-//    return STATE_CONVERSATION_OR_LIST;
+    return STATE_CONVERSATION_OR_LIST;
   }
 
   private ConversationParameters getConversationParameters() {

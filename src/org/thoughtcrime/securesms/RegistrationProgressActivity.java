@@ -201,7 +201,7 @@ public class RegistrationProgressActivity extends SherlockActivity {
     } else {
       Intent intent = new Intent(this, RegistrationActivity.class);
       intent.putExtra("master_secret", masterSecret);
-      startActivity(intent);
+      setResult(RESULT_CANCELED);
       finish();
     }
   }
@@ -329,7 +329,7 @@ public class RegistrationProgressActivity extends SherlockActivity {
     }
 
     shutdownService();
-    startActivity(new Intent(this, RoutingActivity.class));
+    setResult(RESULT_OK);
     finish();
   }
 
@@ -423,7 +423,7 @@ public class RegistrationProgressActivity extends SherlockActivity {
 
       Intent activityIntent = new Intent(RegistrationProgressActivity.this, RegistrationActivity.class);
       activityIntent.putExtra("master_secret", masterSecret);
-      startActivity(activityIntent);
+      setResult(RESULT_CANCELED);
       finish();
     }
   }

@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import org.thoughtcrime.securesms.registration.RegistrationPageFragment;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.database.EncryptedBackupExporter;
@@ -26,7 +26,7 @@ import org.thoughtcrime.securesms.service.KeyCachingService;
 import java.io.IOException;
 
 
-public class ImportFragment extends SherlockFragment {
+public class ImportFragment extends RegistrationPageFragment {
 
   private static final int SUCCESS    = 0;
   private static final int NO_SD_CARD = 1;
@@ -34,10 +34,6 @@ public class ImportFragment extends SherlockFragment {
 
   private MasterSecret masterSecret;
   private ProgressDialog progressDialog;
-
-  public void setMasterSecret(MasterSecret masterSecret) {
-    this.masterSecret = masterSecret;
-  }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
@@ -134,6 +130,21 @@ public class ImportFragment extends SherlockFragment {
     });
     builder.setNegativeButton(getActivity().getString(R.string.ImportFragment_cancel), null);
     builder.show();
+  }
+
+  @Override
+  public void onFinishPage(CompletionListener listener) {
+
+  }
+
+  @Override
+  public void onSkipPage(CompletionListener listener) {
+    listener.onComplete();
+  }
+
+  @Override
+  public void setMasterSecret(MasterSecret masterSecret) {
+    this.masterSecret = masterSecret;
   }
 
   private class ImportPlaintextBackupTask extends AsyncTask<Void, Void, Integer> {

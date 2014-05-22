@@ -13,22 +13,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragment;
 import com.google.android.gcm.GCMRegistrar;
 import com.google.i18n.phonenumbers.AsYouTypeFormatter;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
-import org.thoughtcrime.securesms.CountrySelectionActivity;
-import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.RegistrationProgressActivity;
-import org.thoughtcrime.securesms.RoutingActivity;
 import org.thoughtcrime.securesms.registration.RegistrationPageFragment;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
@@ -36,16 +30,19 @@ import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.whispersystems.textsecure.util.PhoneNumberFormatter;
 import org.whispersystems.textsecure.util.Util;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 public class PushRegistrationFragment extends RegistrationPageFragment {
-  private static final int PICK_COUNTRY = 1;
+  private static final int PICK_COUNTRY    = 1;
+  private static final int DO_REGISTRATION = 2;
 
   private AsYouTypeFormatter   countryFormatter;
   private ArrayAdapter<String> countrySpinnerAdapter;
-  private Spinner              countrySpinner;
-  private TextView             countryCode;
-  private TextView             number;
-  private Button               createButton;
-  private Button               skipButton;
+  private CompletionListener   pendingCompletionListener = null;
+  @InjectView(R.id.country_spinner) Spinner  countrySpinner;
+  @InjectView(R.id.country_code)    TextView countryCode;
+  @InjectView(R.id.number)          TextView number;
 
   private MasterSecret masterSecret;
 
@@ -71,14 +68,19 @@ public class PushRegistrationFragment extends RegistrationPageFragment {
       this.countryCode.setText(data.getIntExtra("country_code", 1) + "");
       setCountryDisplay(data.getStringExtra("country_name"));
       setCountryFormatter(data.getIntExtra("country_code", 1));
+    } if (requestCode == DO_REGISTRATION) {
+      if (resultCode == Activity.RESULT_OK && pendingCompletionListener != null) {
+        Log.w("PushFragment", "got back ok registration result, returning that all's well.");
+        pendingCompletionListener.onComplete();
+      } else if (pendingCompletionListener != null) {
+        pendingCompletionListener.onCancel();
+      }
+      pendingCompletionListener = null;
     }
   }
 
   private void initializeResources() {
-    this.masterSecret = getActivity().getIntent().getParcelableExtra("master_secret");
-    this.countrySpinner = (Spinner) getView().findViewById(R.id.country_spinner);
-    this.countryCode = (TextView) getView().findViewById(R.id.country_code);
-    this.number = (TextView) getView().findViewById(R.id.number);
+    ButterKnife.inject(this, getView());
 
     this.countryCode.addTextChangedListener(new CountryCodeChangedListener());
     this.number.addTextChangedListener(new NumberChangedListener());
@@ -141,8 +143,7 @@ public class PushRegistrationFragment extends RegistrationPageFragment {
 
   @Override
   public void onFinishPage(CompletionListener listener) {
-    handlePushRegistration();
-    listener.onComplete();
+    handlePushRegistration(listener);
   }
 
   @Override
@@ -151,20 +152,25 @@ public class PushRegistrationFragment extends RegistrationPageFragment {
     listener.onComplete();
   }
 
-  public void handlePushRegistration() {
+  @Override
+  public void setMasterSecret(MasterSecret masterSecret) {
+    this.masterSecret = masterSecret;
+  }
+
+  public void handlePushRegistration(final CompletionListener listener) {
     final Activity self = getActivity();
 
     TextSecurePreferences.setPromptedPushRegistration(self, true);
 
     if (Util.isEmpty(countryCode.getText())) {
-      Toast.makeText(self,
+      Toast.makeText(self.getApplicationContext(),
                      getString(R.string.RegistrationActivity_you_must_specify_your_country_code),
                      Toast.LENGTH_LONG).show();
       return;
     }
 
     if (Util.isEmpty(number.getText())) {
-      Toast.makeText(self,
+      Toast.makeText(self.getApplicationContext(),
                      getString(R.string.RegistrationActivity_you_must_specify_your_phone_number),
                      Toast.LENGTH_LONG).show();
       return;
@@ -199,11 +205,17 @@ public class PushRegistrationFragment extends RegistrationPageFragment {
                                  Intent intent = new Intent(self, RegistrationProgressActivity.class);
                                  intent.putExtra("e164number", e164number);
                                  intent.putExtra("master_secret", masterSecret);
-                                 startActivity(intent);
-                                 getActivity().finish();
+                                 pendingCompletionListener = listener;
+                                 startActivityForResult(intent, DO_REGISTRATION);
                                }
                              });
-    dialog.setNegativeButton(getString(R.string.RegistrationActivity_edit), null);
+    dialog.setNegativeButton(getString(R.string.RegistrationActivity_edit),
+                             new DialogInterface.OnClickListener() {
+                               @Override
+                               public void onClick(DialogInterface dialogInterface, int i) {
+                                 listener.onCancel();
+                               }
+                             });
     dialog.show();
   }
 

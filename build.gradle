@@ -24,6 +24,7 @@ dependencies {
     compile 'com.android.support:support-v4:19.0.1'
     compile 'com.google.android.gcm:gcm-client:1.0.2'
     compile 'se.emilsjolander:stickylistheaders:2.2.0'
+    compile 'com.jakewharton:butterknife:5.0.1'
 
     compile project(':library')
 }
@@ -35,6 +36,10 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 19
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
     }
 
     android {
