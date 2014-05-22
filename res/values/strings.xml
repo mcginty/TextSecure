@@ -335,6 +335,9 @@
     <string name="VerifyKeysActivity_their_key_is_correct_it_is_also_necessary_to_get_your_fingerprint_scanned_as_well">Their key is correct. It is also necessary to get your fingerprint scanned as well.</string>
     <string name="VerifyKeysActivity_verified_exclamation">Verified!</string>
 
+    <!-- IdentityKeyView -->
+    <string name="IdentityKeyView_invalid_or_legacy_identity_key">This contact has an invalid or legacy identity key</string>
+
     <!-- ViewIdentityActivity -->
     <string name="ViewIdentityActivity_you_do_not_have_an_identity_key">You do not have an identity key.</string>
     <string name="ViewIdentityActivity_scan_to_compare">Scan to compare</string>

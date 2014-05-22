@@ -81,7 +81,14 @@ public class IdentityKeyView extends RelativeLayout
     this.recipients.addListener(this);
 
     identityName.setText(recipients.toShortString());
-    fingerprint.setText(identity.getIdentityKey().getFingerprint());
+
+    final String fingerprintText;
+    if (this.identityKey == null) {
+      fingerprintText = getContext().getString(R.string.IdentityKeyView_invalid_or_legacy_identity_key);
+    } else {
+      fingerprintText = this.identityKey.getFingerprint();
+    }
+    fingerprint.setText(fingerprintText);
 
     contactBadge.setImageBitmap(recipients.getPrimaryRecipient().getContactPhoto());
     contactBadge.assignContactFromPhone(recipients.getPrimaryRecipient().getNumber(), true);
