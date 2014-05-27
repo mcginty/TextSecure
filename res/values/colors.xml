@@ -30,4 +30,6 @@
     <color name="conversation_item_received_background_dark">#ff333333</color>
     <color name="conversation_item_received_shadow_light">#ffd5d5d5</color>
     <color name="conversation_item_received_shadow_dark">#ff222222</color>
+
+    <color name="background_tab_pressed">#6633B5E5</color>
 </resources>

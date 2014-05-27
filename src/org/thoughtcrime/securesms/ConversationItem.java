@@ -242,7 +242,7 @@ public class ConversationItem extends LinearLayout {
   private void setBodyText(MessageRecord messageRecord) {
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-      bodyText.setText(Emoji.getInstance(context).emojify(messageRecord.getDisplayBody(), Emoji.EMOJI_LARGE),
+      bodyText.setText(Emoji.getInstance(context).replaceEmoji(messageRecord.getDisplayBody()),
                        TextView.BufferType.SPANNABLE);
     } else {
       bodyText.setText(messageRecord.getDisplayBody());

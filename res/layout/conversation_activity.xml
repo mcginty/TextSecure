@@ -4,6 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="?conversation_background"
+    android:id="@+id/conversation_container"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -120,12 +121,5 @@
 
         </LinearLayout>
     </RelativeLayout>
-
-    <org.thoughtcrime.securesms.components.EmojiDrawer
-            android:id="@+id/emoji_drawer"
-            android:visibility="gone"
-            android:layout_weight="1.1"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
 
 </LinearLayout>

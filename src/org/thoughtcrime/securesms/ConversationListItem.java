@@ -105,8 +105,7 @@ public class ConversationListItem extends RelativeLayout
     this.fromView.setText(formatFrom(recipients, count, read));
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-      this.subjectView.setText(Emoji.getInstance(context).emojify(thread.getDisplayBody(),
-                                                                  Emoji.EMOJI_SMALL),
+      this.subjectView.setText(Emoji.getInstance(context).replaceEmoji(thread.getDisplayBody()),
                                TextView.BufferType.SPANNABLE);
     } else {
       this.subjectView.setText(thread.getDisplayBody());

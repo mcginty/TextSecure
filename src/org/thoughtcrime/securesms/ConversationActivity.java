@@ -16,6 +16,7 @@
  */
 package org.thoughtcrime.securesms;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -26,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -40,6 +42,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
@@ -48,6 +51,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,8 +60,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.protobuf.ByteString;
 
-import org.thoughtcrime.securesms.components.EmojiDrawer;
 import org.thoughtcrime.securesms.components.EmojiToggle;
+import org.thoughtcrime.securesms.components.EmojiView;
 import org.thoughtcrime.securesms.contacts.ContactAccessor;
 import org.thoughtcrime.securesms.contacts.ContactAccessor.ContactData;
 import org.thoughtcrime.securesms.crypto.KeyExchangeInitiator;
@@ -94,6 +98,7 @@ import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.util.DirectoryHelper;
 import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.DynamicTheme;
+import org.thoughtcrime.securesms.util.Emoji;
 import org.thoughtcrime.securesms.util.EncryptedCharacterCalculator;
 import org.thoughtcrime.securesms.util.GroupUtil;
 import org.thoughtcrime.securesms.util.MemoryCleaner;
@@ -156,8 +161,9 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   private AttachmentManager             attachmentManager;
   private BroadcastReceiver             securityUpdateReceiver;
   private BroadcastReceiver             groupUpdateReceiver;
-  private EmojiDrawer                   emojiDrawer;
+  private EmojiView                     emojiView;
   private EmojiToggle                   emojiToggle;
+  private PopupWindow                   emojiPopup;
 
   private Recipients recipients;
   private long       threadId;
@@ -165,6 +171,8 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   private boolean    isEncryptedConversation;
   private boolean    isMmsEnabled = true;
   private boolean    isCharactersLeftViewEnabled;
+  private int keyboardHeight = 0;
+  private int keyboardHeightLand = 0;
 
   private CharacterCalculator characterCalculator = new CharacterCalculator();
   private DynamicTheme        dynamicTheme        = new DynamicTheme();
@@ -329,12 +337,12 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
 
   @Override
   public void onBackPressed() {
-    if (emojiDrawer.getVisibility() == View.VISIBLE) {
-      emojiDrawer.setVisibility(View.GONE);
-      emojiToggle.toggle();
-    } else {
+//    if (emojiDrawer.getVisibility() == View.VISIBLE) {
+//      emojiDrawer.setVisibility(View.GONE);
+//      emojiToggle.toggle();
+//    } else {
       super.onBackPressed();
-    }
+//    }
   }
 
   //////// Event Handlers
@@ -712,12 +720,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     composeText         = (EditText)findViewById(R.id.embedded_text_editor);
     masterSecret        = getIntent().getParcelableExtra(MASTER_SECRET_EXTRA);
     charactersLeft      = (TextView)findViewById(R.id.space_left);
-    emojiDrawer         = (EmojiDrawer)findViewById(R.id.emoji_drawer);
     emojiToggle         = (EmojiToggle)findViewById(R.id.emoji_toggle);
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      emojiToggle.setVisibility(View.GONE);
-    }
 
     attachmentAdapter   = new AttachmentTypeSelectorAdapter(this);
     attachmentManager   = new AttachmentManager(this);
@@ -731,7 +734,6 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     composeText.addTextChangedListener(composeKeyPressedListener);
     composeText.setOnEditorActionListener(sendButtonListener);
     composeText.setOnClickListener(composeKeyPressedListener);
-    emojiDrawer.setComposeEditText(composeText);
     emojiToggle.setOnClickListener(new EmojiToggleListener());
 
     recipients.addListener(new RecipientModifiedListener() {
@@ -1065,6 +1067,85 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     }
   }
 
+  private void createEmojiPopup() {
+    emojiView = new EmojiView(this);
+    emojiView.setListener(new EmojiView.Listener() {
+      public void onBackspace() {
+        composeText.dispatchKeyEvent(new KeyEvent(0, 67));
+      }
+
+      public void onEmojiSelected(String paramAnonymousString) {
+        int i = composeText.getSelectionEnd();
+        CharSequence localCharSequence = Emoji.getInstance(getApplicationContext()).replaceEmoji(paramAnonymousString);
+        composeText.setText(composeText.getText().insert(i, localCharSequence));
+        int j = i + localCharSequence.length();
+        composeText.setSelection(j, j);
+      }
+    });
+    emojiPopup = new PopupWindow(emojiView);
+  }
+
+  private void showEmojiPopup(boolean show) {
+    Log.w(TAG, "showing emoji popup? " + show);
+    InputMethodManager localInputMethodManager = (InputMethodManager)getSystemService("input_method");
+    if (show) {
+      if (emojiPopup == null) {
+        createEmojiPopup();
+      }
+      int currentHeight;
+      WindowManager manager = (WindowManager) getSystemService(Activity.WINDOW_SERVICE);
+      int rotation = manager.getDefaultDisplay().getRotation();
+      if (keyboardHeight <= 0) {
+        keyboardHeight = getSharedPreferences("emoji", 0).getInt("kbd_height", Emoji.getInstance(this).scale(200.0f));
+      }
+      if (keyboardHeightLand <= 0) {
+        keyboardHeightLand = getSharedPreferences("emoji", 0).getInt("kbd_height_land3", Emoji.getInstance(this).scale(200.0f));
+      }
+      if (rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_90) {
+        currentHeight = keyboardHeightLand;
+      } else {
+        currentHeight = keyboardHeight;
+      }
+      Log.w(TAG, "setting height to " + currentHeight);
+      Log.w(TAG, "with fragment width at " + findViewById(R.id.fragment_content).getWidth());
+      emojiPopup.setHeight(View.MeasureSpec.makeMeasureSpec(currentHeight, View.MeasureSpec.EXACTLY));
+      emojiPopup.setWidth(View.MeasureSpec.makeMeasureSpec(findViewById(R.id.fragment_content).getWidth(), View.MeasureSpec.EXACTLY));
+//      emojiPopup.setBackgroundDrawable(new ColorDrawable(0xffff0000));
+      emojiPopup.showAtLocation(findViewById(R.id.conversation_container), 83, 0, 0);
+
+      findViewById(R.id.conversation_container).setPadding(0, 0, 0, currentHeight);
+//      if (!keyboardVisible) {
+//        findViewById(R.id.fragment_content).setPadding(0, 0, 0, currentHeight);
+//        emojiButton.setImageResource(R.drawable.ic_msg_panel_hide);
+//        return;
+//      }
+//      emojiButton.setImageResource(R.drawable.ic_msg_panel_kb);
+//      return;
+    }
+//    if (emojiButton != null) {
+//      emojiButton.setImageResource(R.drawable.ic_msg_panel_smiles);
+//    }
+//    if (emojiPopup != null) {
+//      emojiPopup.dismiss();
+//    }
+//    if (findViewById(R.id.fragment_content) != null) {
+//      findViewById(R.id.fragment_content).post(new Runnable() {
+//        public void run() {
+//          if (findViewById(R.id.fragment_content) != null) {
+//            findViewById(R.id.fragment_content).setPadding(0, 0, 0, 0);
+//          }
+//        }
+//      });
+//    }
+  }
+
+  public void hideEmojiPopup() {
+    if (emojiPopup != null && emojiPopup.isShowing()) {
+      showEmojiPopup(false);
+    }
+  }
+
+
   // Listeners
 
   private class AttachmentTypeListener implements DialogInterface.OnClickListener {
@@ -1077,15 +1158,13 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   private class EmojiToggleListener implements OnClickListener {
     @Override
     public void onClick(View v) {
-      InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-
-      if (emojiDrawer.getVisibility() == View.VISIBLE) {
-        input.showSoftInput(composeText, 0);
-        emojiDrawer.setVisibility(View.GONE);
+      final boolean shouldShow;
+      if (emojiPopup == null) {
+        shouldShow = true;
       } else {
-        input.hideSoftInputFromWindow(composeText.getWindowToken(), 0);
-        emojiDrawer.setVisibility(View.VISIBLE);
+        shouldShow = !emojiPopup.isShowing();
       }
+      showEmojiPopup(shouldShow);
     }
   }
 
@@ -1123,9 +1202,9 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
 
     @Override
     public void onClick(View v) {
-      if (emojiDrawer.isOpen()) {
-        emojiToggle.performClick();
-      }
+//      if (emojiDrawer.isOpen()) {
+//        emojiToggle.performClick();
+//      }
     }
 
     @Override

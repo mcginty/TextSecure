@@ -177,4 +177,14 @@ public class Util {
   ////  return BitmapFactory.decodeStream(src, null, options);
   //  }
 
+  public static float getScreenDensity(Context context) {
+    if (context == null || context.getApplicationContext() == null) {
+      return 1.0f;
+    }
+    return context.getApplicationContext().getResources().getDisplayMetrics().density;
+  }
+
+  public static int pxToDp(Context context, int value) {
+    return value * (int)getScreenDensity(context);
+  }
 }
