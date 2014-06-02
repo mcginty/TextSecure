@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="@string/conversation_secure_verified__menu_security"
+    <item android:title="Profile"
           android:id="@+id/menu_security"
-          android:icon="?menu_lock_icon"
-          android:showAsAction="ifRoom">
-          <menu>
-              <item android:title="@string/conversation_secure_verified__menu_verify_identity"
-                    android:id="@+id/menu_verify_identity"/>
-          </menu>
-    </item>
+          android:icon="?menu_lock_icon" />
 </menu>

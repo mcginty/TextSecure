@@ -53,7 +53,6 @@ public class BasicEnglish {
 
   public String fromBytes(final byte[] bytes, int desiredBytes) throws IOException {
     BitInputStream bin         = new BitInputStream(new ByteArrayInputStream(bytes));
-    StringBuilder  builder     = new StringBuilder();
     EntropyString  fingerprint = new EntropyString();
     int bitsRead = 0;
     while (fingerprint.getBits() < (desiredBytes * 8)) {
@@ -78,7 +77,7 @@ public class BasicEnglish {
     final int neededBits = log(words.size(), 2);
     Log.w(TAG, "need " + neededBits + " bits of entropy");
     int bits = bin.readBits(neededBits);
-    Log.w(TAG, "got word " + words.get(bits) + " with " + bits + " bits of entropy");
+    Log.w(TAG, "got word " + words.get(bits) + " with " + neededBits + " bits of entropy");
     return new EntropyString(words.get(bits), neededBits);
   }
 

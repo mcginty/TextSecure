@@ -74,7 +74,7 @@ public class ViewIdentityActivity extends KeyScanningActivity {
 
         String mnemomic;
         try {
-          mnemomic = new BasicEnglish(this).fromBytes(fingerprintBytes, 10);
+          mnemomic = new BasicEnglish(this).fromBytes(fingerprintBytes, 16);
         } catch (IOException ioe) {
           mnemomic = "Oops, some shit went down.";
         }

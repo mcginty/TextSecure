@@ -264,7 +264,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
 
     if (isSingleConversation() && isEncryptedConversation) {
       inflater.inflate(R.menu.conversation_secure_identity, menu);
-      inflater.inflate(R.menu.conversation_secure_sms, menu.findItem(R.id.menu_security).getSubMenu());
+      //inflater.inflate(R.menu.conversation_secure_sms, menu.findItem(R.id.menu_security).getSubMenu());
     } else if (isSingleConversation() && !pushRegistered) {
       inflater.inflate(R.menu.conversation_insecure, menu);
     }
@@ -301,16 +301,24 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     case R.id.menu_add_attachment:            handleAddAttachment();                             return true;
     case R.id.menu_start_secure_session:      handleStartSecureSession();                        return true;
     case R.id.menu_abort_session:             handleAbortSecureSession();                        return true;
-    case R.id.menu_verify_identity:           handleVerifyIdentity();                            return true;
+//    case R.id.menu_verify_identity:           handleVerifyIdentity();                            return true;
     case R.id.menu_group_recipients:          handleDisplayGroupRecipients();                    return true;
     case R.id.menu_distribution_broadcast:    handleDistributionBroadcastEnabled(item);          return true;
     case R.id.menu_distribution_conversation: handleDistributionConversationEnabled(item);       return true;
     case R.id.menu_edit_group:                handleEditPushGroup();                             return true;
     case R.id.menu_leave:                     handleLeavePushGroup();                            return true;
+    case R.id.menu_security:                  handleViewProfile();                               return true;
     case android.R.id.home:                   handleReturnToConversationList();                  return true;
     }
 
     return false;
+  }
+
+  public void handleViewProfile() {
+    final Intent intent = new Intent(this, ProfileActivity.class);
+    intent.putExtra(ProfileActivity.MASTER_SECRET_EXTRA, masterSecret);
+    intent.putExtra(ProfileActivity.RECIPIENT_EXTRA, getRecipients().getPrimaryRecipient());
+    startActivity(intent);
   }
 
   @Override

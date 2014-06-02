@@ -36,6 +36,7 @@ dependencies {
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
     compile 'org.w3c:smil:1.0.0'
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
+    compile 'com.jakewharton:butterknife:5.1.0'
 
     androidTestCompile 'com.squareup:fest-android:1.0.8'
 
@@ -98,6 +99,7 @@ android {
 
      lintOptions {
         abortOnError false
+        disable 'InvalidPackage'
     }
 }
 
