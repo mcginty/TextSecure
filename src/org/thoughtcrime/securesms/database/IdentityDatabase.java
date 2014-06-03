@@ -45,12 +45,14 @@ public class IdentityDatabase extends Database {
   public  static final String RECIPIENT     = "recipient";
   public  static final String IDENTITY_KEY  = "key";
   public  static final String MAC           = "mac";
+  public  static final String VERIFIED      = "verified";
 
   public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME +
       " (" + ID + " INTEGER PRIMARY KEY, " +
       RECIPIENT + " INTEGER UNIQUE, " +
       IDENTITY_KEY + " TEXT, " +
-      MAC + " TEXT);";
+      MAC + " TEXT, " +
+      VERIFIED + " INTEGER);";
 
   public IdentityDatabase(Context context, SQLiteOpenHelper databaseHelper) {
     super(context, databaseHelper);
@@ -118,9 +120,31 @@ public class IdentityDatabase extends Database {
     contentValues.put(RECIPIENT, recipientId);
     contentValues.put(IDENTITY_KEY, identityKeyString);
     contentValues.put(MAC, macString);
+    contentValues.put(VERIFIED, 0);
 
     database.replace(TABLE_NAME, null, contentValues);
 
+    context.getContentResolver().notifyChange(CHANGE_URI, null);
+  }
+
+  public void verifyIdentity(MasterSecret masterSecret, long recipientId, IdentityKey identityKey) {
+    SQLiteDatabase database = databaseHelper.getWritableDatabase();
+    if (database == null) {
+      Log.w("IdentityDatabase", "couldn't get writable database!");
+      return;
+    }
+    if (!isValidIdentity(masterSecret, recipientId, identityKey)) {
+      Log.w("IdentityDatabase", "tried to verify invalid identity");
+      return;
+    }
+
+    final String identityKeyString = Base64.encodeBytes(identityKey.serialize());
+    ContentValues contentValues = new ContentValues();
+    contentValues.put(VERIFIED, 1);
+    database.update(TABLE_NAME,
+                    contentValues,
+                    RECIPIENT + " = ? AND " + IDENTITY_KEY + " = ?",
+                    new String[]{""+recipientId, identityKeyString});
     context.getContentResolver().notifyChange(CHANGE_URI, null);
   }
 

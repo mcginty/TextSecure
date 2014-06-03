@@ -23,13 +23,22 @@
             <TextView android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Troxie Rawlenspike" />
+                android:text="Troxie Rawlenspike"
+                android:textSize="20dp"/>
             <TextView android:id="@+id/number"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+15554443333"/>
+                android:text="+15554443333"
+                android:fontFamily="sans-serif-light"/>
         </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Troxie's identity poem:"
+        android:id="@+id/textView"
+        android:layout_marginTop="30dp"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -38,7 +47,7 @@
         android:fontFamily="serif"
         android:textColor="?conversation_list_item_subject_color"
         android:id="@+id/fingerprint"
-        android:text="fingerprint sentence placeholder"
+        android:text="fingerprint sentence placeholder\nthe banana sits on the hairy heart\nand then it does a slow death"
         android:padding="7dip"
         android:layout_marginTop="30dp"
         />
@@ -47,7 +56,7 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_marginTop="30dp"
-              android:text="Verify their identity:" />
+              android:text="To be super paranoid, you can verify their identity." />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,21 +67,24 @@
             android:layout_weight="1"
             android:drawableTop="@drawable/ic_menu_barcode"
             android:gravity="center_horizontal"
-            android:text="Scan"/>
+            android:text="Scan"
+            android:background="@null"/>
         <Button android:id="@+id/verify_call"
             android:layout_width="0dp"
             android:layout_height="80dp"
             android:layout_weight="1"
             android:drawableTop="@drawable/ic_menu_call_holo_light"
             android:gravity="center_horizontal"
-            android:text="Call"/>
+            android:text="Call"
+            android:background="@null"/>
         <Button android:id="@+id/verify_other"
             android:layout_width="0dp"
             android:layout_height="80dp"
             android:layout_weight="1"
             android:drawableTop="@drawable/ic_menu_groups_holo_light"
             android:gravity="center_horizontal"
-            android:text="Other"/>
+            android:text="Other"
+            android:background="@null"/>
     </LinearLayout>
 
 
