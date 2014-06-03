@@ -49,6 +49,7 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -156,6 +157,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
   private EditText        composeText;
   private ImageButton     sendButton;
   private TextView        charactersLeft;
+  private Button          addContactButton;
 
   private AttachmentTypeSelectorAdapter attachmentAdapter;
   private AttachmentManager             attachmentManager;
@@ -188,6 +190,8 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     initializeReceivers();
     initializeResources();
     initializeDraft();
+    initializeTitleBar();
+    initializeAddContactButton();
   }
 
   @Override
@@ -203,6 +207,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
 
     initializeSecurity();
     initializeTitleBar();
+    initializeAddContactButton();
     initializeEnabledCheck();
     initializeMmsEnabledCheck();
     initializeIme();
@@ -633,6 +638,17 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     this.invalidateOptionsMenu();
   }
 
+  private void initializeAddContactButton() {
+    int visible = View.GONE;
+    Uri uri = getRecipients().getPrimaryRecipient().getContactUri();
+
+    if (isSingleConversation() && uri == null) {
+      visible = View.VISIBLE;
+    }
+
+    addContactButton.setVisibility(visible);
+  }
+
   private void initializeDraft() {
     String draftText  = getIntent().getStringExtra(DRAFT_TEXT_EXTRA);
     Uri    draftImage = getIntent().getParcelableExtra(DRAFT_IMAGE_EXTRA);
@@ -765,6 +781,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     charactersLeft      = (TextView)findViewById(R.id.space_left);
     emojiDrawer         = (EmojiDrawer)findViewById(R.id.emoji_drawer);
     emojiToggle         = (EmojiToggle)findViewById(R.id.emoji_toggle);
+    addContactButton    = (Button)findViewById(R.id.add_contact_button);
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       emojiToggle.setVisibility(View.GONE);
@@ -785,6 +802,7 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     composeText.setOnFocusChangeListener(composeKeyPressedListener);
     emojiDrawer.setComposeEditText(composeText);
     emojiToggle.setOnClickListener(new EmojiToggleListener());
+    addContactButton.setOnClickListener(new AddContactButtonListener());
 
     recipients.addListener(new RecipientModifiedListener() {
       @Override
@@ -1164,6 +1182,16 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
         return true;
       }
       return false;
+    }
+  }
+
+  private class AddContactButtonListener implements OnClickListener {
+    @Override
+    public void onClick(View v) {
+      final Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+      intent.putExtra(ContactsContract.Intents.Insert.PHONE, recipients.getPrimaryRecipient().getNumber());
+      intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+      startActivity(intent);
     }
   }
 
