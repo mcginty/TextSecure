@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:background="@drawable/background_pattern_repeat"
@@ -220,8 +219,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingRight="10dip"
-                            android:text="•"
-                            tools:ignore="HardcodedText" />
+                            android:text="@string/registration_problems__bullet" />
 
                     <LinearLayout
                             android:layout_width="wrap_content"
@@ -251,8 +249,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingRight="10dip"
-                            android:text="•"
-                            tools:ignore="HardcodedText" />
+                            android:text="@string/registration_problems__bullet" />
 
                     <LinearLayout
                             android:layout_width="wrap_content"
@@ -501,8 +498,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
-                        android:text="1:57"
-                        tools:ignore="HardcodedText"
+                        android:text="@string/registration_progress__timer_start"
                         android:textSize="12.0sp" />
 
                 <TextView

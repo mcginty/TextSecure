@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- special strings that do not need translation, see http://tools.android.com/recent/non-translatablestrings -->
+<resources>
+    <string name="database_migration_activity__import_status" translatable="false">0/100</string>
+    <string name="led_pattern_dialog__ms" translatable="false">ms</string>
+    <string name="led_pattern_dialog__0" translatable="false">0</string>
+    <string name="registration_activity__number_prefix" translatable="false">+</string>
+    <string name="registration_problems__bullet" translatable="false">•</string>
+    <string name="registration_progress__timer_start" translatable="false">1:57</string>
+</resources>

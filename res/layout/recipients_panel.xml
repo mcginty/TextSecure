@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/recipients_panel"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
@@ -13,15 +12,12 @@
 
     <org.thoughtcrime.securesms.contacts.RecipientsEditor android:id="@+id/recipients_text"
        android:layout_height="wrap_content"
-        android:capitalize="sentences"
-        android:autoText="true"
         android:inputType="textAutoCorrect|textCapSentences"
         android:singleLine="true"
         android:hint="@string/recipients_panel__to"
         android:paddingRight="45dip"
         android:textColor="?conversation_editor_text_color"
-        android:layout_width="fill_parent"
-        tools:ignore="Deprecated" /><!-- ignore deprecation warnings for android:autoText and android:capitalize -->
+        android:layout_width="fill_parent" />
 
     <ImageButton android:id="@+id/contacts_button"
                  android:background="#00000000"

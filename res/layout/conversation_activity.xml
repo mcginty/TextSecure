@@ -84,8 +84,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.0"
-                        android:autoText="true"
-                        android:capitalize="sentences"
                         android:background="#00ffffff"
                         android:padding="12dp"
                         android:paddingRight="0dp"
@@ -95,8 +93,7 @@
                         android:maxLength="1000"
                         android:maxLines="4"
                         android:nextFocusRight="@+id/send_button"
-                        android:textColor="?conversation_editor_text_color"
-                        tools:ignore="Deprecated" /><!-- ignore deprecation warnings for android:autoText and android:capitalize -->
+                        android:textColor="?conversation_editor_text_color" />
 
                 <ImageButton
                     android:id="@+id/send_button"
@@ -117,9 +114,7 @@
                      android:paddingLeft="5dip"
                      android:layout_width="fill_parent"
                      android:layout_height="wrap_content"
-                     android:visibility="gone"
-                     android:text="160/160 (1)"
-                     tools:ignore="HardcodedText" />
+                     android:visibility="gone" />
 
         </LinearLayout>
     </RelativeLayout>

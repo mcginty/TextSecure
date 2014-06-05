@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout android:layout_height="wrap_content"
   xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="fill_parent"
   android:orientation="vertical"
   android:paddingLeft="5sp"
@@ -36,15 +35,13 @@
           android:id="@+id/SeekBarOnMsLabel"
           android:layout_width="40dip"
           android:layout_height="wrap_content"
-          android:text="0"
-          android:gravity="right"
-          tools:ignore="HardcodedText" />
+          android:text="@string/led_pattern_dialog__0"
+          android:gravity="right" />
         <TextView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_margin="0dip"
-          android:text="ms"
-          tools:ignore="HardcodedText" />
+          android:text="@string/led_pattern_dialog__ms" />
       </LinearLayout>
       <LinearLayout
         android:orientation="horizontal"
@@ -74,15 +71,13 @@
         android:id="@+id/SeekBarOffMsLabel"
         android:layout_width="40dip"
         android:layout_height="wrap_content"
-        android:text="0"
-        android:gravity="right"
-        tools:ignore="HardcodedText" />
+        android:text="@string/led_pattern_dialog__0"
+        android:gravity="right" />
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="0dip"
-        android:text="ms"
-        tools:ignore="HardcodedText" />
+        android:text="@string/led_pattern_dialog__ms" />
       </LinearLayout>
       <LinearLayout
         android:orientation="horizontal"

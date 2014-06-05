@@ -150,7 +150,6 @@ public class ConversationFragment extends SherlockListFragment
     builder.show();
   }
 
-  @SuppressLint("DefaultLocale")
   private void handleDisplayDetails(MessageRecord message) {
     long dateReceived = message.getDateReceived();
     long dateSent     = message.getDateSent();
