@@ -1,5 +1,6 @@
 package org.thoughtcrime.securesms;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -156,6 +157,7 @@ public class DatabaseMigrationActivity extends PassphraseRequiredSherlockActivit
     finish();
   }
 
+  @SuppressLint("HandlerLeak")
   private class ImportStateHandler extends Handler {
     @Override
     public void handleMessage(Message message) {

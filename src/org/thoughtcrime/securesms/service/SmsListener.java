@@ -16,6 +16,8 @@
  */
 package org.thoughtcrime.securesms.service;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,8 +37,8 @@ import java.util.Locale;
 
 public class SmsListener extends BroadcastReceiver {
 
-  private static final String SMS_RECEIVED_ACTION  = Telephony.Sms.Intents.SMS_RECEIVED_ACTION;
-  private static final String SMS_DELIVERED_ACTION = Telephony.Sms.Intents.SMS_DELIVER_ACTION;
+  @SuppressLint("InlinedApi") private static final String SMS_RECEIVED_ACTION  = Telephony.Sms.Intents.SMS_RECEIVED_ACTION;
+  @SuppressLint("InlinedApi") private static final String SMS_DELIVERED_ACTION = Telephony.Sms.Intents.SMS_DELIVER_ACTION;
 
   private boolean isExemption(SmsMessage message, String messageBody) {
 
@@ -50,31 +52,31 @@ public class SmsListener extends BroadcastReceiver {
     }
 
     return
-      message.getOriginatingAddress().length() < 7 &&
-      (messageBody.toUpperCase(Locale.US).startsWith("//ANDROID:") || // Sprint Visual Voicemail
-       messageBody.startsWith("//BREW:")); //BREW stands for “Binary Runtime Environment for Wireless"
+        message.getOriginatingAddress().length() < 7 &&
+            (messageBody.toUpperCase(Locale.US).startsWith("//ANDROID:") || // Sprint Visual Voicemail
+                messageBody.startsWith("//BREW:")); //BREW stands for “Binary Runtime Environment for Wireless"
   }
 
   private SmsMessage getSmsMessageFromIntent(Intent intent) {
-    Bundle bundle             = intent.getExtras();
-    Object[] pdus             = (Object[])bundle.get("pdus");
+    Bundle bundle = intent.getExtras();
+    Object[] pdus = (Object[]) bundle.get("pdus");
 
     if (pdus == null || pdus.length == 0)
       return null;
 
-    return SmsMessage.createFromPdu((byte[])pdus[0]);
+    return SmsMessage.createFromPdu((byte[]) pdus[0]);
   }
 
   private String getSmsMessageBodyFromIntent(Intent intent) {
-    Bundle bundle             = intent.getExtras();
-    Object[] pdus             = (Object[])bundle.get("pdus");
+    Bundle bundle = intent.getExtras();
+    Object[] pdus = (Object[]) bundle.get("pdus");
     StringBuilder bodyBuilder = new StringBuilder();
 
     if (pdus == null)
       return null;
 
     for (Object pdu : pdus)
-      bodyBuilder.append(SmsMessage.createFromPdu((byte[])pdu).getDisplayMessageBody());
+      bodyBuilder.append(SmsMessage.createFromPdu((byte[]) pdu).getDisplayMessageBody());
 
     return bodyBuilder.toString();
   }

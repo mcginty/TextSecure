@@ -1,5 +1,7 @@
 package org.thoughtcrime.securesms.util;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -19,6 +21,7 @@ public class DynamicLanguage {
     setActivityLocale(activity, currentLocale);
   }
 
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   public void onResume(Activity activity) {
     if (!currentLocale.equals(getSelectedLocale(activity))) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {

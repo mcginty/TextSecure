@@ -419,7 +419,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
       final int threadLengthLimit = TextSecurePreferences.getThreadTrimLength(ApplicationPreferencesActivity.this);
       AlertDialog.Builder builder = new AlertDialog.Builder(ApplicationPreferencesActivity.this);
       builder.setTitle(R.string.ApplicationPreferencesActivity_delete_all_old_messages_now);
-      builder.setMessage(String.format(getString(R.string.ApplicationPreferencesActivity_are_you_sure_you_would_like_to_immediately_trim_all_conversation_threads_to_the_s_most_recent_messages),
+      builder.setMessage(getString(R.string.ApplicationPreferencesActivity_are_you_sure_you_would_like_to_immediately_trim_all_conversation_threads_to_the_s_most_recent_messages,
       		                             threadLengthLimit));
       builder.setPositiveButton(R.string.ApplicationPreferencesActivity_delete,
                                 new DialogInterface.OnClickListener() {

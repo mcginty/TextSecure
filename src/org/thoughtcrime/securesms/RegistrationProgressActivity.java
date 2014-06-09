@@ -1,5 +1,6 @@
 package org.thoughtcrime.securesms;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -394,6 +395,7 @@ public class RegistrationProgressActivity extends SherlockActivity {
     }
   }
 
+  @SuppressLint("HandlerLeak")
   private class RegistrationStateHandler extends Handler {
     @Override
     public void handleMessage(Message message) {

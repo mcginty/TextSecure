@@ -1,5 +1,7 @@
 package org.thoughtcrime.securesms.util;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
@@ -19,6 +21,7 @@ public class DynamicTheme {
     activity.setTheme(currentTheme);
   }
 
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   public void onResume(Activity activity) {
     if (currentTheme != getSelectedTheme(activity)) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {

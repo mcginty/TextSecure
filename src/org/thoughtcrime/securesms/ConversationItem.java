@@ -368,7 +368,7 @@ public class ConversationItem extends LinearLayout {
                 slide.setThumbnailOn(mmsThumbnail);
 //                mmsThumbnail.setImageBitmap(slide.getThumbnail());
                 mmsThumbnail.setOnClickListener(new ThumbnailClickListener(slide));
-                mmsThumbnail.setOnLongClickListener(new ThumbnailSaveListener(slide));
+                mmsThumbnail.setOnLongClickListener(new ThumbnailSaveListener(getContext(), slide));
                 mmsThumbnail.setVisibility(View.VISIBLE);
                 return;
               }
@@ -438,18 +438,20 @@ public class ConversationItem extends LinearLayout {
     context.startActivity(intent);
   }
 
-  private class ThumbnailSaveListener extends Handler implements View.OnLongClickListener, Runnable, MediaScannerConnection.MediaScannerConnectionClient {
+  private static class ThumbnailSaveListener extends Handler implements View.OnLongClickListener, Runnable, MediaScannerConnection.MediaScannerConnectionClient {
     private static final int SUCCESS              = 0;
     private static final int FAILURE              = 1;
     private static final int WRITE_ACCESS_FAILURE = 2;
 
-    private final Slide slide;
-    private ProgressDialog progressDialog;
-    private MediaScannerConnection mediaScannerConnection;
-    private File mediaFile;
+    private final Context                context;
+    private final Slide                  slide;
+    private       ProgressDialog         progressDialog;
+    private       MediaScannerConnection mediaScannerConnection;
+    private       File                   mediaFile;
 
-    public ThumbnailSaveListener(Slide slide) {
-      this.slide = slide;
+    public ThumbnailSaveListener(Context context, Slide slide) {
+      this.context = context;
+      this.slide   = slide;
     }
 
     public void run() {

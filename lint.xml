@@ -6,6 +6,29 @@
         <ignore path="res/drawable-xhdpi-v11/icon_cached.png" />
     </issue>
 
+    <issue id="Typos">
+        <ignore path="res/values-*" />
+    </issue>
+
+    <issue id="StringFormatInvalid">
+        <ignore path="res/values-*" />
+    </issue>
+
+    <issue id="StringFormatMatches">
+        <ignore path="res/values-*" />
+    </issue>
+
+    <issue id="TypographyEllipsis">
+        <ignore path="res/values-*" />
+    </issue>
+
+    <issue id="UnusedResources">
+        <ignore path="res/values-*" />
+    </issue>
+
+    <issue id="UseSparseArrays">
+        <ignore path="src/ws/com/google/android/mms/*" />
+    </issue>
     <!-- Change the severity of hardcoded strings to "error" -->
     <!--<issue id="HardcodedText" severity="error" />-->
 </lint>

@@ -156,7 +156,7 @@ public class SendReceiveService extends Service {
 
   private void initializeHandlers() {
     systemStateListener = new SystemStateListener(this);
-    toastHandler        = new ToastHandler();
+    toastHandler        = new ToastHandler(this);
   }
 
   private void initializeProcessors() {
@@ -282,7 +282,12 @@ public class SendReceiveService extends Service {
     }
   }
 
-  public class ToastHandler extends Handler {
+  public static class ToastHandler extends Handler {
+    private final Context context;
+    public ToastHandler(Context context) {
+      this.context = context;
+    }
+
     public void makeToast(String toast) {
       Message message = this.obtainMessage();
       message.obj     = toast;
@@ -290,7 +295,7 @@ public class SendReceiveService extends Service {
     }
     @Override
     public void handleMessage(Message message) {
-      Toast.makeText(SendReceiveService.this, (String)message.obj, Toast.LENGTH_LONG).show();
+      Toast.makeText(context, (String)message.obj, Toast.LENGTH_LONG).show();
     }
   }
 

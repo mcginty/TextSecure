@@ -70,7 +70,7 @@ public class ConversationFragment extends SherlockListFragment
     MessageRecord messageRecord = getMessageRecord();
     if (messageRecord.isFailed()) {
       MenuItem resend = menu.findItem(R.id.menu_context_resend);
-      resend.setVisible(true);
+      if (resend != null) resend.setVisible(true);
     }
   }
 
@@ -168,17 +168,17 @@ public class ConversationFragment extends SherlockListFragment
     builder.setCancelable(true);
 
     if (dateReceived == dateSent || message.isOutgoing()) {
-      builder.setMessage(String.format(getSherlockActivity()
-                                       .getString(R.string.ConversationFragment_transport_s_sent_received_s),
-                                       transport.toUpperCase(),
-                                       dateFormatter.format(new Date(dateSent))));
+      builder.setMessage(getSherlockActivity()
+                         .getString(R.string.ConversationFragment_transport_s_sent_received_s,
+                         transport.toUpperCase(),
+                         dateFormatter.format(new Date(dateSent))));
     } else {
-      builder.setMessage(String.format(getSherlockActivity()
-                                       .getString(R.string.ConversationFragment_sender_s_transport_s_sent_s_received_s),
-                                       message.getIndividualRecipient().getNumber(),
-                                       transport.toUpperCase(),
-                                       dateFormatter.format(new Date(dateSent)),
-                                       dateFormatter.format(new Date(dateReceived))));
+      builder.setMessage(getSherlockActivity()
+                         .getString(R.string.ConversationFragment_sender_s_transport_s_sent_s_received_s,
+                         message.getIndividualRecipient().getNumber(),
+                         transport.toUpperCase(),
+                         dateFormatter.format(new Date(dateSent)),
+                         dateFormatter.format(new Date(dateReceived))));
     }
 
     builder.setPositiveButton(android.R.string.ok, null);
@@ -201,7 +201,7 @@ public class ConversationFragment extends SherlockListFragment
   private void initializeResources() {
     String recipientIds = this.getActivity().getIntent().getStringExtra("recipients");
 
-    this.masterSecret = (MasterSecret)this.getActivity().getIntent()
+    this.masterSecret = this.getActivity().getIntent()
                           .getParcelableExtra("master_secret");
     this.recipients   = RecipientFactory.getRecipientsForIds(getActivity(), recipientIds, true);
     this.threadId     = this.getActivity().getIntent().getLongExtra("thread_id", -1);
@@ -210,7 +210,7 @@ public class ConversationFragment extends SherlockListFragment
   private void initializeListAdapter() {
     if (this.recipients != null && this.threadId != -1) {
       this.setListAdapter(new ConversationAdapter(getActivity(), masterSecret,
-                                                  new FailedIconClickHandler(),
+                                                  new FailedIconClickHandler(listener),
                                                   (!this.recipients.isSingleRecipient()) || this.recipients.isGroupRecipient(),
                                                   DirectoryHelper.isPushDestination(getActivity(), this.recipients)));
       getListView().setRecyclerListener((ConversationAdapter)getListAdapter());
@@ -233,7 +233,12 @@ public class ConversationFragment extends SherlockListFragment
     ((CursorAdapter)getListAdapter()).changeCursor(null);
   }
 
-  private class FailedIconClickHandler extends Handler {
+  private static class FailedIconClickHandler extends Handler {
+    final ConversationFragmentListener listener;
+    public FailedIconClickHandler(ConversationFragmentListener listener) {
+      this.listener = listener;
+    }
+
     @Override
     public void handleMessage(android.os.Message message) {
       if (listener != null) {

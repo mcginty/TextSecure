@@ -5,7 +5,7 @@
       android:versionCode="71"
       android:versionName="2.0.8">
 
-    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="19"/>
+    <uses-sdk tools:ignore="GradleOverrides" android:minSdkVersion="9" android:targetSdkVersion="19"/>
 
     <permission android:name="org.thoughtcrime.securesms.ACCESS_SECRETS"
                 android:label="Access to TextSecure Secrets"
