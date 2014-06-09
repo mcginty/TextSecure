@@ -1,34 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
-    <!-- Ignore the IconColors issue in the given files -->
     <issue id="IconColors">
         <ignore path="res/drawable-hdpi-v11/icon_cached.png" />
         <ignore path="res/drawable-xhdpi-v11/icon_cached.png" />
     </issue>
 
-    <issue id="Typos">
+    <!-- ignore lint on translations and transifex-generated files -->
+    <issue id="MissingTranslation,ExtraTranslation" severity="ignore" />
+
+    <issue id="Typos,StringFormatInvalid,StringFormatMatches,TypographyEllipsis,UnusedResources">
         <ignore path="res/values-*" />
     </issue>
 
-    <issue id="StringFormatInvalid">
-        <ignore path="res/values-*" />
-    </issue>
-
-    <issue id="StringFormatMatches">
-        <ignore path="res/values-*" />
-    </issue>
-
-    <issue id="TypographyEllipsis">
-        <ignore path="res/values-*" />
-    </issue>
-
-    <issue id="UnusedResources">
-        <ignore path="res/values-*" />
-    </issue>
-
-    <issue id="UseSparseArrays">
+    <!-- nobody wants to touch that android mms code, how about we pretend it doesn't exist? -->
+    <issue id="UseSparseArrays,Assert">
         <ignore path="src/ws/com/google/android/mms/*" />
     </issue>
-    <!-- Change the severity of hardcoded strings to "error" -->
-    <!--<issue id="HardcodedText" severity="error" />-->
+
 </lint>
