@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms.util;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
