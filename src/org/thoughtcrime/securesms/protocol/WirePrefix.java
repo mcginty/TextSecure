@@ -16,6 +16,8 @@
  */
 package org.thoughtcrime.securesms.protocol;
 
+import junit.framework.Assert;
+
 import org.whispersystems.textsecure.util.Base64;
 
 import java.security.MessageDigest;
@@ -80,7 +82,9 @@ public abstract class WirePrefix {
 
     String calculatedPrefix = calculatePrefix((prefixType + message).getBytes(), PREFIX_BYTES);
 
-    assert(calculatedPrefix.length() == PREFIX_SIZE);
+    if (calculatedPrefix.length() != PREFIX_SIZE) {
+      throw new AssertionError("calculated prefix didn't match expected prefix size");
+    }
 
     return prefix.equals(calculatedPrefix);
   }
