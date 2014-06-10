@@ -590,7 +590,7 @@
     <string name="registration_progress_activity__sms_verification_failed">SMS verification
         failed.
     </string>
-    <string name="registration_progress_activity__generating_keys">Generating keys&#x2026;</string>
+    <string name="registration_progress_activity__generating_keys">Generating keys&#8230;</string>
     <string name="registration_progress_activity__alert">Alert</string>
     <string name="registration_progress_activity__telephone">Telephone</string>
     <string name="registration_progress_activity__check">Check</string>
