@@ -295,11 +295,9 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
     this.fragment.setMasterSecret(masterSecret);
   }
 
-  @TargetApi(19)
+  @TargetApi(Build.VERSION_CODES.KITKAT)
   private void initializeDefaultMessengerCheck() {
     if (!TextSecurePreferences.hasPromptedDefaultSmsProvider(this) && !Util.isDefaultSmsProvider(this)) {
-      // isDefaultSmsProvider(this) == true if we are running at API level < KITKAT, so the following
-      // code is safe for API >= 19
       TextSecurePreferences.setPromptedDefaultSmsProvider(this, true);
       Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
       intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());

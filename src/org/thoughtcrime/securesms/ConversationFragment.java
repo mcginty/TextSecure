@@ -35,6 +35,7 @@ import org.whispersystems.textsecure.crypto.MasterSecret;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class ConversationFragment extends SherlockListFragment
   implements LoaderManager.LoaderCallbacks<Cursor>
@@ -170,15 +171,15 @@ public class ConversationFragment extends SherlockListFragment
     if (dateReceived == dateSent || message.isOutgoing()) {
       builder.setMessage(getSherlockActivity()
                          .getString(R.string.ConversationFragment_transport_s_sent_received_s,
-                         transport.toUpperCase(),
-                         dateFormatter.format(new Date(dateSent))));
+                                    transport.toUpperCase(Locale.getDefault()),
+                                    dateFormatter.format(new Date(dateSent))));
     } else {
       builder.setMessage(getSherlockActivity()
                          .getString(R.string.ConversationFragment_sender_s_transport_s_sent_s_received_s,
-                         message.getIndividualRecipient().getNumber(),
-                         transport.toUpperCase(),
-                         dateFormatter.format(new Date(dateSent)),
-                         dateFormatter.format(new Date(dateReceived))));
+                                    message.getIndividualRecipient().getNumber(),
+                                    transport.toUpperCase(Locale.getDefault()),
+                                    dateFormatter.format(new Date(dateSent)),
+                                    dateFormatter.format(new Date(dateReceived))));
     }
 
     builder.setPositiveButton(android.R.string.ok, null);

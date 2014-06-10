@@ -53,7 +53,7 @@ public class SmsListener extends BroadcastReceiver {
 
     return
         message.getOriginatingAddress().length() < 7 &&
-            (messageBody.toUpperCase(Locale.US).startsWith("//ANDROID:") || // Sprint Visual Voicemail
+            (messageBody.toUpperCase(Locale.ENGLISH).startsWith("//ANDROID:") || // Sprint Visual Voicemail
                 messageBody.startsWith("//BREW:")); //BREW stands for “Binary Runtime Environment for Wireless"
   }
 
