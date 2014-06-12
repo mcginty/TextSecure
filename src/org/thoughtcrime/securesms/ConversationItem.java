@@ -154,6 +154,7 @@ public class ConversationItem extends LinearLayout {
   public void set(MasterSecret masterSecret, MessageRecord messageRecord,
                   Handler failedIconHandler, boolean groupThread, boolean pushDestination)
   {
+
     this.messageRecord     = messageRecord;
     this.masterSecret      = masterSecret;
     this.failedIconHandler = failedIconHandler;

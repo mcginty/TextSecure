@@ -32,7 +32,6 @@ import static org.whispersystems.textsecure.push.PushMessageProtos.PushMessageCo
 public class GroupReceiver {
   private static final String TAG = GroupReceiver.class.getSimpleName();
 
-  private static final String TAG =  GroupReceiver.class.getSimpleName();;
   private final Context context;
 
   public GroupReceiver(Context context) {
