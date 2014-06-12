@@ -120,6 +120,8 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
       .setOnPreferenceChangeListener(new ListSummaryListener());
     this.findPreference(TextSecurePreferences.LED_BLINK_PREF)
       .setOnPreferenceChangeListener(new ListSummaryListener());
+    this.findPreference(TextSecurePreferences.VIBRATE_PREF)
+      .setOnPreferenceChangeListener(new ListSummaryListener());
     this.findPreference(TextSecurePreferences.RINGTONE_PREF)
       .setOnPreferenceChangeListener(new RingtoneSummaryListener());
     this.findPreference(UPDATE_DIRECTORY_PREF)
@@ -132,6 +134,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     initializeOutgoingSmsSummary((OutgoingSmsPreference) findPreference(OUTGOING_SMS_PREF));
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LED_COLOR_PREF));
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LED_BLINK_PREF));
+    initializeListSummary((ListPreference) findPreference(TextSecurePreferences.VIBRATE_PREF));
     initializeRingtoneSummary((RingtonePreference) findPreference(TextSecurePreferences.RINGTONE_PREF));
   }
 
