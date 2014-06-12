@@ -793,10 +793,10 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     groupUpdateReceiver = new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
-        Log.i("ConversationActivity", "Group update received...");
+        Log.w("ConversationActivity", "Group update received...");
         if (recipients != null) {
           String ids = recipients.toIdString();
-          Log.i("ConversationActivity", "Looking up new recipients...");
+          Log.w("ConversationActivity", "Looking up new recipients...");
           recipients = RecipientFactory.getRecipientsForIds(context, ids, false);
           initializeTitleBar();
         }

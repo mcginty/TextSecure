@@ -21,7 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class IncomingEncryptedPushMessage {
-  private static final String TAG = "InEncryptedPushMessage";
 
   private static final int SUPPORTED_VERSION =  1;
   private static final int CIPHER_KEY_SIZE   = 32;
@@ -81,7 +80,7 @@ public class IncomingEncryptedPushMessage {
     } catch (IllegalBlockSizeException e) {
       throw new AssertionError(e);
     } catch (BadPaddingException e) {
-      Log.w(TAG, e);
+      Log.w("IncomingEncryptedPushMessage", e);
       throw new IOException("Bad padding?");
     }
   }
@@ -103,8 +102,8 @@ public class IncomingEncryptedPushMessage {
       byte[] theirMacBytes = new byte[MAC_SIZE];
       System.arraycopy(ciphertext, ciphertext.length-MAC_SIZE, theirMacBytes, 0, theirMacBytes.length);
 
-      Log.d(TAG, "Our MAC: " + Hex.toString(ourMacBytes));
-      Log.d(TAG, "Thr MAC: " + Hex.toString(theirMacBytes));
+      Log.w("IncomingEncryptedPushMessage", "Our MAC: " + Hex.toString(ourMacBytes));
+      Log.w("IncomingEncryptedPushMessage", "Thr MAC: " + Hex.toString(theirMacBytes));
 
       if (!Arrays.equals(ourMacBytes, theirMacBytes)) {
         throw new IOException("Invalid MAC compare!");
