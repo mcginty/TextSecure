@@ -532,6 +532,7 @@ public class ConversationItem extends LinearLayout {
     builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialogInterface, int i) {
+        Intent intent = new Intent(context, SendReceiveService.class);
         if (messageRecord.isMms()) {
           MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
           if (messageRecord.isPendingInsecureSmsFallback()) {
@@ -539,6 +540,7 @@ public class ConversationItem extends LinearLayout {
           }
           database.markAsOutbox(messageRecord.getId());
           database.markAsForcedSms(messageRecord.getId());
+          intent.setAction(SendReceiveService.SEND_MMS_ACTION);
         } else {
           SmsDatabase database = DatabaseFactory.getSmsDatabase(context);
           if (messageRecord.isPendingInsecureSmsFallback()) {
@@ -546,9 +548,8 @@ public class ConversationItem extends LinearLayout {
           }
           database.markAsOutbox(messageRecord.getId());
           database.markAsForcedSms(messageRecord.getId());
+          intent.setAction(SendReceiveService.SEND_SMS_ACTION);
         }
-        Intent intent = new Intent(context, SendReceiveService.class);
-        intent.setAction(SendReceiveService.SEND_SMS_ACTION);
         intent.putExtra(SendReceiveService.MASTER_SECRET_EXTRA, masterSecret);
         context.startService(intent);
       }
