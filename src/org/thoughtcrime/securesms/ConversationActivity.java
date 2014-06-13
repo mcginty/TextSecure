@@ -782,10 +782,11 @@ public class ConversationActivity extends PassphraseRequiredSherlockFragmentActi
     final Handler handler = new Handler(getMainLooper());
     recipientModifiedListener = new RecipientModifiedListener() {
       @Override
-      public void onModified(Recipient recipient) {
+      public void onModified(final Recipient recipient) {
         handler.post(new Runnable() {
           @Override
           public void run() {
+            Log.w(TAG, "got recipient modified callback, name and number are " + recipient.getName() + "/" + recipient.getNumber());
             initializeTitleBar();
           }
         });
