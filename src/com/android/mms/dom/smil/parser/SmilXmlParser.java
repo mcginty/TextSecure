@@ -26,7 +26,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import com.google.android.mms.MmsException;
+import ws.com.google.android.mms.MmsException;
 
 public class SmilXmlParser {
     private XMLReader mXmlReader;

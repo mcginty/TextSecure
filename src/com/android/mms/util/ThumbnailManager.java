@@ -30,7 +30,6 @@ import android.util.Log;
 import com.android.mms.LogTag;
 import com.android.mms.R;
 import com.android.mms.TempFileProvider;
-import com.android.mms.ui.UriImage;
 import com.android.mms.util.ImageCacheService.ImageData;
 
 import java.io.ByteArrayOutputStream;

@@ -26,7 +26,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.mms.dom.smil.SmilMediaElementImpl;
-import com.google.android.mms.pdu.CharacterSets;
+import ws.com.google.android.mms.pdu.CharacterSets;
 
 public class TextModel extends RegionMediaModel {
     private static final String TAG = "Mms/text";

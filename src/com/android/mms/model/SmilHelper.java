@@ -46,14 +46,13 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 
-import com.android.mms.MmsApp;
 import com.android.mms.dom.smil.SmilDocumentImpl;
 import com.android.mms.dom.smil.parser.SmilXmlParser;
 import com.android.mms.dom.smil.parser.SmilXmlSerializer;
-import com.google.android.mms.ContentType;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.PduBody;
-import com.google.android.mms.pdu.PduPart;
+import ws.com.google.android.mms.ContentType;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.PduBody;
+import ws.com.google.android.mms.pdu.PduPart;
 
 public class SmilHelper {
     private static final String TAG = "Mms/smil";

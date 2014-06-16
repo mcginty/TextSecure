@@ -49,17 +49,16 @@ import android.util.Log;
 import com.android.mms.ContentRestrictionException;
 import com.android.mms.ExceedMessageSizeException;
 import com.android.mms.LogTag;
-import com.android.mms.MmsConfig;
 import com.android.mms.dom.smil.parser.SmilXmlSerializer;
 import com.android.mms.layout.LayoutManager;
-import com.google.android.mms.ContentType;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.GenericPdu;
-import com.google.android.mms.pdu.MultimediaMessagePdu;
-import com.google.android.mms.pdu.PduBody;
-import com.google.android.mms.pdu.PduHeaders;
-import com.google.android.mms.pdu.PduPart;
-import com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.ContentType;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.GenericPdu;
+import ws.com.google.android.mms.pdu.MultimediaMessagePdu;
+import ws.com.google.android.mms.pdu.PduBody;
+import ws.com.google.android.mms.pdu.PduHeaders;
+import ws.com.google.android.mms.pdu.PduPart;
+import ws.com.google.android.mms.pdu.PduPersister;
 import com.android.mms.UnsupportContentTypeException;
 
 public class SlideshowModel extends Model

@@ -31,8 +31,6 @@ import android.provider.Telephony.Sms;
 import android.provider.Telephony.Sms.Conversations;
 import android.util.Log;
 
-import com.android.mms.MmsConfig;
-import com.android.mms.ui.MessageUtils;
 import com.android.mms.ui.MessagingPreferenceActivity;
 
 /**

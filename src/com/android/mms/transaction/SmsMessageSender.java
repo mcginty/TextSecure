@@ -31,9 +31,8 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 
 import com.android.mms.LogTag;
-import com.android.mms.MmsConfig;
 import com.android.mms.ui.MessagingPreferenceActivity;
-import com.google.android.mms.MmsException;
+import ws.com.google.android.mms.MmsException;
 
 import java.util.ArrayList;
 

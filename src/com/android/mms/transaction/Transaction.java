@@ -26,7 +26,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 
 import com.android.mms.util.SendingProgressTokenManager;
-import com.google.android.mms.MmsException;
+import ws.com.google.android.mms.MmsException;
 
 /**
  * Transaction is an abstract class for notification transaction, send transaction

@@ -24,12 +24,11 @@ import android.net.Uri;
 import android.provider.Telephony.Mms.Sent;
 import android.util.Log;
 
-import com.android.mms.ui.MessageUtils;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.EncodedStringValue;
-import com.google.android.mms.pdu.PduComposer;
-import com.google.android.mms.pdu.PduPersister;
-import com.google.android.mms.pdu.ReadRecInd;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.EncodedStringValue;
+import ws.com.google.android.mms.pdu.PduComposer;
+import ws.com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.pdu.ReadRecInd;
 
 /**
  * The ReadRecTransaction is responsible for sending read report

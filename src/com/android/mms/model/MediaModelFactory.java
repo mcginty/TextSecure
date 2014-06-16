@@ -29,11 +29,10 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.mms.LogTag;
-import com.android.mms.MmsConfig;
-import com.google.android.mms.ContentType;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.PduBody;
-import com.google.android.mms.pdu.PduPart;
+import ws.com.google.android.mms.ContentType;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.PduBody;
+import ws.com.google.android.mms.pdu.PduPart;
 
 public class MediaModelFactory {
     private static final String TAG = "Mms:media";

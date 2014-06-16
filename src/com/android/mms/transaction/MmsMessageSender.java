@@ -35,15 +35,15 @@ import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.util.MultiSimUtility;
 import com.android.mms.util.SendingProgressTokenManager;
 import com.android.mms.ui.ComposeMessageActivity;
-import com.google.android.mms.InvalidHeaderValueException;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.EncodedStringValue;
-import com.google.android.mms.pdu.GenericPdu;
-import com.google.android.mms.pdu.PduHeaders;
-import com.google.android.mms.pdu.PduPersister;
-import com.google.android.mms.pdu.ReadRecInd;
-import com.google.android.mms.pdu.SendReq;
-import com.google.android.mms.util.SqliteWrapper;
+import ws.com.google.android.mms.InvalidHeaderValueException;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.EncodedStringValue;
+import ws.com.google.android.mms.pdu.GenericPdu;
+import ws.com.google.android.mms.pdu.PduHeaders;
+import ws.com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.pdu.ReadRecInd;
+import ws.com.google.android.mms.pdu.SendReq;
+import ws.com.google.android.mms.util.SqliteWrapper;
 
 public class MmsMessageSender implements MessageSender {
     private static final String TAG = "MmsMessageSender";

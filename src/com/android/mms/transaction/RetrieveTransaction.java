@@ -29,20 +29,18 @@ import android.provider.Telephony.Mms.Inbox;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.mms.MmsConfig;
-import com.android.mms.ui.MessageUtils;
 import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.util.DownloadManager;
 import com.android.mms.util.Recycler;
 import com.android.mms.widget.MmsWidgetProvider;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.AcknowledgeInd;
-import com.google.android.mms.pdu.EncodedStringValue;
-import com.google.android.mms.pdu.PduComposer;
-import com.google.android.mms.pdu.PduHeaders;
-import com.google.android.mms.pdu.PduParser;
-import com.google.android.mms.pdu.PduPersister;
-import com.google.android.mms.pdu.RetrieveConf;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.AcknowledgeInd;
+import ws.com.google.android.mms.pdu.EncodedStringValue;
+import ws.com.google.android.mms.pdu.PduComposer;
+import ws.com.google.android.mms.pdu.PduHeaders;
+import ws.com.google.android.mms.pdu.PduParser;
+import ws.com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.pdu.RetrieveConf;
 
 /**
  * The RetrieveTransaction is responsible for retrieving multimedia

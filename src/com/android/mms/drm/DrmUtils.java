@@ -22,8 +22,6 @@ import android.drm.DrmStore;
 import android.net.Uri;
 import android.util.Log;
 
-import com.android.mms.MmsApp;
-
 public class DrmUtils {
     private static final String TAG = "DrmUtils";
 

@@ -38,20 +38,18 @@ import android.provider.Telephony.Mms.Inbox;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.android.mms.MmsApp;
-import com.android.mms.MmsConfig;
 import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.util.DownloadManager;
 import com.android.mms.util.Recycler;
 import com.android.mms.widget.MmsWidgetProvider;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.GenericPdu;
-import com.google.android.mms.pdu.NotificationInd;
-import com.google.android.mms.pdu.NotifyRespInd;
-import com.google.android.mms.pdu.PduComposer;
-import com.google.android.mms.pdu.PduHeaders;
-import com.google.android.mms.pdu.PduParser;
-import com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.GenericPdu;
+import ws.com.google.android.mms.pdu.NotificationInd;
+import ws.com.google.android.mms.pdu.NotifyRespInd;
+import ws.com.google.android.mms.pdu.PduComposer;
+import ws.com.google.android.mms.pdu.PduHeaders;
+import ws.com.google.android.mms.pdu.PduParser;
+import ws.com.google.android.mms.pdu.PduPersister;
 
 /**
  * The NotificationTransaction is responsible for handling multimedia

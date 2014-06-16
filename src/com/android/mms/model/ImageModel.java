@@ -35,16 +35,12 @@ import android.util.Log;
 import com.android.mms.ContentRestrictionException;
 import com.android.mms.ExceedMessageSizeException;
 import com.android.mms.LogTag;
-import com.android.mms.MmsApp;
-import com.android.mms.MmsConfig;
 import com.android.mms.dom.smil.SmilMediaElementImpl;
 import com.android.mms.ui.UriImage;
 import com.android.mms.util.ItemLoadedCallback;
 import com.android.mms.util.ItemLoadedFuture;
-import com.android.mms.util.ThumbnailManager;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.PduPart;
-import com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.PduPart;
 
 
 public class ImageModel extends RegionMediaModel {
@@ -137,9 +133,7 @@ public class ImageModel extends RegionMediaModel {
     }
 
     public ItemLoadedFuture loadThumbnailBitmap(ItemLoadedCallback callback) {
-        ThumbnailManager thumbnailManager = MmsApp.getApplication().getThumbnailManager();
-        mItemLoadedFuture = thumbnailManager.getThumbnail(getUri(), callback);
-        return mItemLoadedFuture;
+       return null;
     }
 
     public void cancelThumbnailLoading() {
@@ -186,8 +180,8 @@ public class ImageModel extends RegionMediaModel {
     protected void resizeMedia(int byteLimit, long messageId) throws MmsException {
         UriImage image = new UriImage(mContext, getUri());
 
-        int widthLimit = MmsConfig.getMaxImageWidth();
-        int heightLimit = MmsConfig.getMaxImageHeight();
+        int widthLimit = 2048; // XXX
+        int heightLimit = 2048; // XXX
         int size = getMediaSize();
         // In mms_config.xml, the max width has always been declared larger than the max height.
         // Swap the width and height limits if necessary so we scale the picture as little as
@@ -241,14 +235,14 @@ public class ImageModel extends RegionMediaModel {
         byte[] contentId = period != -1 ? src.substring(0, period).getBytes() : srcBytes;
         part.setContentId(contentId);
 
-        PduPersister persister = PduPersister.getPduPersister(mContext);
-        this.mSize = part.getData().length;
-
-        if (Log.isLoggable(LogTag.APP, Log.VERBOSE)) {
-            Log.v(TAG, "resizeMedia mSize: " + mSize);
-        }
-
-        Uri newUri = persister.persistPart(part, messageId, null);
-        setUri(newUri);
+//        PduPersister persister = PduPersister.getPduPersister(mContext);
+//        this.mSize = part.getData().length;
+//
+//        if (Log.isLoggable(LogTag.APP, Log.VERBOSE)) {
+//            Log.v(TAG, "resizeMedia mSize: " + mSize);
+//        }
+//
+//        Uri newUri = persister.persistPart(part, messageId, null);
+//        setUri(newUri);
     }
 }

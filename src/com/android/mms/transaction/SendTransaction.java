@@ -31,17 +31,16 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.mms.LogTag;
-import com.android.mms.ui.MessageUtils;
 import com.android.mms.util.MultiSimUtility;
 import com.android.mms.util.RateController;
 import com.android.mms.util.SendingProgressTokenManager;
-import com.google.android.mms.pdu.EncodedStringValue;
-import com.google.android.mms.pdu.PduComposer;
-import com.google.android.mms.pdu.PduHeaders;
-import com.google.android.mms.pdu.PduParser;
-import com.google.android.mms.pdu.PduPersister;
-import com.google.android.mms.pdu.SendConf;
-import com.google.android.mms.pdu.SendReq;
+import ws.com.google.android.mms.pdu.EncodedStringValue;
+import ws.com.google.android.mms.pdu.PduComposer;
+import ws.com.google.android.mms.pdu.PduHeaders;
+import ws.com.google.android.mms.pdu.PduParser;
+import ws.com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.pdu.SendConf;
+import ws.com.google.android.mms.pdu.SendReq;
 
 /**
  * The SendTransaction is responsible for sending multimedia messages

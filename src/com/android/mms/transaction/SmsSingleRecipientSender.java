@@ -15,10 +15,7 @@ import android.telephony.SmsManager;
 import android.util.Log;
 
 import com.android.mms.LogTag;
-import com.android.mms.MmsConfig;
-import com.android.mms.data.Conversation;
-import com.android.mms.ui.MessageUtils;
-import com.google.android.mms.MmsException;
+import ws.com.google.android.mms.MmsException;
 
 public class SmsSingleRecipientSender extends SmsMessageSender {
 

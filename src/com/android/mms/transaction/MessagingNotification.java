@@ -70,26 +70,22 @@ import android.widget.Toast;
 
 import com.android.mms.LogTag;
 import com.android.mms.R;
-import com.android.mms.data.Contact;
-import com.android.mms.data.Conversation;
-import com.android.mms.data.WorkingMessage;
 import com.android.mms.model.SlideModel;
 import com.android.mms.model.SlideshowModel;
 import com.android.mms.quickmessage.QmMarkRead;
 import com.android.mms.quickmessage.QuickMessagePopup;
 import com.android.mms.ui.ComposeMessageActivity;
 import com.android.mms.ui.ConversationList;
-import com.android.mms.ui.MessageUtils;
 import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.util.AddressUtils;
 import com.android.mms.util.DownloadManager;
 import com.android.mms.widget.MmsWidgetProvider;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.EncodedStringValue;
-import com.google.android.mms.pdu.GenericPdu;
-import com.google.android.mms.pdu.MultimediaMessagePdu;
-import com.google.android.mms.pdu.PduHeaders;
-import com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.EncodedStringValue;
+import ws.com.google.android.mms.pdu.GenericPdu;
+import ws.com.google.android.mms.pdu.MultimediaMessagePdu;
+import ws.com.google.android.mms.pdu.PduHeaders;
+import ws.com.google.android.mms.pdu.PduPersister;
 
 /**
  * This class is used to update the notification indicator. It will check whether

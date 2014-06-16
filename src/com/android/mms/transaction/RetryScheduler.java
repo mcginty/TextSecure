@@ -40,8 +40,8 @@ import com.android.mms.util.MultiSimUtility;
 import com.android.mms.LogTag;
 import com.android.mms.R;
 import com.android.mms.util.DownloadManager;
-import com.google.android.mms.pdu.PduHeaders;
-import com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.pdu.PduHeaders;
+import ws.com.google.android.mms.pdu.PduPersister;
 
 public class RetryScheduler implements Observer {
     private static final String TAG = "RetryScheduler";

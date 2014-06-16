@@ -24,12 +24,12 @@ import android.util.Log;
 
 import com.android.mms.LogTag;
 import com.android.mms.model.SlideshowModel;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.GenericPdu;
-import com.google.android.mms.pdu.MultimediaMessagePdu;
-import com.google.android.mms.pdu.PduPersister;
-import com.google.android.mms.util.PduCache;
-import com.google.android.mms.util.PduCacheEntry;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.GenericPdu;
+import ws.com.google.android.mms.pdu.MultimediaMessagePdu;
+import ws.com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.util.PduCache;
+import ws.com.google.android.mms.util.PduCacheEntry;
 
 /**
  * Primary {@link PduLoaderManager} implementation used by {@link MessagingApplication}.

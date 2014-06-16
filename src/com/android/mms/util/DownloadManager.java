@@ -38,12 +38,11 @@ import android.widget.Toast;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.mms.R;
-import com.android.mms.data.Contact;
 import com.android.mms.ui.MessagingPreferenceActivity;
-import com.google.android.mms.MmsException;
-import com.google.android.mms.pdu.EncodedStringValue;
-import com.google.android.mms.pdu.NotificationInd;
-import com.google.android.mms.pdu.PduPersister;
+import ws.com.google.android.mms.MmsException;
+import ws.com.google.android.mms.pdu.EncodedStringValue;
+import ws.com.google.android.mms.pdu.NotificationInd;
+import ws.com.google.android.mms.pdu.PduPersister;
 
 public class DownloadManager {
     private static final String TAG = "DownloadManager";

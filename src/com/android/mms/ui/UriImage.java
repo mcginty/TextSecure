@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import android.database.sqlite.SqliteWrapper;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -38,8 +37,8 @@ import android.webkit.MimeTypeMap;
 import com.android.mms.LogTag;
 import com.android.mms.exif.ExifInterface;
 import com.android.mms.model.ImageModel;
-import com.google.android.mms.ContentType;
-import com.google.android.mms.pdu.PduPart;
+import ws.com.google.android.mms.ContentType;
+import ws.com.google.android.mms.pdu.PduPart;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -122,7 +121,7 @@ public class UriImage {
 
     private void initFromContentUri(Context context, Uri uri) {
         ContentResolver resolver = context.getContentResolver();
-        Cursor c = SqliteWrapper.query(context, resolver,
+        Cursor c = resolver.query(
                             uri, null, null, null, null);
 
         mSrc = null;
@@ -296,7 +295,7 @@ public class UriImage {
             int attempts = 1;
             int sampleSize = 1;
             BitmapFactory.Options options = new BitmapFactory.Options();
-            int quality = MessageUtils.IMAGE_COMPRESSION_QUALITY;
+            int quality = 80;
             Bitmap b = null;
 
             // In this loop, attempt to decode the stream with the best possible subsampling (we
@@ -379,8 +378,8 @@ public class UriImage {
                     int jpgFileSize = os.size();
                     if (jpgFileSize > byteLimit) {
                         quality = (quality * byteLimit) / jpgFileSize;  // watch for int division!
-                        if (quality < MessageUtils.MINIMUM_IMAGE_COMPRESSION_QUALITY) {
-                            quality = MessageUtils.MINIMUM_IMAGE_COMPRESSION_QUALITY;
+                        if (quality < 50) {
+                            quality = 50;
                         }
 
                         if (Log.isLoggable(LogTag.APP, Log.VERBOSE)) {

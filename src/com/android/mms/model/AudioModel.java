@@ -25,7 +25,6 @@ import org.w3c.dom.events.Event;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.provider.MediaStore.Audio;
 import android.provider.Telephony.Mms.Part;
@@ -35,7 +34,7 @@ import android.util.Log;
 import com.android.mms.ContentRestrictionException;
 import com.android.mms.dom.events.EventImpl;
 import com.android.mms.dom.smil.SmilMediaElementImpl;
-import com.google.android.mms.MmsException;
+import ws.com.google.android.mms.MmsException;
 
 public class AudioModel extends MediaModel {
     private static final String TAG = MediaModel.TAG;
@@ -57,7 +56,7 @@ public class AudioModel extends MediaModel {
 
     private void initModelFromUri(Uri uri) throws MmsException {
         ContentResolver cr = mContext.getContentResolver();
-        Cursor c = SqliteWrapper.query(mContext, cr, uri, null, null, null, null);
+        Cursor c = cr.query(uri, null, null, null, null);
 
         if (c != null) {
             try {

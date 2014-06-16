@@ -33,7 +33,7 @@ import android.util.Log;
 
 import com.android.mms.ContentRestrictionException;
 import com.android.mms.dom.smil.SmilParElementImpl;
-import com.google.android.mms.ContentType;
+import ws.com.google.android.mms.ContentType;
 
 public class SlideModel extends Model implements List<MediaModel>, EventListener {
     public static final String TAG = "Mms/slideshow";

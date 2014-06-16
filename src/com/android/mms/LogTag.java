@@ -23,10 +23,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.util.Log;
 
-import com.android.mms.data.Contact;
-import com.android.mms.data.Conversation;
-import com.android.mms.data.RecipientIdCache;
-
 public class LogTag {
     public static final String TAG = "Mms";
 

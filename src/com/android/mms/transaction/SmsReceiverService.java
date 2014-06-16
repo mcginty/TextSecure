@@ -22,7 +22,6 @@ package com.android.mms.transaction;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.provider.Telephony.Sms.Intents.SMS_DELIVER_ACTION;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -34,7 +33,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
@@ -45,7 +43,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.preference.PreferenceManager;
 import android.provider.Telephony.Sms;
 import android.provider.Telephony.Sms.Inbox;
 import android.provider.Telephony.Sms.Intents;
@@ -65,16 +62,13 @@ import android.widget.Toast;
 import com.android.internal.telephony.MSimConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.mms.LogTag;
-import com.android.mms.MmsConfig;
 import com.android.mms.R;
-import com.android.mms.data.Contact;
-import com.android.mms.data.Conversation;
 import com.android.mms.ui.ClassZeroActivity;
 import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.util.Recycler;
 import com.android.mms.util.SendingProgressTokenManager;
 import com.android.mms.widget.MmsWidgetProvider;
-import com.google.android.mms.MmsException;
+import ws.com.google.android.mms.MmsException;
 
 /**
  * This service essentially plays the role of a "worker thread", allowing us to store
