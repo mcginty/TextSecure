@@ -1,5 +1,6 @@
 package org.thoughtcrime.securesms.database;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.whispersystems.textsecure.util.Util;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -142,7 +143,7 @@ public class XmlBackup {
 
   public static class Writer {
 
-    private static final String  XML_HEADER      = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>";
+    private static final String  XML_HEADER      = "<?xml version=\"1.1\" encoding=\"UTF-8\" standalone=\"yes\" ?>";
     private static final String  CREATED_BY      = "<!-- File Created By TextSecure -->";
     private static final String  OPEN_TAG_SMSES  = "<smses count=\"%d\">";
     private static final String  CLOSE_TAG_SMSES = "</smses>";
@@ -150,8 +151,6 @@ public class XmlBackup {
     private static final String  CLOSE_EMPTYTAG  = "/>";
     private static final String  OPEN_ATTRIBUTE  = "=\"";
     private static final String  CLOSE_ATTRIBUTE = "\" ";
-
-    private static final Pattern PATTERN         = Pattern.compile("[^\u0020-\uD7FF]");
 
     private final BufferedWriter bufferedWriter;
 
@@ -170,11 +169,11 @@ public class XmlBackup {
 
       stringBuilder.append(OPEN_TAG_SMS);
       appendAttribute(stringBuilder, PROTOCOL, item.getProtocol());
-      appendAttribute(stringBuilder, ADDRESS, escapeXML(item.getAddress()));
+      appendAttribute(stringBuilder, ADDRESS, StringEscapeUtils.escapeXml11(item.getAddress()));
       appendAttribute(stringBuilder, DATE, item.getDate());
       appendAttribute(stringBuilder, TYPE, item.getType());
-      appendAttribute(stringBuilder, SUBJECT, escapeXML(item.getSubject()));
-      appendAttribute(stringBuilder, BODY, escapeXML(item.getBody()));
+      appendAttribute(stringBuilder, SUBJECT, StringEscapeUtils.escapeXml11(item.getSubject()));
+      appendAttribute(stringBuilder, BODY, StringEscapeUtils.escapeXml11(item.getBody()));
       appendAttribute(stringBuilder, TOA, "null");
       appendAttribute(stringBuilder, SC_TOA, "null");
       appendAttribute(stringBuilder, SERVICE_CENTER, item.getServiceCenter());
@@ -196,27 +195,5 @@ public class XmlBackup {
       bufferedWriter.write(CLOSE_TAG_SMSES);
       bufferedWriter.close();
     }
-
-    private String escapeXML(String s) {
-      if (Util.isEmpty(s)) return s;
-
-      Matcher matcher = PATTERN.matcher( s.replace("&",  "&amp;")
-                                          .replace("<",  "&lt;")
-                                          .replace(">",  "&gt;")
-                                          .replace("\"", "&quot;")
-                                          .replace("'",  "&apos;"));
-      StringBuffer st = new StringBuffer();
-
-      while (matcher.find()) {
-        String escaped="";
-        for (char ch: matcher.group(0).toCharArray()) {
-          escaped += ("&#" + ((int) ch) + ";");
-        }
-        matcher.appendReplacement(st, escaped);
-      }
-      matcher.appendTail(st);
-      return st.toString();
-    }
-
   }
 }

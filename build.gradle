@@ -22,6 +22,7 @@ repositories {
 }
 
 dependencies {
+    compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
     compile 'com.android.support:support-v4:19.1.0'
     compile 'com.google.android.gcm:gcm-client:1.0.2'
@@ -32,6 +33,7 @@ dependencies {
 
 dependencyVerification {
     verify = [
+        'org.apache.commons:commons-lang3:6b81d10754dadf184d386011486e6509c2cc0c3d33565ced4fb4402b9413d47d',
         'com.actionbarsherlock:actionbarsherlock:5ab04d74101f70024b222e3ff9c87bee151ec43331b4a2134b6cc08cf8565819',
         'com.android.support:support-v4:3f40fa7b3a4ead01ce15dce9453b061646e7fe2e7c51cb75ca01ee1e77037f3f',
         'com.google.android.gcm:gcm-client:5ff578202f93dcba1c210d015deb4241c7cdad9b7867bd1b32e0a5f4c16986ca',
