@@ -112,6 +112,21 @@
 
         </PreferenceScreen>
 
+        <ListPreference android:key="pref_theme"
+                        android:title="@string/preferences__theme"
+                        android:entries="@array/pref_theme_entries"
+                        android:entryValues="@array/pref_theme_values"
+                        android:defaultValue="light"
+                        android:summary="Light">
+        </ListPreference>
+
+        <ListPreference android:key="pref_language"
+                        android:title="@string/preferences__language"
+                        android:entries="@array/language_entries"
+                        android:entryValues="@array/language_values"
+                        android:summary="Default"
+                        android:defaultValue="zz"/>
+
     <PreferenceScreen android:key="pref_storage_screen"
                       android:title="@string/preferences__delete_old_messages">
         <CheckBoxPreference android:defaultValue="false"
@@ -132,21 +147,6 @@
 
     </PreferenceScreen>
 
-
-        <ListPreference android:key="pref_theme"
-                        android:title="@string/preferences__theme"
-                        android:entries="@array/pref_theme_entries"
-                        android:entryValues="@array/pref_theme_values"
-                        android:defaultValue="light"
-                        android:summary="Light">
-        </ListPreference>
-
-        <ListPreference android:key="pref_language"
-                        android:title="@string/preferences__language"
-                        android:entries="@array/language_entries"
-                        android:entryValues="@array/language_values"
-                        android:summary="Default"
-                        android:defaultValue="zz"/>
 
     <CheckBoxPreference android:defaultValue="false"
                         android:key="pref_enter_key"

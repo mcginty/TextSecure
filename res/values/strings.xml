@@ -761,8 +761,8 @@
     <string name="preferences__language">Language</string>
     <string name="preferences__make_default_sms_app">Set as default SMS app</string>
     <string name="preferences__make_textsecure_the_default_sms_mms_app">Make TextSecure the default SMS/MMS application for your system.</string>
-    <string name="preferences__use_data_channel">Push messages</string>
-    <string name="preferences__use_the_data_channel_for_communication_with_other_textsecure_users">Increase privacy and avoid SMS fees</string>
+    <string name="preferences__use_data_channel">TextSecure data messages</string>
+    <string name="preferences__use_the_data_channel_for_communication_with_other_textsecure_users">Better privacy and no SMS fees</string>
     <string name="preferences__allow_sms_fallback">Allow outgoing SMS to</string>
     <string name="preferences__allow_sms_fallback_disabled_reason">TextSecure is currently your default SMS app. Please set another default SMS app first to change this preference.</string>
     <string name="preferences__refresh_push_directory">Refresh push directory</string>
