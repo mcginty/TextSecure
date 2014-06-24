@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -40,7 +41,9 @@ import android.preference.RingtonePreference;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.provider.Telephony;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -129,6 +132,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LED_COLOR_PREF));
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LED_BLINK_PREF));
     initializeRingtoneSummary((RingtonePreference) findPreference(TextSecurePreferences.RINGTONE_PREF));
+    initializeScreenSummaries();
   }
 
   @Override
@@ -264,6 +268,22 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     }
   }
 
+  private void initializeScreenSummaries() {
+    Context context = ApplicationPreferencesActivity.this;
+
+    SpannableString spanOn  = new SpannableString(getString(R.string.ApplicationPreferencesActivity_on) + " ");
+    SpannableString spanOff = new SpannableString(getString(R.string.ApplicationPreferencesActivity_off) + " ");
+    spanOn.setSpan (new StyleSpan(Typeface.ITALIC), 0, spanOn.length(), 0);
+    spanOff.setSpan(new StyleSpan(Typeface.ITALIC), 0, spanOff.length(), 0);
+
+    CharSequence notificationSummary = TextSecurePreferences.isNotificationsEnabled(context)        ? spanOn : spanOff;
+    CharSequence storageSummary      = TextSecurePreferences.isThreadLengthTrimmingEnabled(context) ? spanOn : spanOff;
+    CharSequence passwordSummary     = !TextSecurePreferences.isPasswordDisabled(context)           ? spanOn : spanOff;
+    this.findPreference(TextSecurePreferences.NOTIFICATION_SCREEN).setSummary(notificationSummary);
+    this.findPreference(TextSecurePreferences.STORAGE_SCREEN).setSummary(storageSummary);
+    this.findPreference(TextSecurePreferences.PASSWORD_SCREEN).setSummary(passwordSummary);
+  }
+
   private void initializeListSummary(ListPreference pref) {
     pref.setSummary(pref.getEntry());
   }
@@ -295,6 +315,10 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
       dynamicTheme.onResume(this);
     } else if (key.equals(TextSecurePreferences.LANGUAGE_PREF)) {
       dynamicLanguage.onResume(this);
+    } else if (key.equals(TextSecurePreferences.NOTIFICATION_PREF) ||
+               key.equals(TextSecurePreferences.THREAD_TRIM_ENABLED) ||
+               key.equals(TextSecurePreferences.DISABLE_PASSPHRASE_PREF)) {
+      initializeScreenSummaries();
     }
   }
 

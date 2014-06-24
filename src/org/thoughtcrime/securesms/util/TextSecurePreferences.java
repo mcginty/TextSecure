@@ -9,6 +9,7 @@ import java.io.IOException;
 public class TextSecurePreferences {
 
   public  static final String IDENTITY_PREF                    = "pref_choose_identity";
+  public  static final String PASSWORD_SCREEN                  = "pref_password_screen";
   public  static final String CHANGE_PASSPHRASE_PREF           = "pref_change_passphrase";
   public  static final String DISABLE_PASSPHRASE_PREF          = "pref_disable_passphrase";
   public  static final String THEME_PREF                       = "pref_theme";
@@ -23,7 +24,8 @@ public class TextSecurePreferences {
   private static final String LAST_VERSION_CODE_PREF           = "last_version_code";
   public  static final String RINGTONE_PREF                    = "pref_key_ringtone";
   private static final String VIBRATE_PREF                     = "pref_key_vibrate";
-  private static final String NOTIFICATION_PREF                = "pref_key_enable_notifications";
+  public  static final String NOTIFICATION_SCREEN              = "pref_notification_screen";
+  public  static final String NOTIFICATION_PREF                = "pref_key_enable_notifications";
   public  static final String LED_COLOR_PREF                   = "pref_led_color";
   public  static final String LED_BLINK_PREF                   = "pref_led_blink";
   private static final String LED_BLINK_PREF_CUSTOM            = "pref_led_blink_custom";
@@ -36,7 +38,8 @@ public class TextSecurePreferences {
   private static final String ENTER_SENDS_PREF                 = "pref_enter_sends";
   private static final String ENTER_PRESENT_PREF               = "pref_enter_key";
   private static final String SMS_DELIVERY_REPORT_PREF         = "pref_delivery_report_sms";
-  private static final String THREAD_TRIM_ENABLED              = "pref_trim_threads";
+  public  static final String STORAGE_SCREEN                   = "pref_storage_screen";
+  public  static final String THREAD_TRIM_ENABLED              = "pref_trim_threads";
   private static final String LOCAL_NUMBER_PREF                = "pref_local_number";
   private static final String VERIFYING_STATE_PREF             = "pref_verifying";
   public  static final String REGISTERED_GCM_PREF              = "pref_gcm_registered";
