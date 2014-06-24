@@ -131,6 +131,10 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
       .setOnPreferenceChangeListener(new ListSummaryListener());
     this.findPreference(TextSecurePreferences.RINGTONE_PREF)
       .setOnPreferenceChangeListener(new RingtoneSummaryListener());
+    this.findPreference(TextSecurePreferences.THEME_PREF)
+      .setOnPreferenceChangeListener(new ListSummaryListener());
+    this.findPreference(TextSecurePreferences.LANGUAGE_PREF)
+      .setOnPreferenceChangeListener(new ListSummaryListener());
     this.findPreference(SUBMIT_DEBUG_LOG_PREF)
         .setOnPreferenceClickListener(new SubmitDebugLogListener());
     this.findPreference(OUTGOING_SMS_PREF)
@@ -140,6 +144,8 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LED_COLOR_PREF));
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LED_BLINK_PREF));
     initializeRingtoneSummary((RingtonePreference) findPreference(TextSecurePreferences.RINGTONE_PREF));
+    initializeListSummary((ListPreference) findPreference(TextSecurePreferences.THEME_PREF));
+    initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LANGUAGE_PREF));
     initializeScreenSummaries();
   }
 
@@ -199,7 +205,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
   }
 
   private void initializePlatformSpecificOptions() {
-    PreferenceGroup    smsMmsCategory          = (PreferenceGroup) findPreference("sms_mms_category");
+    PreferenceGroup    smsMmsCategory          = (PreferenceGroup) findPreference("pref_sms_mms_screen");
 //    PreferenceGroup    advancedCategory         = (PreferenceGroup) findPreference("advanced_category");
     Preference         defaultPreference        = findPreference(KITKAT_DEFAULT_PREF);
     Preference         allSmsPreference         = findPreference(TextSecurePreferences.ALL_SMS_PREF);
@@ -261,12 +267,45 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
   private void initializeScreenSummaries() {
     Context context = ApplicationPreferencesActivity.this;
 
-    int spanOn  = R.string.ApplicationPreferencesActivity_on;
-    int spanOff = R.string.ApplicationPreferencesActivity_off;
+    final int on       = R.string.ApplicationPreferencesActivity_on;
+    final int off      = R.string.ApplicationPreferencesActivity_off;
+    final int sms      = R.string.ApplicationPreferencesActivity_sms;
+    final int mms      = R.string.ApplicationPreferencesActivity_mms;
+    final int partial  = R.string.ApplicationPreferencesActivity_partial;
+    final int incoming = R.string.ApplicationPreferencesActivity_incoming;
+    final int outgoing = R.string.ApplicationPreferencesActivity_outgoing;
 
-    int notificationSummary = TextSecurePreferences.isNotificationsEnabled(context)        ? spanOn : spanOff;
-    int storageSummary      = TextSecurePreferences.isThreadLengthTrimmingEnabled(context) ? spanOn : spanOff;
-    int passwordSummary     = !TextSecurePreferences.isPasswordDisabled(context)           ? spanOn : spanOff;
+    int smsSummaryInc;
+    boolean kitkatSMS    = Util.isDefaultSmsProvider(context); // true for < KitKat
+    boolean preKitkatSMS = TextSecurePreferences.isInterceptAllSmsEnabled(context); // true for >= KitKat
+    boolean preKitkatMMS = TextSecurePreferences.isInterceptAllMmsEnabled(context); // true for >= KitKat
+    if (kitkatSMS && preKitkatSMS && preKitkatMMS) {
+      smsSummaryInc = on;
+    } else if (preKitkatSMS && !preKitkatMMS){
+      smsSummaryInc = sms;
+    } else if (!preKitkatSMS && preKitkatMMS) {
+      smsSummaryInc = mms;
+    } else {
+      smsSummaryInc = off;
+    }
+
+    int smsSummaryOut;
+    if (TextSecurePreferences.isFallbackSmsAllowed(context) && TextSecurePreferences.isDirectSmsAllowed(context)) {
+      smsSummaryOut = on;
+    } else if (TextSecurePreferences.isFallbackSmsAllowed(context) ^ TextSecurePreferences.isDirectSmsAllowed(context)) {
+      smsSummaryOut = partial;
+    } else {
+      smsSummaryOut = off;
+    }
+    CharSequence smsSummary = getString(incoming) + ": " + getString(smsSummaryInc) + ", " +
+                              getString(outgoing) + ": " + getString(smsSummaryOut);
+
+    this.findPreference("pref_sms_mms_screen").setSummary(smsSummary);
+
+    final int notificationSummary = TextSecurePreferences.isNotificationsEnabled(context)        ? on : off;
+    final int storageSummary      = TextSecurePreferences.isThreadLengthTrimmingEnabled(context) ? on : off;
+    final int passwordSummary     = !TextSecurePreferences.isPasswordDisabled(context)           ? on : off;
+
     this.findPreference(TextSecurePreferences.NOTIFICATION_SCREEN).setSummary(notificationSummary);
     this.findPreference(TextSecurePreferences.STORAGE_SCREEN).setSummary(storageSummary);
     this.findPreference(TextSecurePreferences.PASSWORD_SCREEN).setSummary(passwordSummary);
