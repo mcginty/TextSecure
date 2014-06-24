@@ -16,8 +16,10 @@
  */
 package org.thoughtcrime.securesms;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,9 +44,15 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.provider.Telephony;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.MenuItem;
@@ -76,6 +84,7 @@ import java.io.IOException;
  *
  */
 
+@SuppressWarnings("deprecation")
 public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPreferenceActivity
     implements SharedPreferences.OnSharedPreferenceChangeListener
 {
@@ -84,7 +93,6 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
   private static final int PICK_IDENTITY_CONTACT        = 1;
   private static final int ENABLE_PASSPHRASE_ACTIVITY   = 2;
 
-  private static final String DISPLAY_CATEGORY_PREF = "pref_display_category";
   private static final String PUSH_MESSAGING_PREF   = "pref_toggle_push_messaging";
   private static final String MMS_PREF              = "pref_mms_preferences";
   private static final String KITKAT_DEFAULT_PREF   = "pref_set_default";
@@ -191,16 +199,16 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
   }
 
   private void initializePlatformSpecificOptions() {
-    PreferenceGroup    pushSmsCategory          = (PreferenceGroup) findPreference("push_sms_category");
-    PreferenceGroup    advancedCategory         = (PreferenceGroup) findPreference("advanced_category");
+    PreferenceGroup    smsMmsCategory          = (PreferenceGroup) findPreference("sms_mms_category");
+//    PreferenceGroup    advancedCategory         = (PreferenceGroup) findPreference("advanced_category");
     Preference         defaultPreference        = findPreference(KITKAT_DEFAULT_PREF);
     Preference         allSmsPreference         = findPreference(TextSecurePreferences.ALL_SMS_PREF);
     Preference         allMmsPreference         = findPreference(TextSecurePreferences.ALL_MMS_PREF);
     Preference         screenSecurityPreference = findPreference(TextSecurePreferences.SCREEN_SECURITY_PREF);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && pushSmsCategory != null) {
-      if (allSmsPreference != null) pushSmsCategory.removePreference(allSmsPreference);
-      if (allMmsPreference != null) pushSmsCategory.removePreference(allMmsPreference);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      if (allSmsPreference != null) smsMmsCategory.removePreference(allSmsPreference);
+      if (allMmsPreference != null) smsMmsCategory.removePreference(allMmsPreference);
 
       if (Util.isDefaultSmsProvider(this)) {
         defaultPreference.setIntent(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
@@ -213,32 +221,15 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
         defaultPreference.setTitle(getString(R.string.ApplicationPreferencesActivity_sms_disabled));
         defaultPreference.setSummary(getString(R.string.ApplicationPreferencesActivity_touch_to_make_textsecure_your_default_sms_app));
       }
-    } else if (pushSmsCategory != null && defaultPreference != null) {
-      pushSmsCategory.removePreference(defaultPreference);
+    } else if (defaultPreference != null) {
+      smsMmsCategory.removePreference(defaultPreference);
     }
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH &&
-        advancedCategory != null                                       &&
         screenSecurityPreference != null)
     {
-      advancedCategory.removePreference(screenSecurityPreference);
+      getPreferenceScreen().removePreference(screenSecurityPreference);
     }
-  }
-
-  private void initializeEditTextSummary(final EditTextPreference preference) {
-    if (preference.getText() == null) {
-      preference.setSummary("Not set");
-    } else {
-      preference.setSummary(preference.getText());
-    }
-
-    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-      @Override
-      public boolean onPreferenceChange(Preference pref, Object newValue) {
-        preference.setSummary(newValue == null ? "Not set" : ((String) newValue));
-        return true;
-      }
-    });
   }
 
   private void initializePushMessagingToggle() {
@@ -251,8 +242,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     ContactIdentityManager identity = ContactIdentityManager.getInstance(this);
 
     if (identity.isSelfIdentityAutoDetected()) {
-      Preference preference = this.findPreference(DISPLAY_CATEGORY_PREF);
-      this.getPreferenceScreen().removePreference(preference);
+      this.getPreferenceScreen().removePreference(this.findPreference(TextSecurePreferences.IDENTITY_PREF));
     } else {
       Uri contactUri = identity.getSelfIdentityUri();
 
@@ -271,14 +261,12 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
   private void initializeScreenSummaries() {
     Context context = ApplicationPreferencesActivity.this;
 
-    SpannableString spanOn  = new SpannableString(getString(R.string.ApplicationPreferencesActivity_on) + " ");
-    SpannableString spanOff = new SpannableString(getString(R.string.ApplicationPreferencesActivity_off) + " ");
-    spanOn.setSpan (new StyleSpan(Typeface.ITALIC), 0, spanOn.length(), 0);
-    spanOff.setSpan(new StyleSpan(Typeface.ITALIC), 0, spanOff.length(), 0);
+    int spanOn  = R.string.ApplicationPreferencesActivity_on;
+    int spanOff = R.string.ApplicationPreferencesActivity_off;
 
-    CharSequence notificationSummary = TextSecurePreferences.isNotificationsEnabled(context)        ? spanOn : spanOff;
-    CharSequence storageSummary      = TextSecurePreferences.isThreadLengthTrimmingEnabled(context) ? spanOn : spanOff;
-    CharSequence passwordSummary     = !TextSecurePreferences.isPasswordDisabled(context)           ? spanOn : spanOff;
+    int notificationSummary = TextSecurePreferences.isNotificationsEnabled(context)        ? spanOn : spanOff;
+    int storageSummary      = TextSecurePreferences.isThreadLengthTrimmingEnabled(context) ? spanOn : spanOff;
+    int passwordSummary     = !TextSecurePreferences.isPasswordDisabled(context)           ? spanOn : spanOff;
     this.findPreference(TextSecurePreferences.NOTIFICATION_SCREEN).setSummary(notificationSummary);
     this.findPreference(TextSecurePreferences.STORAGE_SCREEN).setSummary(storageSummary);
     this.findPreference(TextSecurePreferences.PASSWORD_SCREEN).setSummary(passwordSummary);
@@ -506,6 +494,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
       }
 
       try {
+        //noinspection ResultOfMethodCallIgnored
         Integer.parseInt((String)newValue);
       } catch (NumberFormatException nfe) {
         Log.w("ApplicationPreferencesActivity", nfe);
@@ -613,11 +602,62 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
   public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference)
   {
     super.onPreferenceTreeClick(preferenceScreen, preference);
-    if (preference!=null)
-      if (preference instanceof PreferenceScreen)
-          if (((PreferenceScreen)preference).getDialog()!=null)
-            ((PreferenceScreen)preference).getDialog().getWindow().getDecorView().setBackgroundDrawable(this.getWindow().getDecorView().getBackground().getConstantState().newDrawable());
+    if (preference != null) {
+      if (preference instanceof PreferenceScreen) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+          initializeActionBar((PreferenceScreen) preference);
+        }
+        if (((PreferenceScreen) preference).getDialog() != null) {
+          ((PreferenceScreen) preference).getDialog().getWindow().getDecorView().setBackgroundDrawable(this.getWindow().getDecorView().getBackground().getConstantState().newDrawable());
+        }
+      }
+    }
     return false;
   }
+
+  /** Sets up the action bar for an {@link PreferenceScreen} */
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+  public static void initializeActionBar(PreferenceScreen preferenceScreen) {
+    final Dialog dialog = preferenceScreen.getDialog();
+
+    if (dialog != null) {
+      // Inialize the action bar
+      dialog.getActionBar().setDisplayHomeAsUpEnabled(true);
+
+      // Apply custom home button area click listener to close the PreferenceScreen because PreferenceScreens are dialogs which swallow
+      // events instead of passing to the activity
+      // Related Issue: https://code.google.com/p/android/issues/detail?id=4611
+      View homeBtn = dialog.findViewById(android.R.id.home);
+
+      if (homeBtn != null) {
+        View.OnClickListener dismissDialogClickListener = new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            dialog.dismiss();
+          }
+        };
+
+        // Prepare yourselves for some hacky programming
+        ViewParent homeBtnContainer = homeBtn.getParent();
+
+        // The home button is an ImageView inside a FrameLayout
+        if (homeBtnContainer instanceof FrameLayout) {
+          ViewGroup containerParent = (ViewGroup) homeBtnContainer.getParent();
+
+          if (containerParent instanceof LinearLayout) {
+            // This view also contains the title text, set the whole view as clickable
+            containerParent.setOnClickListener(dismissDialogClickListener);
+          } else {
+            // Just set it on the home button
+            ((FrameLayout) homeBtnContainer).setOnClickListener(dismissDialogClickListener);
+          }
+        } else {
+          // The 'If all else fails' default case
+          homeBtn.setOnClickListener(dismissDialogClickListener);
+        }
+      }
+    }
+  }
+
 
 }

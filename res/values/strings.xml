@@ -32,10 +32,10 @@
     <string name="ApplicationPreferencesActivity_you_are_not_registered_with_the_push_service">You are not registered with the push service...</string>
     <string name="ApplicationPreferencesActivity_updating_directory">Updating directory</string>
     <string name="ApplicationPreferencesActivity_updating_push_directory">Updating push directory...</string>
-    <string name="ApplicationPreferencesActivity_sms_enabled">Incoming SMS Enabled</string>
+    <string name="ApplicationPreferencesActivity_sms_enabled">Incoming SMS enabled</string>
     <string name="ApplicationPreferencesActivity_touch_to_change_your_default_sms_app">Touch to change your default SMS app</string>
-    <string name="ApplicationPreferencesActivity_sms_disabled">Incoming SMS Disabled</string>
-    <string name="ApplicationPreferencesActivity_touch_to_make_textsecure_your_default_sms_app">Touch to make TextSecure your default SMS app</string>
+    <string name="ApplicationPreferencesActivity_sms_disabled">Incoming SMS disabled</string>
+    <string name="ApplicationPreferencesActivity_touch_to_make_textsecure_your_default_sms_app">Touch to make this your default SMS app</string>
     <string name="ApplicationPreferencesActivity_on">On</string>
     <string name="ApplicationPreferencesActivity_off">Off</string>
 
@@ -739,7 +739,7 @@
     <string name="preferences__custom">Custom</string>
     <string name="preferences__miscellaneous">Miscellaneous</string>
     <string name="preferences__advanced">Advanced</string>
-    <string name="preferences__passphrase">Passphrase protection</string>
+    <string name="preferences__passphrase">Access lock</string>
     <string name="preferences__advanced_mms_access_point_names">MMS preferences</string>
     <string name="preferences__enable_manual_mms">Enable manual MMS</string>
     <string name="preferences__override_system_mms_settings">Override system MMS settings with the information below.</string>
@@ -753,8 +753,8 @@
     <string name="preferences__conversation_length_limit">Conversation length limit</string>
     <string name="preferences__trim_all_threads_now">Trim all threads now</string>
     <string name="preferences__scan_through_all_conversation_threads_and_enforce_conversation_length_limits">Scan through all conversation threads and enforce conversation length limits</string>
-    <string name="preferences__light_theme">Light theme</string>
-    <string name="preferences__dark_theme">Dark theme</string>
+    <string name="preferences__light_theme">Light</string>
+    <string name="preferences__dark_theme">Dark</string>
     <string name="preferences__appearance">Appearance</string>
     <string name="preferences__theme">Theme</string>
     <string name="preferences__default">Default</string>
@@ -762,9 +762,7 @@
     <string name="preferences__make_default_sms_app">Set as default SMS app</string>
     <string name="preferences__make_textsecure_the_default_sms_mms_app">Make TextSecure the default SMS/MMS application for your system.</string>
     <string name="preferences__use_data_channel">Push messages</string>
-    <string name="preferences__use_the_data_channel_for_communication_with_other_textsecure_users">
-        Increase privacy and avoid SMS fees by using the data channel for communication with other TextSecure users
-    </string>
+    <string name="preferences__use_the_data_channel_for_communication_with_other_textsecure_users">Increase privacy and avoid SMS fees</string>
     <string name="preferences__allow_sms_fallback">Allow outgoing SMS to</string>
     <string name="preferences__allow_sms_fallback_disabled_reason">TextSecure is currently your default SMS app. Please set another default SMS app first to change this preference.</string>
     <string name="preferences__refresh_push_directory">Refresh push directory</string>
