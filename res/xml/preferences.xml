@@ -6,7 +6,8 @@
                             android:title="@string/preferences__use_data_channel"
                             android:summary="@string/preferences__use_the_data_channel_for_communication_with_other_textsecure_users"/>
 
-    <PreferenceScreen android:key="sms_mms_category" android:title="SMS/MMS" android:summary="Incoming on, outgoing off">
+    <PreferenceScreen android:key="pref_sms_mms_screen"
+                      android:title="SMS/MMS">
         <CheckBoxPreference android:defaultValue="true"
                           android:key="pref_all_sms"
                           android:summary="@string/preferences__use_textsecure_for_viewing_and_storing_all_incoming_text_messages"
@@ -116,15 +117,13 @@
                         android:title="@string/preferences__theme"
                         android:entries="@array/pref_theme_entries"
                         android:entryValues="@array/pref_theme_values"
-                        android:defaultValue="light"
-                        android:summary="Light">
+                        android:defaultValue="light">
         </ListPreference>
 
         <ListPreference android:key="pref_language"
                         android:title="@string/preferences__language"
                         android:entries="@array/language_entries"
                         android:entryValues="@array/language_values"
-                        android:summary="Default"
                         android:defaultValue="zz"/>
 
     <PreferenceScreen android:key="pref_storage_screen"

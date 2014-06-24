@@ -38,6 +38,11 @@
     <string name="ApplicationPreferencesActivity_touch_to_make_textsecure_your_default_sms_app">Touch to make this your default SMS app</string>
     <string name="ApplicationPreferencesActivity_on">On</string>
     <string name="ApplicationPreferencesActivity_off">Off</string>
+    <string name="ApplicationPreferencesActivity_partial">Partial</string>
+    <string name="ApplicationPreferencesActivity_sms">SMS</string>
+    <string name="ApplicationPreferencesActivity_mms">MMS</string>
+    <string name="ApplicationPreferencesActivity_incoming">Incoming</string>
+    <string name="ApplicationPreferencesActivity_outgoing">outgoing</string>
 
     <!-- AttachmentTypeSelectorAdapter -->
 
