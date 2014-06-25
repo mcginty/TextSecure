@@ -205,16 +205,15 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
   }
 
   private void initializePlatformSpecificOptions() {
-    PreferenceGroup    smsMmsCategory          = (PreferenceGroup) findPreference("pref_sms_mms_screen");
-//    PreferenceGroup    advancedCategory         = (PreferenceGroup) findPreference("advanced_category");
+    PreferenceGroup    smsMmsScreen             = (PreferenceGroup) findPreference("pref_sms_mms_screen");
     Preference         defaultPreference        = findPreference(KITKAT_DEFAULT_PREF);
     Preference         allSmsPreference         = findPreference(TextSecurePreferences.ALL_SMS_PREF);
     Preference         allMmsPreference         = findPreference(TextSecurePreferences.ALL_MMS_PREF);
     Preference         screenSecurityPreference = findPreference(TextSecurePreferences.SCREEN_SECURITY_PREF);
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      if (allSmsPreference != null) smsMmsCategory.removePreference(allSmsPreference);
-      if (allMmsPreference != null) smsMmsCategory.removePreference(allMmsPreference);
+      if (allSmsPreference != null) smsMmsScreen.removePreference(allSmsPreference);
+      if (allMmsPreference != null) smsMmsScreen.removePreference(allMmsPreference);
 
       if (Util.isDefaultSmsProvider(this)) {
         defaultPreference.setIntent(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
@@ -228,7 +227,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
         defaultPreference.setSummary(getString(R.string.ApplicationPreferencesActivity_touch_to_make_textsecure_your_default_sms_app));
       }
     } else if (defaultPreference != null) {
-      smsMmsCategory.removePreference(defaultPreference);
+      smsMmsScreen.removePreference(defaultPreference);
     }
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH &&

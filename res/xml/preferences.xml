@@ -146,6 +146,10 @@
 
     </PreferenceScreen>
 
+    <CheckBoxPreference android:defaultValue="true"
+                        android:key="pref_auto_complete_key_exchange"
+                        android:title="@string/preferences__complete_key_exchanges"
+                        android:summary="@string/preferences__automatically_complete_key_exchanges_for_new_sessions_or_for_existing_sessions_with_the_same_identity_key" />
 
     <CheckBoxPreference android:defaultValue="false"
                         android:key="pref_enter_key"
