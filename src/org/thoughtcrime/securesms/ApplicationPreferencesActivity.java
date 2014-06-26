@@ -658,7 +658,10 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     return false;
   }
 
-  /** Sets up the action bar for an {@link PreferenceScreen} */
+  /*
+   * source: http://stackoverflow.com/a/16800527/3755928
+   * Sets up the action bar for an {@link PreferenceScreen}
+   */
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   public static void initializeActionBar(PreferenceScreen preferenceScreen) {
     final Dialog dialog = preferenceScreen.getDialog();
