@@ -659,7 +659,10 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
   }
 
   /*
-   * source: http://stackoverflow.com/a/16800527/3755928
+   * source  : http://stackoverflow.com/a/16800527/3755928
+   * licence : cc-by-sa
+   * author  : jimmithy (http://stackoverflow.com/users/1299623/jimmithy)
+   *
    * Sets up the action bar for an {@link PreferenceScreen}
    */
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
