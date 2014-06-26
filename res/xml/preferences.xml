@@ -78,7 +78,7 @@
 
         </PreferenceScreen>
 
-        <PreferenceScreen android:key="pref_password_screen"
+        <PreferenceScreen android:key="pref_access_lock_screen"
                           android:title="@string/preferences__passphrase">
             <CheckBoxPreference android:key="pref_disable_passphrase"
                                 android:defaultValue="false"

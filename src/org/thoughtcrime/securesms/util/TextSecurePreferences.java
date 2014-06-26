@@ -9,7 +9,7 @@ import java.io.IOException;
 public class TextSecurePreferences {
 
   public  static final String IDENTITY_PREF                    = "pref_choose_identity";
-  public  static final String PASSWORD_SCREEN                  = "pref_password_screen";
+  public  static final String ACCESS_LOCK_SCREEN               = "pref_access_lock_screen";
   public  static final String CHANGE_PASSPHRASE_PREF           = "pref_change_passphrase";
   public  static final String DISABLE_PASSPHRASE_PREF          = "pref_disable_passphrase";
   public  static final String THEME_PREF                       = "pref_theme";
@@ -29,6 +29,7 @@ public class TextSecurePreferences {
   public  static final String LED_COLOR_PREF                   = "pref_led_color";
   public  static final String LED_BLINK_PREF                   = "pref_led_blink";
   private static final String LED_BLINK_PREF_CUSTOM            = "pref_led_blink_custom";
+  public  static final String SMS_MMS_SCREEN                   = "pref_sms_mms_screen";
   public  static final String ALL_MMS_PREF                     = "pref_all_mms";
   public  static final String ALL_SMS_PREF                     = "pref_all_sms";
   private static final String PASSPHRASE_TIMEOUT_INTERVAL_PREF = "pref_timeout_interval";
@@ -51,9 +52,9 @@ public class TextSecurePreferences {
   private static final String IN_THREAD_NOTIFICATION_PREF      = "pref_key_inthread_notifications";
 
   private static final String LOCAL_REGISTRATION_ID_PREF       = "pref_local_registration_id";
-  private static final String FALLBACK_SMS_ALLOWED_PREF        = "pref_allow_sms_traffic_out";
+  public  static final String FALLBACK_SMS_ALLOWED_PREF        = "pref_allow_sms_traffic_out";
   private static final String FALLBACK_SMS_ASK_REQUIRED_PREF   = "pref_sms_fallback_ask";
-  private static final String DIRECT_SMS_ALLOWED_PREF          = "pref_sms_non_data_out";
+  public  static final String DIRECT_SMS_ALLOWED_PREF          = "pref_sms_non_data_out";
 
   public static boolean isFallbackSmsAllowed(Context context) {
     return getBooleanPreference(context, FALLBACK_SMS_ALLOWED_PREF, true);

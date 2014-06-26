@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -43,14 +42,12 @@ import android.preference.RingtonePreference;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.provider.Telephony;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -146,7 +143,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     initializeRingtoneSummary((RingtonePreference) findPreference(TextSecurePreferences.RINGTONE_PREF));
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.THEME_PREF));
     initializeListSummary((ListPreference) findPreference(TextSecurePreferences.LANGUAGE_PREF));
-    initializeScreenSummaries();
+    setScreenSummaries();
   }
 
   @Override
@@ -162,6 +159,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     dynamicLanguage.onResume(this);
 
     initializePlatformSpecificOptions();
+    setScreenSummaries();
   }
 
   @Override
@@ -263,7 +261,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     }
   }
 
-  private void initializeScreenSummaries() {
+  private void setScreenSummaries() {
     Context context = ApplicationPreferencesActivity.this;
 
     final int on       = R.string.ApplicationPreferencesActivity_on;
@@ -299,15 +297,18 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
     CharSequence smsSummary = getString(incoming) + ": " + getString(smsSummaryInc) + ", " +
                               getString(outgoing) + ": " + getString(smsSummaryOut);
 
-    this.findPreference("pref_sms_mms_screen").setSummary(smsSummary);
+    findPreference(TextSecurePreferences.SMS_MMS_SCREEN).setSummary(smsSummary);
 
     final int notificationSummary = TextSecurePreferences.isNotificationsEnabled(context)        ? on : off;
     final int storageSummary      = TextSecurePreferences.isThreadLengthTrimmingEnabled(context) ? on : off;
     final int passwordSummary     = !TextSecurePreferences.isPasswordDisabled(context)           ? on : off;
 
-    this.findPreference(TextSecurePreferences.NOTIFICATION_SCREEN).setSummary(notificationSummary);
-    this.findPreference(TextSecurePreferences.STORAGE_SCREEN).setSummary(storageSummary);
-    this.findPreference(TextSecurePreferences.PASSWORD_SCREEN).setSummary(passwordSummary);
+    findPreference(TextSecurePreferences.NOTIFICATION_SCREEN).setSummary(notificationSummary);
+    findPreference(TextSecurePreferences.ACCESS_LOCK_SCREEN).setSummary(passwordSummary);
+    findPreference(TextSecurePreferences.STORAGE_SCREEN).setSummary(storageSummary);
+
+    BaseAdapter baseAdapter = (BaseAdapter) getPreferenceScreen().getRootAdapter();
+    baseAdapter.notifyDataSetChanged();
   }
 
   private void initializeListSummary(ListPreference pref) {
@@ -341,10 +342,14 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredSherlockPr
       dynamicTheme.onResume(this);
     } else if (key.equals(TextSecurePreferences.LANGUAGE_PREF)) {
       dynamicLanguage.onResume(this);
-    } else if (key.equals(TextSecurePreferences.NOTIFICATION_PREF) ||
-               key.equals(TextSecurePreferences.THREAD_TRIM_ENABLED) ||
-               key.equals(TextSecurePreferences.DISABLE_PASSPHRASE_PREF)) {
-      initializeScreenSummaries();
+    } else if (key.equals(TextSecurePreferences.ALL_SMS_PREF) ||
+               key.equals(TextSecurePreferences.ALL_MMS_PREF) ||
+               key.equals(TextSecurePreferences.FALLBACK_SMS_ALLOWED_PREF) ||
+               key.equals(TextSecurePreferences.DIRECT_SMS_ALLOWED_PREF) ||
+               key.equals(TextSecurePreferences.NOTIFICATION_PREF) ||
+               key.equals(TextSecurePreferences.DISABLE_PASSPHRASE_PREF) ||
+               key.equals(TextSecurePreferences.THREAD_TRIM_ENABLED)) {
+      setScreenSummaries();
     }
   }
 
