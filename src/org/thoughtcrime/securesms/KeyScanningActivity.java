@@ -18,6 +18,9 @@ package org.thoughtcrime.securesms;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.whispersystems.textsecure.crypto.SerializableKey;
@@ -25,9 +28,6 @@ import org.whispersystems.textsecure.util.Base64;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import org.whispersystems.textsecure.zxing.integration.IntentIntegrator;
 import org.whispersystems.textsecure.zxing.integration.IntentResult;
 
@@ -56,7 +56,7 @@ public abstract class KeyScanningActivity extends PassphraseRequiredSherlockActi
   public boolean onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
 
-    MenuInflater inflater = this.getSupportMenuInflater();
+    MenuInflater inflater = this.getMenuInflater();
     menu.clear();
 
     inflater.inflate(R.menu.key_scanning, menu);

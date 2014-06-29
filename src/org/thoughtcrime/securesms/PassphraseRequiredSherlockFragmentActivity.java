@@ -1,12 +1,13 @@
 package org.thoughtcrime.securesms;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 
 import org.whispersystems.textsecure.crypto.MasterSecret;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 
-public class PassphraseRequiredSherlockFragmentActivity extends SherlockFragmentActivity implements PassphraseRequiredActivity {
+public class PassphraseRequiredSherlockFragmentActivity extends ActionBarActivity implements PassphraseRequiredActivity {
 
   private final PassphraseRequiredMixin delegate = new PassphraseRequiredMixin();
 

@@ -12,11 +12,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
 import android.text.ClipboardManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.CursorAdapter;
@@ -24,12 +30,6 @@ import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-
-import com.actionbarsherlock.app.SherlockListFragment;
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.loaders.ConversationLoader;
@@ -55,7 +55,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class ConversationFragment extends SherlockListFragment
+public class ConversationFragment extends ListFragment
   implements LoaderManager.LoaderCallbacks<Cursor>
 {
   private static final String TAG = ConversationFragment.class.getSimpleName();
@@ -65,7 +65,7 @@ public class ConversationFragment extends SherlockListFragment
   private MasterSecret masterSecret;
   private Recipients   recipients;
   private long         threadId;
-  private ActionMode   actionMode;
+  private ActionMode actionMode;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
@@ -115,7 +115,7 @@ public class ConversationFragment extends SherlockListFragment
           return false;
         }
 
-        actionMode = getSherlockActivity().startActionMode(actionModeCallback);
+        actionMode = ((ActionBarActivity)getActivity()).startSupportActionMode(actionModeCallback);
         view.setSelected(true);
         return true;
       }
@@ -230,12 +230,12 @@ public class ConversationFragment extends SherlockListFragment
     builder.setCancelable(true);
 
     if (dateReceived == dateSent || message.isOutgoing()) {
-      builder.setMessage(String.format(getSherlockActivity()
+      builder.setMessage(String.format(getActivity()
                                        .getString(R.string.ConversationFragment_transport_s_sent_received_s),
                                        transport.toUpperCase(),
                                        dateFormatter.format(new Date(dateSent))));
     } else {
-      builder.setMessage(String.format(getSherlockActivity()
+      builder.setMessage(String.format(getActivity()
                                        .getString(R.string.ConversationFragment_sender_s_transport_s_sent_s_received_s),
                                        message.getIndividualRecipient().getNumber(),
                                        transport.toUpperCase(),

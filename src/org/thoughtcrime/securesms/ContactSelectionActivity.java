@@ -22,13 +22,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.app.ActionBar.TabListener;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.support.v7.app.ActionBar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import org.thoughtcrime.securesms.util.DynamicTheme;
 
@@ -78,7 +75,7 @@ public class ContactSelectionActivity extends PassphraseRequiredSherlockFragment
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = this.getSupportMenuInflater();
+    MenuInflater inflater = this.getMenuInflater();
     inflater.inflate(R.menu.contact_selection, menu);
 
     return true;
@@ -157,7 +154,7 @@ public class ContactSelectionActivity extends PassphraseRequiredSherlockFragment
 
   }
 
-  private class ViewPagerTabListener implements TabListener {
+  private class ViewPagerTabListener implements ActionBar.TabListener {
 
     private int tabIndex;
 
@@ -166,17 +163,17 @@ public class ContactSelectionActivity extends PassphraseRequiredSherlockFragment
     }
 
     @Override
-    public void onTabSelected(Tab tab, FragmentTransaction fragmentTransaction) {
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
       viewPager.setCurrentItem(tabIndex);
     }
 
     @Override
-    public void onTabUnselected(Tab tab, FragmentTransaction fragmentTransaction) {
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 
     }
 
     @Override
-    public void onTabReselected(Tab tab, FragmentTransaction fragmentTransaction) {
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 
     }
 

@@ -19,27 +19,34 @@ repositories {
     maven {
         url "https://raw.github.com/whispersystems/maven/master/gson/releases/"
     }
+    maven {
+        url "https://raw.github.com/kolavar/android-support-v4-preferencefragment/master/maven-repository/"
+    }
 }
 
 dependencies {
-    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
-    compile 'com.android.support:support-v4:19.1.0'
+    compile 'com.android.support:appcompat-v7:20.0.0'
     compile 'com.google.android.gcm:gcm-client:1.0.2'
     compile 'se.emilsjolander:stickylistheaders:2.2.0'
+    compile ('com.android.support:support-v4-preferencefragment:1.0.0@aar'){
+        exclude module: 'support-v4'
+    }
 
     compile project(':library')
 }
 
 dependencyVerification {
     verify = [
-        'com.actionbarsherlock:actionbarsherlock:5ab04d74101f70024b222e3ff9c87bee151ec43331b4a2134b6cc08cf8565819',
-        'com.android.support:support-v4:3f40fa7b3a4ead01ce15dce9453b061646e7fe2e7c51cb75ca01ee1e77037f3f',
+        'com.android.support:appcompat-v7:736f576ab0b68d27bdf18b1e7931566e6d8254b73965175313e87f8866b91547',
         'com.google.android.gcm:gcm-client:5ff578202f93dcba1c210d015deb4241c7cdad9b7867bd1b32e0a5f4c16986ca',
         'se.emilsjolander:stickylistheaders:89146b46c96fea0e40200474a2625cda10fe94891e4128f53cdb42375091b9b6',
+        'com.android.support:support-v4-preferencefragment:5470f5872514a6226fa1fc6f4e000991f38805691c534cf0bd2778911fc773ad',
+        'com.android.support:support-v4:81f2b1c2c94efd5a4ec7fcd97b6cdcd00e87a933905c5c86103c7319eb024572',
         'com.google.protobuf:protobuf-java:ad9769a22989e688a46af4d3accc348cc501ced22118033230542bc916e33f0b',
         'com.madgag:sc-light-jdk15on:931f39d351429fb96c2f749e7ecb1a256a8ebbf5edca7995c9cc085b94d1841d',
         'com.googlecode.libphonenumber:libphonenumber:c2cffa5c2ccb8fd5fc4b432aa7d1ee27482860c9751035a25c8ffa2375274fcf',
         'org.whispersystems:gson:08f4f7498455d1539c9233e5aac18e9b1805815ef29221572996508eb512fe51',
+        'com.android.support:support-annotations:1aa96ef0cc4a445bfc2f93ccf762305bc57fa107b12afe9d11f3863ae8a11036',
     ]
 }
 

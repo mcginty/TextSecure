@@ -1,13 +1,12 @@
 package org.thoughtcrime.securesms;
 
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 
 import org.whispersystems.textsecure.crypto.MasterSecret;
 
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-
 public abstract class PassphraseRequiredSherlockPreferenceActivity
-  extends SherlockPreferenceActivity
+  extends PreferenceActivity
   implements PassphraseRequiredActivity
 {
 

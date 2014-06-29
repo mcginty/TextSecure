@@ -21,9 +21,9 @@ import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
+import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.MenuItem;
 import org.thoughtcrime.securesms.mms.MmsDownloadHelper;
 import org.thoughtcrime.securesms.service.SendReceiveService;
 import org.thoughtcrime.securesms.util.DynamicLanguage;
@@ -45,7 +45,7 @@ public class MmsPreferencesActivity extends PassphraseRequiredSherlockPreference
     dynamicLanguage.onCreate(this);
     super.onCreate(icicle);
 
-    this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    this.getActionBar().setDisplayHomeAsUpEnabled(true);
     initializePreferences();
 
     masterSecret = getIntent().getParcelableExtra("master_secret");

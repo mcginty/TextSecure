@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="TextSecure.IntroTheme" parent="@style/Theme.Sherlock.Light">
+    <style name="TextSecure.IntroTheme" parent="@style/Theme.AppCompat.Light">
         <item name="android:actionBarStyle">@style/TextSecure.IntroActionBar</item>
-        <item name="actionBarStyle">@style/TextSecure.IntroActionBar</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="windowContentOverlay">@null</item>
     </style>
 
-    <style name="TextSecure.LightTheme" parent="@style/Theme.Sherlock.Light">
+    <style name="TextSecure.LightTheme" parent="@style/Theme.AppCompat.Light">
         <item name="android:actionBarStyle">@style/TextSecure.LightActionBar</item>
         <item name="actionBarStyle">@style/TextSecure.LightActionBar</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="windowContentOverlay">@null</item>
         <item name="conversation_list_item_background_read">@drawable/conversation_list_item_background_read_light</item>
         <item name="conversation_list_item_background_unread">@drawable/conversation_list_item_background_unread_light</item>
         <item name="conversation_list_item_background_selected">@drawable/list_selected_holo_light</item>
@@ -86,7 +83,7 @@
            tools:ignore="NewApi">
         <item name="android:homeAsUpIndicator">@drawable/ic_drawer</item>
         <item name="homeAsUpIndicator">@drawable/ic_drawer</item>
-        <item name="navigation_drawer_background">@color/abs__background_holo_light</item>
+        <item name="navigation_drawer_background">@android:color/background_light</item>
         <item name="navigation_drawer_text_color">#ff333333</item>
         <item name="navigation_drawer_icons">@array/navigation_drawer_icons_light</item>
         <item name="navigation_drawer_shadow">@drawable/drawer_shadow_light</item>

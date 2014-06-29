@@ -11,17 +11,18 @@ import android.provider.ContactsContract;
 import android.provider.Telephony;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 
 import org.thoughtcrime.securesms.service.DirectoryRefreshListener;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -104,15 +105,43 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
 
   @Override
   public boolean onPrepareOptionsMenu(Menu menu) {
-    MenuInflater inflater = this.getSupportMenuInflater();
+    MenuInflater inflater = this.getMenuInflater();
     menu.clear();
 
     inflater.inflate(R.menu.text_secure_normal, menu);
 
     menu.findItem(R.id.menu_clear_passphrase).setVisible(!TextSecurePreferences.isPasswordDisabled(this));
 
-    super.onPrepareOptionsMenu(menu);
+    if (this.masterSecret != null) {
+      inflater.inflate(R.menu.conversation_list, menu);
+      MenuItem menuItem = menu.findItem(R.id.menu_search);
+      SearchView searchView = (SearchView) MenuItemCompat.getActionView(menuItem);
+      initializeSearch(searchView);
+    } else {
+      inflater.inflate(R.menu.conversation_list_empty, menu);
+    }
+
+      super.onPrepareOptionsMenu(menu);
     return true;
+  }
+
+  private void initializeSearch(SearchView searchView) {
+    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+      @Override
+      public boolean onQueryTextSubmit(String query) {
+        ConversationListFragment fragment = (ConversationListFragment)getSupportFragmentManager()
+            .findFragmentById(R.id.fragment_content);
+        if (fragment != null) {
+          fragment.setQueryFilter(query);
+          return true;
+        }
+        return false;
+      }
+      @Override
+      public boolean onQueryTextChange(String newText) {
+        return onQueryTextSubmit(newText);
+      }
+    });
   }
 
   @Override
@@ -263,7 +292,7 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
     };
 
     getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI,
-                                                 true, observer);
+        true, observer);
   }
 
   private void initializeSenderReceiverService() {
@@ -310,7 +339,7 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
 
       super.onDrawerClosed(drawerView);
 
-      invalidateOptionsMenu();
+      supportInvalidateOptionsMenu();
     }
 
     @Override
@@ -319,7 +348,7 @@ public class ConversationListActivity extends PassphraseRequiredSherlockFragment
       super.onDrawerOpened(drawerView);
       fragment.resetQueryFilter();
 
-      invalidateOptionsMenu();
+      supportInvalidateOptionsMenu();
     }
   }
 }
