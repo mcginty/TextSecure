@@ -254,7 +254,11 @@ public class ConversationItem extends RelativeLayout {
       pendingIndicator.setVisibility(messageRecord.isPendingSmsFallback() ? View.VISIBLE : View.GONE);
       indicatorText.setVisibility(messageRecord.isPendingSmsFallback() ? View.VISIBLE : View.GONE);
     }
-    bodyText.setCompoundDrawablesWithIntrinsicBounds(messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0, 0, messageRecord.isSecure() ? R.drawable.ic_menu_lock_small_holo_light : 0, 0);
+    final int topDrawable = messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0;
+    final int leftDrawable = (!messageRecord.isOutgoing()) && messageRecord.isSecure() ? R.drawable.ic_menu_lock_small_holo_light : 0;
+    final int rightDrawable = messageRecord.isOutgoing() && messageRecord.isSecure() ? R.drawable.ic_menu_lock_small_holo_light : 0;
+
+    bodyText.setCompoundDrawablesWithIntrinsicBounds(leftDrawable, topDrawable, rightDrawable, 0);
     deliveredImage.setVisibility(!messageRecord.isKeyExchange() && messageRecord.isDelivered() ? View.VISIBLE : View.GONE);
 
     mmsThumbnail.setVisibility(View.GONE);
@@ -283,7 +287,7 @@ public class ConversationItem extends RelativeLayout {
 
     if (squashedDate) {
       dateText.setVisibility(View.GONE);
-      triangleTick.setVisibility(View.GONE);
+      triangleTick.setVisibility(View.INVISIBLE);
       this.setPadding(getPaddingLeft(),
                       getPaddingTop(),
                       getPaddingRight(),
@@ -324,7 +328,7 @@ public class ConversationItem extends RelativeLayout {
   }
 
   private void setGroupMessageStatus(MessageRecord messageRecord) {
-    if (groupThread && !messageRecord.isOutgoing()) {
+    if (groupThread && !messageRecord.isOutgoing() && !squashedDate) {
       this.groupStatusText.setText(messageRecord.getIndividualRecipient().toShortString());
       this.groupStatusText.setVisibility(View.VISIBLE);
     } else {
@@ -424,21 +428,25 @@ public class ConversationItem extends RelativeLayout {
   private void setContactPhotoForRecipient(final Recipient recipient) {
     if (contactPhoto == null) return;
 
-    contactPhoto.setImageBitmap(recipient.getCircleCroppedContactPhoto());
+    if (squashedDate) {
+      contactPhoto.setVisibility(View.INVISIBLE);
+    } else {
+      contactPhoto.setImageBitmap(recipient.getCircleCroppedContactPhoto());
 
-    contactPhoto.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        if (recipient.getContactUri() != null) {
-          QuickContact.showQuickContact(context, contactPhoto, recipient.getContactUri(), QuickContact.MODE_LARGE, null);
-        } else {
-          Intent intent = new Intent(Intents.SHOW_OR_CREATE_CONTACT, Uri.fromParts("tel", recipient.getNumber(), null));
-          context.startActivity(intent);
+      contactPhoto.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          if (recipient.getContactUri() != null) {
+            QuickContact.showQuickContact(context, contactPhoto, recipient.getContactUri(), QuickContact.MODE_LARGE, null);
+          } else {
+            Intent intent = new Intent(Intents.SHOW_OR_CREATE_CONTACT, Uri.fromParts("tel", recipient.getNumber(), null));
+            context.startActivity(intent);
+          }
         }
-      }
-    });
+      });
 
-    contactPhoto.setVisibility(View.VISIBLE);
+      contactPhoto.setVisibility(View.VISIBLE);
+    }
   }
 
   /// Event handlers
