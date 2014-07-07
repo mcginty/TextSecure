@@ -37,7 +37,7 @@
             android:contentDescription="@string/conversation_item_sent__pending_approval_description"/>
     </LinearLayout>
 
-    <RelativeLayout android:id="@+id/conversation_item_parent"
+    <LinearLayout android:id="@+id/conversation_item_parent"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_alignParentRight="true"
@@ -53,7 +53,8 @@
         <TextView android:id="@+id/conversation_item_body"
             android:autoLink="all"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_height="0dp"
             android:paddingTop="5dip"
             android:drawablePadding="5dp"
             android:linksClickable="true"
@@ -66,7 +67,6 @@
             android:id="@+id/mms_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/conversation_item_body"
             android:visibility="gone">
 
             <ImageView
@@ -94,7 +94,6 @@
             android:id="@+id/mms_download_controls"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/mms_view"
             android:orientation="horizontal">
 
             <Button android:id="@+id/mms_download_button"
@@ -118,7 +117,6 @@
         <LinearLayout android:id="@+id/indicators"
                       android:layout_width="wrap_content"
                       android:layout_height="match_parent"
-                      android:layout_below="@id/mms_download_controls"
                       android:orientation="horizontal"
                       android:paddingTop="0dip"
                       android:layout_gravity="right">
@@ -155,7 +153,7 @@
                       android:paddingTop="1dip" />
         </LinearLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <View android:id="@+id/triangle_tick"
         android:background="?conversation_item_sent_triangle_background"
