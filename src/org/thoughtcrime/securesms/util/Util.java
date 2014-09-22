@@ -31,6 +31,8 @@ import org.whispersystems.textsecure.util.InvalidNumberException;
 import org.whispersystems.textsecure.util.PhoneNumberFormatter;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -160,5 +162,14 @@ public class Util {
     } catch (PackageManager.NameNotFoundException e) {
       throw new AssertionError(e);
     }
+  }
+
+  public static void delete(File f) throws IOException {
+    if (f.isDirectory()) {
+      for (File c : f.listFiles())
+        delete(c);
+    }
+    if (!f.delete())
+      throw new IOException("Failed to delete file: " + f);
   }
 }

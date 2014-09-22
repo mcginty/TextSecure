@@ -88,6 +88,15 @@ public class DatabaseFactory {
     }
   }
 
+  public static void destroyInstance() {
+    synchronized (lock) {
+      if (instance != null) {
+        instance.close();
+        instance = null;
+      }
+    }
+  }
+
   public static MmsSmsDatabase getMmsSmsDatabase(Context context) {
     return getInstance(context).mmsSmsDatabase;
   }
@@ -161,6 +170,10 @@ public class DatabaseFactory {
     this.draftDatabase    = new DraftDatabase(context, databaseHelper);
     this.pushDatabase     = new PushDatabase(context, databaseHelper);
     this.groupDatabase    = new GroupDatabase(context, databaseHelper);
+  }
+
+  public void close() {
+    this.databaseHelper.close();
   }
 
   public void reset(Context context) {

@@ -62,6 +62,18 @@ public class CanonicalAddressDatabase {
     }
   }
 
+  public static void destroyInstance() {
+    if (instance != null) {
+      synchronized (lock) {
+        if (instance != null) {
+          instance.close();
+          instance = null;
+        }
+      }
+    }
+  }
+
+
   private CanonicalAddressDatabase(Context context) {
     databaseHelper = new DatabaseHelper(context, DATABASE_NAME, null, DATABASE_VERSION);
     fillCache();
@@ -130,7 +142,6 @@ public class CanonicalAddressDatabase {
 
   public void close() {
     databaseHelper.close();
-    instance = null;
   }
 
   public long getCanonicalAddressId(String address) {

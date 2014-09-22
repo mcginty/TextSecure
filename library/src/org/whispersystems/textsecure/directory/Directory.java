@@ -51,8 +51,18 @@ public class Directory {
         }
       }
     }
-
     return instance;
+  }
+
+  public static void destroyInstance() {
+    if (instance != null) {
+      synchronized (instanceLock) {
+        if (instance != null) {
+          instance.close();
+          instance = null;
+        }
+      }
+    }
   }
 
   private final DatabaseHelper databaseHelper;
@@ -61,6 +71,10 @@ public class Directory {
   private Directory(Context context) {
     this.context = context;
     this.databaseHelper = new DatabaseHelper(context, DATABASE_NAME, null, DATABASE_VERSION);
+  }
+
+  public void close() {
+    this.databaseHelper.close();
   }
 
   public boolean isSmsFallbackSupported(String e164number) {

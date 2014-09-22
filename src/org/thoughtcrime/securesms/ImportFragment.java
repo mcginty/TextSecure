@@ -14,23 +14,32 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
+
+import org.thoughtcrime.securesms.backup.UnsupportedVersionException;
+import org.thoughtcrime.securesms.database.CanonicalAddressDatabase;
+import org.thoughtcrime.securesms.database.DatabaseFactory;
+import org.thoughtcrime.securesms.util.DisablePushMessagingAsyncTask;
+import org.thoughtcrime.securesms.util.DisablePushMessagingAsyncTask.PushDisabledCallback;
+import org.thoughtcrime.securesms.util.TextSecurePreferences;
+import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.database.EncryptedBackupExporter;
-import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.NoExternalStorageException;
 import org.thoughtcrime.securesms.database.PlaintextBackupImporter;
 import org.thoughtcrime.securesms.service.ApplicationMigrationService;
-import org.thoughtcrime.securesms.service.KeyCachingService;
+import org.whispersystems.textsecure.directory.Directory;
 
+import java.io.File;
 import java.io.IOException;
 
 
 public class ImportFragment extends SherlockFragment {
 
-  private static final int SUCCESS    = 0;
-  private static final int NO_SD_CARD = 1;
-  private static final int ERROR_IO   = 2;
+  private static final int SUCCESS              = 0;
+  private static final int NO_SD_CARD           = 1;
+  private static final int ERROR_IO             = 2;
+  private static final int ERROR_BAD_VERSION    = 3;
 
   private MasterSecret masterSecret;
   private ProgressDialog progressDialog;
@@ -110,11 +119,21 @@ public class ImportFragment extends SherlockFragment {
     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
     builder.setIcon(Dialogs.resolveIcon(getActivity(), R.attr.dialog_alert_icon));
     builder.setTitle(getActivity().getString(R.string.ImportFragment_restore_encrypted_backup));
-    builder.setMessage(getActivity().getString(R.string.ImportFragment_restoring_an_encrypted_backup_will_completely_replace_your_existing_keys));
+
+    builder.setMessage(R.string.ImportFragment_restoring_an_encrypted_backup_will_completely_replace_your_existing_keys);
     builder.setPositiveButton(getActivity().getString(R.string.ImportFragment_restore), new AlertDialog.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
-        new ImportEncryptedBackupTask().execute();
+        if (TextSecurePreferences.isPushRegistered(getActivity())) {
+          new DisablePushMessagingAsyncTask(getActivity(), new PushDisabledCallback() {
+            @Override
+            public void onComplete(int code) {
+              new ImportEncryptedBackupTask().execute();
+            }
+          }).execute();
+        } else {
+          new ImportEncryptedBackupTask().execute();
+        }
       }
     });
     builder.setNegativeButton(getActivity().getString(R.string.ImportFragment_cancel), null);
@@ -177,7 +196,7 @@ public class ImportFragment extends SherlockFragment {
     @Override
     protected Integer doInBackground(Void... params) {
       try {
-        PlaintextBackupImporter.importPlaintextFromSd(getActivity(), masterSecret);
+        PlaintextBackupImporter.importPlaintextFromSd(getActivity(), masterSecret, null);
         return SUCCESS;
       } catch (NoExternalStorageException e) {
         Log.w("ImportFragment", e);
@@ -187,7 +206,7 @@ public class ImportFragment extends SherlockFragment {
         return ERROR_IO;
       }
     }
-}
+  }
 
   private class ImportEncryptedBackupTask extends AsyncTask<Void, Void, Integer> {
 
@@ -219,22 +238,38 @@ public class ImportFragment extends SherlockFragment {
                          context.getString(R.string.ImportFragment_error_importing_backup),
                          Toast.LENGTH_LONG).show();
           break;
-        case SUCCESS:
-          DatabaseFactory.getInstance(context).reset(context);
-          Intent intent = new Intent(context, KeyCachingService.class);
-          intent.setAction(KeyCachingService.CLEAR_KEY_ACTION);
-          context.startService(intent);
-
+        case ERROR_BAD_VERSION:
           Toast.makeText(context,
-                         context.getString(R.string.ImportFragment_restore_complete),
+                         context.getString(R.string.ImportFragment_error_importing_backup_version),
                          Toast.LENGTH_LONG).show();
+          break;
+        case SUCCESS:
+          Intent i = getActivity().getApplicationContext()
+                                  .getPackageManager()
+                                  .getLaunchIntentForPackage(getActivity().getApplicationContext().getPackageName());
+          i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+          getActivity().startActivity(i);
+
       }
     }
 
     @Override
     protected Integer doInBackground(Void... params) {
       try {
-        EncryptedBackupExporter.importFromSd(getActivity());
+        Log.w("ImportFragment", "deleting databases");
+        DatabaseFactory.destroyInstance();
+        CanonicalAddressDatabase.destroyInstance();
+        Directory.destroyInstance();
+        getActivity().deleteDatabase("messages.db");
+        getActivity().deleteDatabase("whisper_directory.db");
+        getActivity().deleteDatabase("canonical_address.db");
+
+        Log.w("ImportFragment", "deleting files and settings");
+        Util.delete(getActivity().getFilesDir());
+        Util.delete(new File(getActivity().getFilesDir().getParent(), "shared_prefs"));
+
+//        Log.w("ImportFragment", "preparing ")
+        EncryptedBackupExporter.prepareImport(getActivity());
         return SUCCESS;
       } catch (NoExternalStorageException e) {
         Log.w("ImportFragment", e);
@@ -242,8 +277,10 @@ public class ImportFragment extends SherlockFragment {
       } catch (IOException e) {
         Log.w("ImportFragment", e);
         return ERROR_IO;
+      } catch (UnsupportedVersionException e) {
+        Log.w("ImportFragment", e);
+        return ERROR_BAD_VERSION;
       }
     }
   }
-
 }

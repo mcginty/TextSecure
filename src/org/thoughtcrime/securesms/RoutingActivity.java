@@ -2,6 +2,7 @@ package org.thoughtcrime.securesms;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
@@ -20,6 +21,7 @@ public class RoutingActivity extends PassphraseRequiredSherlockActivity {
   private static final int STATE_CONVERSATION_OR_LIST     = 3;
   private static final int STATE_UPGRADE_DATABASE         = 4;
   private static final int STATE_PROMPT_PUSH_REGISTRATION = 5;
+  private static final int STATE_IMPORT_ENCRYPTED_DB      = 6;
 
   private MasterSecret masterSecret   = null;
   private boolean      isVisible      = false;
@@ -85,7 +87,16 @@ public class RoutingActivity extends PassphraseRequiredSherlockActivity {
     case STATE_CONVERSATION_OR_LIST:     handleDisplayConversationOrList(); break;
     case STATE_UPGRADE_DATABASE:         handleUpgradeDatabase();           break;
     case STATE_PROMPT_PUSH_REGISTRATION: handlePushRegistration();          break;
+    case STATE_IMPORT_ENCRYPTED_DB:      handleImportEncryptedDatabase();   break;
     }
+  }
+
+  private void handleImportEncryptedDatabase() {
+    Log.w("Router", "handling importing of encrypted database");
+    Intent intent = new Intent(this, EncryptedBackupImportActivity.class);
+    intent.putExtra("master_secret", masterSecret);
+    intent.putExtra("next_intent", getConversationListIntent());
+    startActivity(intent);
   }
 
   private void handleCreatePassphrase() {
@@ -184,6 +195,7 @@ public class RoutingActivity extends PassphraseRequiredSherlockActivity {
   }
 
   private int getApplicationState() {
+    Log.w("Routing", "getting app state");
     if (!MasterSecretUtil.isPassphraseInitialized(this))
       return STATE_CREATE_PASSPHRASE;
 
@@ -192,6 +204,9 @@ public class RoutingActivity extends PassphraseRequiredSherlockActivity {
 
     if (DatabaseUpgradeActivity.isUpdate(this))
       return STATE_UPGRADE_DATABASE;
+
+    if (EncryptedBackupImportActivity.isPendingImport(this))
+      return STATE_IMPORT_ENCRYPTED_DB;
 
     if (!TextSecurePreferences.hasPromptedPushRegistration(this))
       return STATE_PROMPT_PUSH_REGISTRATION;

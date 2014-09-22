@@ -154,6 +154,19 @@ public class Util {
     out.close();
   }
 
+  public static void copy(InputStream in, OutputStream out, int len) throws IOException {
+    byte[] buffer = new byte[4096];
+    int    total  = 0;
+    int    read;
+
+    while ((read = in.read(buffer, 0, total + 4096 > len ? len - total : 4096)) != -1) {
+      out.write(buffer, 0, read);
+    }
+
+    in.close();
+    out.close();
+  }
+
   public static String join(Collection<String> list, String delimiter) {
     StringBuilder result = new StringBuilder();
     int i=0;
