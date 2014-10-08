@@ -114,25 +114,6 @@ public class Recipient implements Parcelable, CanonicalRecipient {
         }
       }
 
-    future.setListener(new FutureTaskListener<RecipientDetails>() {
-      @Override
-      public void onSuccess(RecipientDetails result) {
-        if (result != null) {
-          HashSet<RecipientModifiedListener> localListeners;
-
-          synchronized (Recipient.this) {
-            Recipient.this.name         = result.name;
-            Recipient.this.contactUri   = result.contactUri;
-            Recipient.this.contactPhoto = result.avatar;
-            localListeners              = (HashSet<RecipientModifiedListener>)listeners.clone();
-            listeners.clear();
-          }
-
-          for (RecipientModifiedListener listener : localListeners)
-            listener.onModified(Recipient.this);
-        }
-      }
-
       @Override
       public void onFailure(Throwable error) {
         Log.w("Recipient", error);
