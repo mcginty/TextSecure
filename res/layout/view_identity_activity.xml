@@ -45,6 +45,8 @@
                 android:fontFamily="serif"
                 android:textColor="?conversation_list_item_subject_color"
                 android:id="@+id/identity_fingerprint_mnemonic"
+                android:textSize="15sp"
+                android:lineSpacingExtra="5sp"
                 android:text=""
                 android:padding="7dip"
                 />
