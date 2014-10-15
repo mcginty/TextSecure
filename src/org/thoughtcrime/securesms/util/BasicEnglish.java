@@ -17,7 +17,6 @@ import java.util.List;
 public class BasicEnglish {
   private static final String TAG = BasicEnglish.class.getSimpleName();
   Context           context;
-  byte[]            input;
   List<String> n, vi, vt, adj, adv, p, art;
 
   public BasicEnglish(Context context) {
@@ -54,7 +53,6 @@ public class BasicEnglish {
   public String fromBytes(final byte[] bytes, int desiredBytes) throws IOException {
     BitInputStream bin         = new BitInputStream(new ByteArrayInputStream(bytes));
     EntropyString  fingerprint = new EntropyString();
-    int bitsRead = 0;
     while (fingerprint.getBits() < (desiredBytes * 8)) {
       try {
         fingerprint.append(getSentence(bin));
@@ -96,19 +94,23 @@ public class BasicEnglish {
 
   EntropyString getSentence(BitInputStream bits) throws IOException {
     final EntropyString sentence = new EntropyString();
-    sentence.append(getNounPhrase(bits)).append(" ");   // Subject
+    sentence.append(getNounPhrase(bits));   // Subject
     if (bits.readBit() != 0) {
-      sentence.append(getWord(vt, bits)).append(" ");   // Transitive verb
-      sentence.append(getNounPhrase(bits)).append(" "); // Object of transitive verb
+      sentence.append(" ").append(getWord(vt, bits));   // Transitive verb
+      sentence.append(" ").append(getNounPhrase(bits)); // Object of transitive verb
     } else {
-      sentence.append(getWord(vi, bits)).append(" ");   // Intransitive verb
+      sentence.append(" ").append(getWord(vi, bits));   // Intransitive verb
     }
     sentence.incBits();
 
-    if (bits.readBit() != 0) sentence.append(getWord(adv, bits)).append(" "); // Adverb
+    if (bits.readBit() != 0) {
+      sentence.append(" ").append(getWord(adv, bits)); // Adverb
+    }
+
     sentence.incBits();
     if (bits.readBit() != 0) {
-      sentence.append(getWord(p, bits));    // Preposition
+      sentence.append(" ").append(getWord(p, bits));    // Preposition
+      sentence.append(" ").append(getNounPhrase(bits)); // Object of preposition
     }
     sentence.incBits();
     Log.w(TAG, "got sentence " + sentence + " with " + sentence.getBits() + " bits of entropy");

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            tools:context=".ViewIdentityActivity">
 
     <LinearLayout android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
@@ -39,17 +41,17 @@
 
         <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1.1"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:fontFamily="serif"
                 android:textColor="?conversation_list_item_subject_color"
                 android:id="@+id/identity_fingerprint_mnemonic"
-                android:textSize="15sp"
-                android:lineSpacingExtra="5sp"
-                android:text=""
                 android:padding="7dip"
-                />
+                tools:text="that feeling reads darkly at that foolish flight\nthat comfort comes to that true list sadly near that married brick"
+                android:password="false"
+                android:editable="false"
+                android:clickable="false"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -98,7 +100,8 @@
             android:id="@+id/identity_fingerprint"
             android:text=""
             android:textColor="?conversation_list_item_subject_color"
-            android:padding="7dip" />
+            android:padding="7dip"
+            tools:text="01 02 03 04 05 06 07 08 09 a0\n01 02 03 04 05 06 07 08 09 a0"/>
 
 
     </LinearLayout>

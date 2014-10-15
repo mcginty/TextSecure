@@ -69,7 +69,7 @@ public class ViewIdentityActivity extends KeyScanningActivity {
         identityFingerprintMnemonic.setText(R.string.ViewIdentityActivity_you_do_not_have_an_identity_key);
       } else {
         byte[] identityBytes = identityKey.serialize();
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
         byte[] fingerprintBytes = md.digest(identityBytes);
 
         String mnemomic;
@@ -81,7 +81,7 @@ public class ViewIdentityActivity extends KeyScanningActivity {
 
         identityFingerprintMnemonic.setText(mnemomic);
 
-        identityFingerprint.setText(Hex.toString(fingerprintBytes));
+        identityFingerprint.setText(Hex.toString(Arrays.copyOfRange(fingerprintBytes,0,16)));
       }
     } catch (NoSuchAlgorithmException nsae) {
       Log.w("ViewIdentityActivity", nsae);
