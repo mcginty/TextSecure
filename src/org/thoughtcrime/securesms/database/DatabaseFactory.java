@@ -56,8 +56,8 @@ public class DatabaseFactory {
   private static final int INTRODUCED_PUSH_DATABASE_VERSION  = 10;
   private static final int INTRODUCED_GROUP_DATABASE_VERSION = 11;
   private static final int INTRODUCED_PUSH_FIX_VERSION       = 12;
-  private static final int INTRODUCED_IDENTITY_VERIFICATION  = 13;
-  private static final int DATABASE_VERSION                  = 13;
+//  private static final int INTRODUCED_IDENTITY_VERIFICATION  = 13;
+  private static final int DATABASE_VERSION                  = 12;
 
   private static final String DATABASE_NAME    = "messages.db";
   private static final Object lock             = new Object();
@@ -697,9 +697,9 @@ public class DatabaseFactory {
         db.execSQL("DROP TABLE push_backup;");
       }
 
-      if (oldVersion < INTRODUCED_IDENTITY_VERIFICATION) {
-        db.execSQL("ALTER TABLE identities ADD COLUMN verified INTEGER DEFAULT 0;");
-      }
+//      if (oldVersion < INTRODUCED_IDENTITY_VERIFICATION) {
+//        db.execSQL("ALTER TABLE identities ADD COLUMN verified INTEGER DEFAULT 0;");
+//      }
 
       db.setTransactionSuccessful();
       db.endTransaction();
