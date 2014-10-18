@@ -18,12 +18,13 @@ package org.thoughtcrime.securesms;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.os.Handler;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.Adapter;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.support.v4.widget.CursorAdapter;
 
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -45,15 +46,12 @@ import java.util.Map;
  * @author Moxie Marlinspike
  *
  */
-public class ConversationAdapter extends CursorAdapter implements AbsListView.RecyclerListener {
+public class ConversationAdapter extends Adapter<ConversationAdapter.ViewHolder> {
+  private static final String TAG = ConversationAdapter.class.getSimpleName();
 
   private static final int MAX_CACHE_SIZE = 40;
   private final Map<String,SoftReference<MessageRecord>> messageRecordCache =
       Collections.synchronizedMap(new LRUCache<String, SoftReference<MessageRecord>>(MAX_CACHE_SIZE));
-
-  public static final int MESSAGE_TYPE_OUTGOING = 0;
-  public static final int MESSAGE_TYPE_INCOMING = 1;
-  public static final int MESSAGE_TYPE_GROUP_ACTION = 2;
 
   private final Handler failedIconClickHandler;
   private final Context context;
@@ -61,11 +59,21 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
   private final boolean groupThread;
   private final boolean pushDestination;
   private final LayoutInflater inflater;
+  private       Cursor cursor;
+  private final DataSetObserver observer;
+
+  public static class ViewHolder extends RecyclerView.ViewHolder {
+    public ConversationItem conversationItem;
+    public ViewHolder(ConversationItem conversationItem) {
+      super(conversationItem);
+      this.conversationItem = conversationItem;
+    }
+  }
 
   public ConversationAdapter(Context context, MasterSecret masterSecret,
                              Handler failedIconClickHandler, boolean groupThread, boolean pushDestination)
   {
-    super(context, null, true);
+    super();
     this.context                = context;
     this.masterSecret           = masterSecret;
     this.failedIconClickHandler = failedIconClickHandler;
@@ -74,9 +82,16 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
     this.inflater               = LayoutInflater.from(context);
   }
 
-  @Override
-  public void bindView(View view, Context context, Cursor cursor) {
-    ConversationItem item       = (ConversationItem)view;
+  public void changeCursor(Cursor newCursor) {
+    Log.w(TAG, "changeCursor()");
+    if (cursor != null && !cursor.isClosed()) {
+      cursor.close();
+    }
+    cursor = newCursor;
+    notifyDataSetChanged();
+  }
+
+  public void bindData(ConversationItem item, Cursor cursor) {
     long id                     = cursor.getLong(cursor.getColumnIndexOrThrow(SmsDatabase.ID));
     String type                 = cursor.getString(cursor.getColumnIndexOrThrow(MmsSmsDatabase.TRANSPORT));
     MessageRecord messageRecord = getMessageRecord(id, cursor, type);
@@ -84,48 +99,58 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
     item.set(masterSecret, messageRecord, failedIconClickHandler, groupThread, pushDestination);
   }
 
-  @Override
-  public View newView(Context context, Cursor cursor, ViewGroup parent) {
-    View view;
+  public ConversationItem newView(Cursor cursor, ViewGroup parent, int type) {
 
-    int type = getItemViewType(cursor);
-
+    int layout;
     switch (type) {
-      case ConversationAdapter.MESSAGE_TYPE_OUTGOING:
-        view = inflater.inflate(R.layout.conversation_item_sent, parent, false);
-        break;
-      case ConversationAdapter.MESSAGE_TYPE_INCOMING:
-        view = inflater.inflate(R.layout.conversation_item_received, parent, false);
-        break;
-      case ConversationAdapter.MESSAGE_TYPE_GROUP_ACTION:
-        view = inflater.inflate(R.layout.conversation_item_activity, parent, false);
-        break;
+      case R.id.message_type_outgoing:     layout = R.layout.conversation_item_sent;     break;
+      case R.id.message_type_incoming:     layout = R.layout.conversation_item_received; break;
+      case R.id.message_type_group_action: layout = R.layout.conversation_item_activity; break;
       default: throw new IllegalArgumentException("unsupported item view type given to ConversationAdapter");
     }
-
-    bindView(view, context, cursor);
-    return view;
+    return (ConversationItem) inflater.inflate(layout, parent, false);
   }
 
   @Override
-  public int getViewTypeCount() {
-    return 3;
+  public ViewHolder onCreateViewHolder(ViewGroup parent, int type) {
+    Log.w(TAG, "onCreateViewHolder()");
+    ConversationItem item = newView(cursor, parent, type);
+    return new ViewHolder(item);
   }
 
   @Override
-  public int getItemViewType(int position) {
-    Cursor cursor = (Cursor)getItem(position);
+  public void onBindViewHolder(ViewHolder viewHolder, int i) {
+    Log.w(TAG, "onBindViewHolder(" + i + ")");
+    if (cursor == null || !cursor.moveToPosition(i)) return;
+    bindData(viewHolder.conversationItem, cursor);
+  }
+
+  public int getItemViewType(int i) {
+    Log.w(TAG, "getItemViewType(" + i + ")");
+    if (cursor == null || !cursor.moveToPosition(i)) {
+      Log.w(TAG, "cursor null or out of bounds, returning default item view type");
+      return 0;
+    }
     return getItemViewType(cursor);
   }
 
+  @Override
+  public int getItemCount() {
+    if (cursor == null) return 0;
+    return cursor.getCount();
+  }
+
   private int getItemViewType(Cursor cursor) {
+    for (String name:cursor.getColumnNames()) {
+      Log.w(TAG, "column: " + name);
+    }
     long id                     = cursor.getLong(cursor.getColumnIndexOrThrow(MmsSmsColumns.ID));
     String type                 = cursor.getString(cursor.getColumnIndexOrThrow(MmsSmsDatabase.TRANSPORT));
     MessageRecord messageRecord = getMessageRecord(id, cursor, type);
 
-    if      (messageRecord.isGroupAction()) return MESSAGE_TYPE_GROUP_ACTION;
-    else if (messageRecord.isOutgoing())    return MESSAGE_TYPE_OUTGOING;
-    else                                    return MESSAGE_TYPE_INCOMING;
+    if      (messageRecord.isGroupAction()) return R.id.message_type_group_action;
+    else if (messageRecord.isOutgoing())    return R.id.message_type_outgoing;
+    else                                    return R.id.message_type_incoming;
   }
 
   private MessageRecord getMessageRecord(long messageId, Cursor cursor, String type) {
@@ -148,18 +173,16 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
     return messageRecord;
   }
 
-  @Override
-  protected void onContentChanged() {
-    super.onContentChanged();
-    messageRecordCache.clear();
-  }
+  private class ChangeObserver extends DataSetObserver {
 
-  public void close() {
-    this.getCursor().close();
-  }
+    @Override
+    public void onChanged() {
+      notifyDataSetChanged();
+    }
 
-  @Override
-  public void onMovedToScrapHeap(View view) {
-    ((ConversationItem)view).unbind();
+    @Override
+    public void onInvalidated() {
+      notifyDataSetChanged();
+    }
   }
 }

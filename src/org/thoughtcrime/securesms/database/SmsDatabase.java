@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.thoughtcrime.securesms.util.Util.canonicalizeNumber;
+import de.greenrobot.event.EventBus;
 
 /**
  * Database for storage of SMS messages.

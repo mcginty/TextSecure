@@ -23,6 +23,8 @@ import android.net.Uri;
 
 import java.util.Set;
 
+import de.greenrobot.event.EventBus;
+
 public abstract class Database {
 
   protected static final String ID_WHERE            = "_id = ?";
@@ -42,8 +44,9 @@ public abstract class Database {
       notifyConversationListeners(threadId);
   }
 
-  protected void notifyConversationListeners(long threadId) {
+  protected void notifyConversationListeners(long threadId, ThreadEvent event) {
     context.getContentResolver().notifyChange(Uri.parse(CONVERSATION_URI + threadId), null);
+    EventBus.getDefault().post(event);
   }
 
   protected void notifyConversationListListeners() {
@@ -62,4 +65,15 @@ public abstract class Database {
     this.databaseHelper = databaseHelper;
   }
 
+  public static class ThreadEvent {
+    public long threadId;
+    public ThreadEvent(long threadId) {
+      this.threadId = threadId;
+    }
+  }
+  public static class InsertEvent extends ThreadEvent {
+    public InsertEvent(long threadId) {
+      super(threadId);
+    }
+  }
 }

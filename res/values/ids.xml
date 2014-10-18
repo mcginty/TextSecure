@@ -2,4 +2,7 @@
 <resources>
     <item type="id" name="holder_tag"/>
     <item type="id" name="contact_info_tag"/>
+    <item type="id" name="message_type_outgoing"/>
+    <item type="id" name="message_type_incoming"/>
+    <item type="id" name="message_type_group_action"/>
 </resources>
