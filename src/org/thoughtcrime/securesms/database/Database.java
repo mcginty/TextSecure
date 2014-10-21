@@ -39,9 +39,9 @@ public abstract class Database {
     this.databaseHelper = databaseHelper;
   }
 
-  protected void notifyConversationListeners(Set<Long> threadIds) {
+  protected void notifyConversationListeners(Set<Long> threadIds, ThreadEvent event) {
     for (long threadId : threadIds)
-      notifyConversationListeners(threadId);
+      notifyConversationListeners(threadId, event);
   }
 
   protected void notifyConversationListeners(long threadId, ThreadEvent event) {
@@ -71,9 +71,29 @@ public abstract class Database {
       this.threadId = threadId;
     }
   }
-  public static class InsertEvent extends ThreadEvent {
-    public InsertEvent(long threadId) {
+
+  public static class MessageEvent extends ThreadEvent {
+    private long messageId;
+    public MessageEvent(long threadId, long messageId) {
       super(threadId);
+      this.messageId = messageId;
+    }
+  }
+
+  public static class InsertEvent extends MessageEvent {
+    public InsertEvent(long threadId, long messageId) {
+      super(threadId, messageId);
+    }
+  }
+
+  public static class DeleteEvent extends MessageEvent {
+    public DeleteEvent(long threadId, long messageId) {
+      super(threadId, messageId);
+    }
+  }
+  public static class UpdateEvent extends MessageEvent {
+    public UpdateEvent(long threadId, long messageId) {
+      super(threadId, messageId);
     }
   }
 }

@@ -104,7 +104,7 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
     long threadId = getThreadIdForMessage(id);
 
     DatabaseFactory.getThreadDatabase(context).update(threadId);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new UpdateEvent(threadId, id));
     notifyConversationListListeners();
   }
 
@@ -239,7 +239,8 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
 
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
     db.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {id+""});
-    notifyConversationListeners(getThreadIdForMessage(id));
+    long threadId = getThreadIdForMessage(id);
+    notifyConversationListeners(threadId, new UpdateEvent(threadId, id));
   }
 
   public void markAsSentFailed(long id) {
@@ -308,7 +309,7 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
     long threadId = getThreadIdForMessage(messageId);
 
     DatabaseFactory.getThreadDatabase(context).update(threadId);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new UpdateEvent(threadId, messageId));
     notifyConversationListListeners();
   }
 
@@ -419,7 +420,7 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
     }
 
     DatabaseFactory.getThreadDatabase(context).update(threadId);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new InsertEvent(threadId, messageId));
     Trimmer.trimThread(context, threadId);
 
     return new Pair<Long, Long>(messageId, threadId);
@@ -451,10 +452,11 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
       contentValues.put(TYPE, type);
 
       SQLiteDatabase db = databaseHelper.getWritableDatabase();
-      messageIds.add(db.insert(TABLE_NAME, ADDRESS, contentValues));
+      long messageId = db.insert(TABLE_NAME, ADDRESS, contentValues);
+      messageIds.add(messageId);
 
       DatabaseFactory.getThreadDatabase(context).update(threadId);
-      notifyConversationListeners(threadId);
+      notifyConversationListeners(threadId, new InsertEvent(threadId, messageId));
       Trimmer.trimThread(context, threadId);
     }
 
@@ -498,7 +500,7 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
     long threadId     = getThreadIdForMessage(messageId);
     db.delete(TABLE_NAME, ID_WHERE, new String[] {messageId+""});
     DatabaseFactory.getThreadDatabase(context).update(threadId);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new DeleteEvent(threadId, messageId));
   }
 
   /*package */void deleteThread(long threadId) {

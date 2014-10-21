@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import org.thoughtcrime.securesms.database.Database.InsertEvent;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MmsSmsColumns;
@@ -37,6 +38,8 @@ import org.thoughtcrime.securesms.util.LRUCache;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.Map;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * A cursor adapter for a conversation thread.  Ultimately
@@ -60,7 +63,6 @@ public class ConversationAdapter extends Adapter<ConversationAdapter.ViewHolder>
   private final boolean pushDestination;
   private final LayoutInflater inflater;
   private       Cursor cursor;
-  private final DataSetObserver observer;
 
   public static class ViewHolder extends RecyclerView.ViewHolder {
     public ConversationItem conversationItem;
@@ -80,6 +82,11 @@ public class ConversationAdapter extends Adapter<ConversationAdapter.ViewHolder>
     this.groupThread            = groupThread;
     this.pushDestination        = pushDestination;
     this.inflater               = LayoutInflater.from(context);
+    EventBus.getDefault().register(this);
+  }
+
+  public void onEvent(InsertEvent event) {
+    notifyItemInserted();
   }
 
   public void changeCursor(Cursor newCursor) {
@@ -171,18 +178,5 @@ public class ConversationAdapter extends Adapter<ConversationAdapter.ViewHolder>
     messageRecordCache.put(type + messageId, new SoftReference<MessageRecord>(messageRecord));
 
     return messageRecord;
-  }
-
-  private class ChangeObserver extends DataSetObserver {
-
-    @Override
-    public void onChanged() {
-      notifyDataSetChanged();
-    }
-
-    @Override
-    public void onInvalidated() {
-      notifyDataSetChanged();
-    }
   }
 }
