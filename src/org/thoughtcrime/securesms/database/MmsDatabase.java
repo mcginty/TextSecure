@@ -198,7 +198,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
                                  RECEIPT_COUNT + " = " + RECEIPT_COUNT + " + 1 WHERE " + ID + " = ?",
                                  new String[] {String.valueOf(id)});
 
-                notifyConversationListeners(threadId);
+                notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, id));
               }
             } catch (InvalidNumberException e) {
               Log.w("MmsDatabase", e);
@@ -324,32 +324,38 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
 
   public void markAsOutbox(long messageId) {
     updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_OUTBOX_TYPE);
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsForcedSms(long messageId) {
     updateMailboxBitmask(messageId, 0, Types.MESSAGE_FORCE_SMS_BIT);
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsPendingSecureSmsFallback(long messageId) {
     updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_PENDING_SECURE_SMS_FALLBACK);
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsPendingInsecureSmsFallback(long messageId) {
     updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_PENDING_INSECURE_SMS_FALLBACK);
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsSending(long messageId) {
     updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_SENDING_TYPE);
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsSentFailed(long messageId) {
     updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_SENT_FAILED_TYPE);
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsSent(long messageId, byte[] mmsId, long status) {
@@ -360,7 +366,8 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
 
     database.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {messageId+""});
     updateMailboxBitmask(messageId, Types.BASE_TYPE_MASK, Types.BASE_SENT_TYPE);
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markDownloadState(long messageId, long state) {
@@ -369,7 +376,8 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
     contentValues.put(STATUS, state);
 
     database.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {messageId + ""});
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markDeliveryStatus(long messageId, int status) {
@@ -378,12 +386,13 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
     contentValues.put(STATUS, status);
 
     database.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {messageId + ""});
-    notifyConversationListeners(getThreadIdForMessage(messageId));
+    long threadId = getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsNoSession(long messageId, long threadId) {
     updateMailboxBitmask(messageId, Types.ENCRYPTION_MASK, Types.ENCRYPTION_REMOTE_NO_SESSION_BIT);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsSecure(long messageId) {
@@ -400,17 +409,17 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
 
   public void markAsDecryptFailed(long messageId, long threadId) {
     updateMailboxBitmask(messageId, Types.ENCRYPTION_MASK, Types.ENCRYPTION_REMOTE_FAILED_BIT);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsDecryptDuplicate(long messageId, long threadId) {
     updateMailboxBitmask(messageId, Types.ENCRYPTION_MASK, Types.ENCRYPTION_REMOTE_DUPLICATE_BIT);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void markAsLegacyVersion(long messageId, long threadId) {
     updateMailboxBitmask(messageId, Types.ENCRYPTION_MASK, Types.ENCRYPTION_REMOTE_LEGACY_BIT);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void setMessagesRead(long threadId) {
@@ -551,7 +560,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
     }
 
     DatabaseFactory.getThreadDatabase(context).update(threadId);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new InsertMessageEvent(threadId, messageId));
     Trimmer.trimThread(context, threadId);
 
     return new Pair<Long, Long>(messageId, threadId);
@@ -623,7 +632,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
   }
 
   public void markIncomingNotificationReceived(long threadId) {
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new GeneralThreadEvent(threadId));
     DatabaseFactory.getThreadDatabase(context).update(threadId);
 
     if (org.thoughtcrime.securesms.util.Util.isDefaultSmsProvider(context)) {
@@ -707,7 +716,8 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
     addressDatabase.insertAddressesForId(messageId, headers);
     partsDatabase.insertParts(messageId, body);
 
-    notifyConversationListeners(contentValues.getAsLong(THREAD_ID));
+    long threadId =contentValues.getAsLong(THREAD_ID);
+    notifyConversationListeners(threadId, new InsertMessageEvent(threadId, messageId));
     DatabaseFactory.getThreadDatabase(context).update(contentValues.getAsLong(THREAD_ID));
 
     return messageId;
@@ -723,7 +733,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
     SQLiteDatabase database = databaseHelper.getWritableDatabase();
     database.delete(TABLE_NAME, ID_WHERE, new String[] {messageId+""});
     DatabaseFactory.getThreadDatabase(context).update(threadId);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new DeleteMessageEvent(threadId, messageId));
   }
 
   public void deleteThread(long threadId) {

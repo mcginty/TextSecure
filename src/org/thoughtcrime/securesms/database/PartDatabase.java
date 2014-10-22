@@ -321,7 +321,8 @@ public class PartDatabase extends Database {
     }
 
     database.update(TABLE_NAME, values, ID_WHERE, new String[] {partId+""});
-    notifyConversationListeners(DatabaseFactory.getMmsDatabase(context).getThreadIdForMessage(messageId));
+    long threadId = DatabaseFactory.getMmsDatabase(context).getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public void updateFailedDownloadedPart(long messageId, long partId, PduPart part)
@@ -337,7 +338,8 @@ public class PartDatabase extends Database {
     values.put(DATA, (String)null);
 
     database.update(TABLE_NAME, values, ID_WHERE, new String[] {partId+""});
-    notifyConversationListeners(DatabaseFactory.getMmsDatabase(context).getThreadIdForMessage(messageId));
+    long threadId = DatabaseFactory.getMmsDatabase(context).getThreadIdForMessage(messageId);
+    notifyConversationListeners(threadId, new UpdateMessageEvent(threadId, messageId));
   }
 
   public PduPart getPart(long partId, boolean includeData) {

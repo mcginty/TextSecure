@@ -23,6 +23,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.util.Log;
 
+import org.thoughtcrime.securesms.database.Database.GeneralThreadEvent;
 import org.whispersystems.textsecure.crypto.MasterCipher;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.recipients.RecipientFactory;
@@ -179,7 +180,7 @@ public class SmsMigrator {
 
       ourSmsDatabase.endTransaction(transaction);
       DatabaseFactory.getThreadDatabase(context).update(ourThreadId);
-      DatabaseFactory.getThreadDatabase(context).notifyConversationListeners(ourThreadId);
+      DatabaseFactory.getThreadDatabase(context).notifyConversationListeners(ourThreadId, new GeneralThreadEvent(ourThreadId));
 
     } finally {
       if (cursor != null)

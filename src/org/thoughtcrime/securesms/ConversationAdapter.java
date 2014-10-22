@@ -18,7 +18,6 @@ package org.thoughtcrime.securesms;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -26,7 +25,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import org.thoughtcrime.securesms.database.Database.InsertEvent;
+import org.thoughtcrime.securesms.database.Database.InsertMessageEvent;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MmsSmsColumns;
@@ -85,8 +84,9 @@ public class ConversationAdapter extends Adapter<ConversationAdapter.ViewHolder>
     EventBus.getDefault().register(this);
   }
 
-  public void onEvent(InsertEvent event) {
-    notifyItemInserted();
+  @SuppressWarnings("unused")
+  public void onEvent(InsertMessageEvent event) {
+    notifyItemInserted(0);
   }
 
   public void changeCursor(Cursor newCursor) {

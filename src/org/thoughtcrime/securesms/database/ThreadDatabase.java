@@ -194,7 +194,7 @@ public class ThreadDatabase extends Database {
         DatabaseFactory.getMmsDatabase(context).deleteMessagesInThreadBeforeDate(threadId, lastTweetDate);
 
         update(threadId);
-        notifyConversationListeners(threadId);
+        notifyConversationListeners(threadId, new GeneralThreadEvent(threadId));
       }
     } finally {
       if (cursor != null)
@@ -281,7 +281,7 @@ public class ThreadDatabase extends Database {
     DatabaseFactory.getSmsDatabase(context).deleteThread(threadId);
     DatabaseFactory.getMmsDatabase(context).deleteThread(threadId);
     deleteThread(threadId);
-    notifyConversationListeners(threadId);
+    notifyConversationListeners(threadId, new DeleteThreadEvent(threadId));
     notifyConversationListListeners();
   }
 
@@ -290,7 +290,7 @@ public class ThreadDatabase extends Database {
     DatabaseFactory.getSmsDatabase(context).deleteThreads(selectedConversations);
     DatabaseFactory.getMmsDatabase(context).deleteThreads(selectedConversations);
     deleteThreads(selectedConversations);
-    notifyConversationListeners(selectedConversations);
+    notifyConversationListeners(selectedConversations, new DeleteThreadEvent(0)); // XXX
     notifyConversationListListeners();
   }
 

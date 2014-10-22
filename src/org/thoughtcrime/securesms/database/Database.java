@@ -65,14 +65,26 @@ public abstract class Database {
     this.databaseHelper = databaseHelper;
   }
 
-  public static class ThreadEvent {
+  public static abstract class ThreadEvent {
     public long threadId;
     public ThreadEvent(long threadId) {
       this.threadId = threadId;
     }
   }
 
-  public static class MessageEvent extends ThreadEvent {
+  public static class InsertThreadEvent extends ThreadEvent {
+    public InsertThreadEvent(long threadId) { super(threadId); }
+  }
+
+  public static class DeleteThreadEvent extends ThreadEvent {
+    public DeleteThreadEvent(long threadId) { super(threadId); }
+  }
+
+  public static class GeneralThreadEvent extends ThreadEvent {
+    public GeneralThreadEvent(long threadId) { super(threadId); }
+  }
+
+  public static abstract class MessageEvent extends ThreadEvent {
     private long messageId;
     public MessageEvent(long threadId, long messageId) {
       super(threadId);
@@ -80,19 +92,20 @@ public abstract class Database {
     }
   }
 
-  public static class InsertEvent extends MessageEvent {
-    public InsertEvent(long threadId, long messageId) {
+  public static class InsertMessageEvent extends MessageEvent {
+    public InsertMessageEvent(long threadId, long messageId) {
       super(threadId, messageId);
     }
   }
 
-  public static class DeleteEvent extends MessageEvent {
-    public DeleteEvent(long threadId, long messageId) {
+  public static class DeleteMessageEvent extends MessageEvent {
+    public DeleteMessageEvent(long threadId, long messageId) {
       super(threadId, messageId);
     }
   }
-  public static class UpdateEvent extends MessageEvent {
-    public UpdateEvent(long threadId, long messageId) {
+
+  public static class UpdateMessageEvent extends MessageEvent {
+    public UpdateMessageEvent(long threadId, long messageId) {
       super(threadId, messageId);
     }
   }
