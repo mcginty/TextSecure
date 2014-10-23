@@ -20,6 +20,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.Set;
 
@@ -84,11 +86,27 @@ public abstract class Database {
     public GeneralThreadEvent(long threadId) { super(threadId); }
   }
 
-  public static abstract class MessageEvent extends ThreadEvent {
+  public static abstract class MessageEvent extends ThreadEvent implements Parcelable {
     private long messageId;
     public MessageEvent(long threadId, long messageId) {
       super(threadId);
       this.messageId = messageId;
+    }
+
+    public MessageEvent(Parcel in) {
+      super(in.readLong());
+      this.messageId = in.readLong();
+    }
+
+    @Override
+    public int describeContents() {
+      return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+      parcel.writeLong(threadId);
+      parcel.writeLong(messageId);
     }
   }
 
@@ -96,6 +114,21 @@ public abstract class Database {
     public InsertMessageEvent(long threadId, long messageId) {
       super(threadId, messageId);
     }
+
+    public InsertMessageEvent(Parcel in) {
+      super(in);
+    }
+    public static final Parcelable.Creator<InsertMessageEvent> CREATOR
+        = new Parcelable.Creator<InsertMessageEvent>() {
+      public InsertMessageEvent createFromParcel(Parcel in) {
+        return new InsertMessageEvent(in);
+      }
+
+      public InsertMessageEvent[] newArray(int size) {
+        return new InsertMessageEvent[size];
+      }
+    };
+
   }
 
   public static class DeleteMessageEvent extends MessageEvent {

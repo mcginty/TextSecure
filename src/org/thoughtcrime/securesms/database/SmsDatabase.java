@@ -132,7 +132,7 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
     Cursor cursor     = null;
 
     try {
-      cursor = db.query(TABLE_NAME, new String[] {"COUNT(*)"}, null, null, null, null, null);
+      cursor = db.query(TABLE_NAME, new String[]{"COUNT(*)"}, null, null, null, null, null);
 
       if (cursor != null && cursor.moveToFirst()) return cursor.getInt(0);
       else                                        return 0;
@@ -334,7 +334,7 @@ public class SmsDatabase extends Database implements MmsSmsColumns {
     long           newMessageId = db.insert(TABLE_NAME, null, contentValues);
 
     DatabaseFactory.getThreadDatabase(context).update(record.getThreadId());
-    notifyConversationListeners(record.getThreadId());
+    notifyConversationListeners(record.getThreadId(), new UpdateMessageEvent(record.getThreadId(), messageId));
     Trimmer.trimThread(context, record.getThreadId());
     reader.close();
     

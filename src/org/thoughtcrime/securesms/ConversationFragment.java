@@ -37,6 +37,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import org.thoughtcrime.securesms.database.Database.InsertMessageEvent;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.loaders.ConversationLoader;
 import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
@@ -60,6 +61,8 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import de.greenrobot.event.EventBus;
 
 public class ConversationFragment extends SherlockFragment
   implements LoaderManager.LoaderCallbacks<Cursor>
@@ -111,11 +114,19 @@ public class ConversationFragment extends SherlockFragment
                                         new FailedIconClickHandler(),
                                         (!this.recipients.isSingleRecipient()) || this.recipients.isGroupRecipient(),
                                         DirectoryHelper.isPushDestination(getActivity(), this.recipients));
-      layoutManager = new LinearLayoutManager(getActivity());
+      layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, true);
       list.setLayoutManager(layoutManager);
       list.setAdapter(adapter);
-      getLoaderManager().initLoader(0, null, this);
+      getLoaderManager().initLoader(0, new Bundle(), this);
+      EventBus.getDefault().register(this);
     }
+  }
+
+  @SuppressWarnings("unused")
+  public void onEvent(InsertMessageEvent event) {
+    Bundle bundle = new Bundle();
+    bundle.putParcelable("event", event);
+    getLoaderManager().restartLoader(0, bundle, this);
   }
 
   private void initializeContextualActionBar() {
@@ -288,19 +299,20 @@ public class ConversationFragment extends SherlockFragment
   }
 
   @Override
-  public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
-    return new ConversationLoader(getActivity(), threadId);
+  public Loader<Cursor> onCreateLoader(int arg0, Bundle bundle) {
+    return new ConversationLoader(getActivity(), threadId, bundle);
   }
 
   @Override
-  public void onLoadFinished(Loader<Cursor> arg0, Cursor cursor) {
+  public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
     Log.w(TAG, "got us a new cursor " + cursor);
-    adapter.changeCursor(cursor);
+    Bundle bundle = ((ConversationLoader)loader).getBundle();
+    adapter.updateCursor(cursor, (InsertMessageEvent)bundle.getParcelable("event"));
   }
 
   @Override
   public void onLoaderReset(Loader<Cursor> arg0) {
-    adapter.changeCursor(null);
+    adapter.updateCursor(null, null);
   }
 
   private class FailedIconClickHandler extends Handler {

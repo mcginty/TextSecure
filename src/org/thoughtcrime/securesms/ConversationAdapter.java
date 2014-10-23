@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import org.thoughtcrime.securesms.database.Database.InsertMessageEvent;
+import org.thoughtcrime.securesms.database.Database.ThreadEvent;
 import org.whispersystems.textsecure.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MmsSmsColumns;
@@ -81,21 +82,19 @@ public class ConversationAdapter extends Adapter<ConversationAdapter.ViewHolder>
     this.groupThread            = groupThread;
     this.pushDestination        = pushDestination;
     this.inflater               = LayoutInflater.from(context);
-    EventBus.getDefault().register(this);
   }
 
-  @SuppressWarnings("unused")
-  public void onEvent(InsertMessageEvent event) {
-    notifyItemInserted(0);
-  }
-
-  public void changeCursor(Cursor newCursor) {
+  public void updateCursor(Cursor newCursor, ThreadEvent event) {
     Log.w(TAG, "changeCursor()");
     if (cursor != null && !cursor.isClosed()) {
       cursor.close();
     }
     cursor = newCursor;
-    notifyDataSetChanged();
+    if (event == null) {
+      notifyDataSetChanged();
+    } else {
+      notifyItemInserted(0);
+    }
   }
 
   public void bindData(ConversationItem item, Cursor cursor) {

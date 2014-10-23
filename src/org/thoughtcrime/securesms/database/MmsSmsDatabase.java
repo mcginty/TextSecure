@@ -51,7 +51,7 @@ public class MmsSmsDatabase extends Database {
                               MmsDatabase.MESSAGE_SIZE, MmsDatabase.EXPIRY,
                               MmsDatabase.STATUS, MmsSmsColumns.RECEIPT_COUNT, TRANSPORT};
 
-    String order           = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " ASC";
+    String order           = MmsSmsColumns.NORMALIZED_DATE_RECEIVED + " DESC";
 
     String selection       = MmsSmsColumns.THREAD_ID + " = " + threadId;
 
