@@ -17,12 +17,7 @@
 package org.thoughtcrime.securesms.database.model;
 
 import android.content.Context;
-import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
-import android.text.style.TextAppearanceSpan;
 
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.database.MmsSmsColumns;
@@ -30,6 +25,9 @@ import org.thoughtcrime.securesms.database.SmsDatabase;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.Recipients;
 import org.thoughtcrime.securesms.util.GroupUtil;
+
+import static org.thoughtcrime.securesms.util.SpanUtil.bold;
+import static org.thoughtcrime.securesms.util.SpanUtil.italic;
 
 /**
  * The base class for message record models that are displayed in
@@ -177,12 +175,8 @@ public abstract class MessageRecord extends DisplayRecord {
     return type;
   }
 
-  protected SpannableString emphasisAdded(String sequence) {
-    SpannableString spannable = new SpannableString(sequence);
-    spannable.setSpan(new RelativeSizeSpan(0.9f), 0, sequence.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-    spannable.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0, sequence.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-    return spannable;
+  protected static SpannableString emphasisAdded(String sequence) {
+    return (SpannableString)bold(italic(sequence));
   }
 
   public boolean equals(Object other) {

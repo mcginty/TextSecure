@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <org.thoughtcrime.securesms.ConversationListItem
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="70dp">
 
     <FrameLayout android:id="@+id/contact_photo_frame"
                  android:layout_width="wrap_content"
@@ -18,11 +19,12 @@
         <org.thoughtcrime.securesms.components.ForegroundImageView
             android:id="@+id/contact_photo_image"
             android:foreground="@drawable/contact_photo_background"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:cropToPadding="true"
             android:scaleType="centerCrop"
             android:visibility="gone"
+            tools:src="@drawable/ic_contact_picture"
             android:contentDescription="Contact Photo Image"
             android:layout_marginLeft="0dp" />
     </FrameLayout>
@@ -52,7 +54,9 @@
                       android:textAppearance="?android:attr/textAppearanceMedium"
                       android:textColor="?attr/conversation_list_item_contact_color"
                       android:singleLine="true"
-                      android:ellipsize="marquee" />
+                      tools:text="Nadya Tolonko"
+                      android:ellipsize="marquee"
+                />
 
             <ImageView android:id="@+id/attachment"
                        android:layout_marginLeft="3dip"
@@ -77,7 +81,9 @@
                       android:textAppearance="?android:attr/textAppearanceSmall"
                       android:textColor="?attr/conversation_list_item_date_color"
                       android:fontFamily="sans-serif-light"
-                      android:singleLine="true" />
+                      tools:text="30 mins"
+                      android:singleLine="true"
+                      android:layout_gravity="top" />
             </LinearLayout>
 
         <TextView android:id="@+id/subject"
@@ -87,6 +93,7 @@
                   android:textColor="?attr/conversation_list_item_subject_color"
                   android:fontFamily="sans-serif-light"
                   android:singleLine="true"
+                  tools:text="get the bastards"
                   android:ellipsize="end" />
 
     </LinearLayout>

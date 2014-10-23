@@ -16,18 +16,28 @@
  */
 package org.thoughtcrime.securesms;
 
-import android.graphics.drawable.Drawable;
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.nineoldandroids.animation.ObjectAnimator;
 
 import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
 import org.thoughtcrime.securesms.util.MemoryCleaner;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.VersionTracker;
 
 /**
@@ -38,6 +48,7 @@ import org.thoughtcrime.securesms.util.VersionTracker;
 
 public class PassphraseCreateActivity extends PassphraseActivity {
 
+  private Button continueButton;
   public PassphraseCreateActivity() { }
 
   @Override
@@ -47,19 +58,25 @@ public class PassphraseCreateActivity extends PassphraseActivity {
     setContentView(R.layout.create_passphrase_activity);
 
     initializeResources();
+
+    ObjectAnimator.ofFloat(findViewById(R.id.catch_phrase), "alpha", 0.0f, 1.0f).setDuration(500).start();
   }
 
   private void initializeResources() {
-    getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-    getSupportActionBar().setCustomView(R.layout.light_centered_app_title);
-    mitigateAndroidTilingBug();
-
+    continueButton = (Button)findViewById(R.id.continue_button);
+    continueButton.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        setResult(Activity.RESULT_OK);
+        finish();
+      }
+    });
     TextSecurePreferences.setPasswordDisabled(this, true);
     new SecretGenerator().execute(MasterSecretUtil.UNENCRYPTED_PASSPHRASE);
   }
 
   private class SecretGenerator extends AsyncTask<String, Void, Void> {
-    private MasterSecret   masterSecret;
+    private MasterSecret masterSecret;
 
     @Override
     protected void onPreExecute() {
@@ -86,17 +103,20 @@ public class PassphraseCreateActivity extends PassphraseActivity {
     }
   }
 
-  private void mitigateAndroidTilingBug() {
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-      Drawable actionBarBackground = getResources().getDrawable(R.drawable.background_pattern_repeat);
-      Util.fixBackgroundRepeat(actionBarBackground);
-      getSupportActionBar().setBackgroundDrawable(actionBarBackground);
-      Util.fixBackgroundRepeat(findViewById(R.id.scroll_parent).getBackground());
-    }
-  }
-
   @Override
-  protected void cleanup() {
-    System.gc();
+  protected void onMasterSecretSet() {
+    Animation animation = new AlphaAnimation(0.0f, 1.0f);
+    animation.setDuration(500);
+    animation.setInterpolator(new AccelerateDecelerateInterpolator());
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+      ViewAnimationUtils.createCircularReveal(continueButton,
+                                              continueButton.getWidth() / 2,
+                                              continueButton.getHeight() / 2, 0, continueButton.getWidth())
+                        .setDuration(1000)
+                        .start();
+    } else {
+      ObjectAnimator.ofFloat(continueButton, "alpha", 0.0f, 1.0f).setDuration(500).start();
+    }
+    continueButton.setVisibility(View.VISIBLE);
   }
 }

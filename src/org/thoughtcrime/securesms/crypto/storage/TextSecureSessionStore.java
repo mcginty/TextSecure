@@ -67,7 +67,7 @@ public class TextSecureSessionStore implements SessionStore {
           throw new AssertionError("Unknown version: " + versionMarker);
         }
       } catch (InvalidMessageException | IOException e) {
-        Log.w(TAG, "No existing session information found.");
+        Log.w(TAG, "No existing session information found.", e);
         return new SessionRecord();
       }
     }

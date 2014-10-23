@@ -36,7 +36,7 @@ import org.thoughtcrime.securesms.util.MemoryCleaner;
 public abstract class PassphraseActivity extends ActionBarActivity {
 
   private KeyCachingService keyCachingService;
-  private MasterSecret masterSecret;
+  private MasterSecret      masterSecret;
 
   protected void setMasterSecret(MasterSecret masterSecret) {
     this.masterSecret = masterSecret;
@@ -48,7 +48,7 @@ public abstract class PassphraseActivity extends ActionBarActivity {
     return masterSecret;
   }
 
-  protected abstract void cleanup();
+  protected abstract void onMasterSecretSet();
 
   private ServiceConnection serviceConnection = new ServiceConnection() {
       @Override
@@ -59,10 +59,7 @@ public abstract class PassphraseActivity extends ActionBarActivity {
         PassphraseActivity.this.unbindService(PassphraseActivity.this.serviceConnection);
 
         MemoryCleaner.clean(masterSecret);
-        cleanup();
-
-        PassphraseActivity.this.setResult(RESULT_OK);
-        PassphraseActivity.this.finish();
+        onMasterSecretSet();
       }
 
       @Override

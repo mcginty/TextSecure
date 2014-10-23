@@ -5,7 +5,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true"
-            android:background="@drawable/background_pattern_repeat">
+            android:background="@color/textsecure_primary">
 
     <RelativeLayout android:id="@+id/prompt_layout"
                     android:layout_width="match_parent"
@@ -16,7 +16,7 @@
                    android:layout_height="wrap_content"
                    android:layout_centerHorizontal="true"
                    android:layout_marginBottom="50dp"
-                   android:src="@drawable/lockscreen_watermark"
+                   android:src="@drawable/unlock_logo"
                    android:contentDescription="@string/PassphrasePromptActivity_watermark_content_description"
                    android:layout_marginTop="30dp"/>
 
@@ -32,12 +32,11 @@
                       android:layout_marginLeft="50dp"
                       android:layout_marginRight="50dp"
                       android:singleLine="true"
-                      android:background="@drawable/passphrase_input_background"
                       android:paddingLeft="10dp"
                       android:paddingRight="10dp"/>
 
             <ImageButton android:id="@+id/ok_button"
-                         android:src="@drawable/ic_action_forward"
+                         android:src="@drawable/ic_arrow_forward_white_24dp"
                          android:contentDescription="@string/PassphrasePromptActivity_ok_button_content_description"
                          android:background="@null"
                          android:text="@string/prompt_passphrase_activity__unlock"

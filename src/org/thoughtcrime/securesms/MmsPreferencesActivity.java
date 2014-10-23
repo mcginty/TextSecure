@@ -81,5 +81,4 @@ public class MmsPreferencesActivity extends PassphraseRequiredActionBarActivity 
   public void onBackPressed() {
     super.onBackPressed();
   }
-
 }

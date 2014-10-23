@@ -1,6 +1,5 @@
 package org.thoughtcrime.securesms;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +18,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.MaterialDialog.ButtonCallback;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.i18n.phonenumbers.AsYouTypeFormatter;
@@ -27,6 +28,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
 import org.thoughtcrime.securesms.util.Dialogs;
+import org.thoughtcrime.securesms.util.SpanUtil;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.util.Util;
@@ -196,22 +198,21 @@ public class RegistrationActivity extends ActionBarActivity {
         return;
       }
 
-      AlertDialog.Builder dialog = new AlertDialog.Builder(self);
-      dialog.setMessage(String.format(getString(R.string.RegistrationActivity_we_will_now_verify_that_the_following_number_is_associated_with_your_device_s),
-                                      PhoneNumberFormatter.getInternationalFormatFromE164(e164number)));
-      dialog.setPositiveButton(getString(R.string.RegistrationActivity_continue),
-                               new DialogInterface.OnClickListener() {
-                                 @Override
-                                 public void onClick(DialogInterface dialog, int which) {
-                                   Intent intent = new Intent(self, RegistrationProgressActivity.class);
-                                   intent.putExtra("e164number", e164number);
-                                   intent.putExtra("master_secret", masterSecret);
-                                   startActivity(intent);
-                                   finish();
-                                 }
-                               });
-      dialog.setNegativeButton(getString(R.string.RegistrationActivity_edit), null);
-      dialog.show();
+      new MaterialDialog.Builder(self).title(PhoneNumberFormatter.getInternationalFormatFromE164(e164number))
+                                      .content(getString(R.string.RegistrationActivity_we_will_now_verify_that_the_following_number_is_associated_with_your_device_s))
+                                      .positiveText(R.string.RegistrationActivity_continue)
+                                      .negativeText(R.string.RegistrationActivity_edit)
+                                      .callback(new ButtonCallback() {
+                                            @Override
+                                            public void onPositive(MaterialDialog dialog) {
+                                              Intent intent = new Intent(self, RegistrationProgressActivity.class);
+                                              intent.putExtra("e164number", e164number);
+                                              intent.putExtra("master_secret", masterSecret);
+                                              startActivity(intent);
+                                              finish();
+                                            }
+                                          })
+                                      .show();
     }
   }
 

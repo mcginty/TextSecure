@@ -35,6 +35,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,7 +71,7 @@ import java.util.Set;
  *
  */
 
-public class ConversationItem extends LinearLayout {
+public class ConversationItem extends RelativeLayout {
   private final static String TAG = ConversationItem.class.getSimpleName();
 
   private final int    STYLE_ATTRIBUTES[] = new int[]{R.attr.conversation_item_sent_push_background,
@@ -97,17 +98,19 @@ public class ConversationItem extends LinearLayout {
   private boolean       groupThread;
   private boolean       pushDestination;
 
-  private  View      conversationParent;
-  private  TextView  bodyText;
-  private  TextView  dateText;
-  private  TextView  indicatorText;
-  private  TextView  groupStatusText;
-  private  ImageView secureImage;
-  private  ImageView failedImage;
-  private  ImageView contactPhoto;
-  private  ImageView deliveryImage;
-  private  View      triangleTick;
-  private  ImageView pendingIndicator;
+  private LinearLayout conversationParent;
+  private TextView     bodyText;
+  private TextView     dateText;
+  private TextView     indicatorText;
+  private TextView     groupStatusText;
+  private ImageView    smsIndicator;
+  private ImageView unsecuredImage;
+  private ImageView    failedImage;
+  private ImageView    contactPhoto;
+  private ImageView    deliveryImage;
+  private View         triangleTick;
+  private ImageView    pendingIndicator;
+  private View         indicators;
 
   private Set<MessageRecord>              batchSelected;
   private SelectionClickListener          selectionClickListener;
@@ -140,21 +143,23 @@ public class ConversationItem extends LinearLayout {
   protected void onFinishInflate() {
     super.onFinishInflate();
 
-    this.bodyText            = (TextView) findViewById(R.id.conversation_item_body);
-    this.dateText            = (TextView) findViewById(R.id.conversation_item_date);
-    this.indicatorText       = (TextView) findViewById(R.id.indicator_text);
-    this.groupStatusText     = (TextView) findViewById(R.id.group_message_status);
-    this.secureImage         = (ImageView)findViewById(R.id.sms_secure_indicator);
-    this.failedImage         = (ImageView)findViewById(R.id.sms_failed_indicator);
-    this.mmsContainer        =            findViewById(R.id.mms_view);
-    this.mmsThumbnail        = (ImageView)findViewById(R.id.image_view);
-    this.mmsDownloadButton   = (Button)   findViewById(R.id.mms_download_button);
-    this.mmsDownloadingLabel = (TextView) findViewById(R.id.mms_label_downloading);
-    this.contactPhoto        = (ImageView)findViewById(R.id.contact_photo);
-    this.deliveryImage       = (ImageView)findViewById(R.id.delivered_indicator);
-    this.conversationParent  =            findViewById(R.id.conversation_item_parent);
-    this.triangleTick        =            findViewById(R.id.triangle_tick);
-    this.pendingIndicator    = (ImageView)findViewById(R.id.pending_approval_indicator);
+    this.bodyText            = (TextView    ) findViewById(R.id.conversation_item_body    );
+    this.dateText            = (TextView    ) findViewById(R.id.conversation_item_date    );
+    this.indicatorText       = (TextView    ) findViewById(R.id.indicator_text            );
+    this.groupStatusText     = (TextView    ) findViewById(R.id.group_message_status      );
+    this.unsecuredImage      = (ImageView   ) findViewById(R.id.unsecured_indicator       );
+    this.smsIndicator        = (ImageView   ) findViewById(R.id.sms_indicator             );
+    this.failedImage         = (ImageView   ) findViewById(R.id.sms_failed_indicator      );
+    this.mmsContainer        =                findViewById(R.id.mms_view                  );
+    this.mmsThumbnail        = (ImageView   ) findViewById(R.id.image_view                );
+    this.mmsDownloadButton   = (Button      ) findViewById(R.id.mms_download_button       );
+    this.mmsDownloadingLabel = (TextView    ) findViewById(R.id.mms_label_downloading     );
+    this.contactPhoto        = (ImageView   ) findViewById(R.id.contact_photo             );
+    this.deliveryImage       = (ImageView   ) findViewById(R.id.delivered_indicator       );
+    this.conversationParent  = (LinearLayout) findViewById(R.id.conversation_item_parent  );
+    this.triangleTick        =                findViewById(R.id.triangle_tick             );
+    this.pendingIndicator    = (ImageView   ) findViewById(R.id.pending_approval_indicator);
+    this.indicators          =                findViewById(R.id.indicators                );
     this.backgroundDrawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
 
     setOnClickListener(clickListener);
@@ -283,9 +288,12 @@ public class ConversationItem extends LinearLayout {
       pendingIndicator.setVisibility(messageRecord.isPendingSmsFallback() ? View.VISIBLE : View.GONE);
       indicatorText.setVisibility(messageRecord.isPendingSmsFallback() ? View.VISIBLE : View.GONE);
     }
-    secureImage.setVisibility(messageRecord.isSecure() ? View.VISIBLE : View.GONE);
-    bodyText.setCompoundDrawablesWithIntrinsicBounds(0, 0, messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0, 0);
-    deliveryImage.setVisibility(!messageRecord.isKeyExchange() && messageRecord.isDelivered() ? View.VISIBLE : View.GONE);
+    bodyText.setCompoundDrawablesWithIntrinsicBounds(messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0, 0, 0, 0);
+    smsIndicator.setVisibility(messageRecord.isPush() || messageRecord.isPending() ? View.GONE : View.VISIBLE);
+    unsecuredImage.setVisibility(messageRecord.isSecure() ? View.GONE : View.VISIBLE);
+    if (messageRecord.isOutgoing()) {
+      deliveryImage.setVisibility(!messageRecord.isKeyExchange() && messageRecord.isDelivered() ? View.VISIBLE : View.GONE);
+    }
 
     mmsThumbnail.setVisibility(View.GONE);
     mmsDownloadButton.setVisibility(View.GONE);

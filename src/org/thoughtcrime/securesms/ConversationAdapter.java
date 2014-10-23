@@ -117,8 +117,6 @@ public class ConversationAdapter extends CursorAdapter implements AbsListView.Re
         break;
       default: throw new IllegalArgumentException("unsupported item view type given to ConversationAdapter");
     }
-
-    bindView(view, context, cursor);
     return view;
   }
 
