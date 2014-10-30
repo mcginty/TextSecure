@@ -17,6 +17,7 @@
 package org.thoughtcrime.securesms.mms;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -77,8 +78,10 @@ public class ImageSlide extends Slide {
       InputStream measureStream = getPartDataInputStream();
       InputStream dataStream    = getPartDataInputStream();
 
-      thumbnail = new BitmapDrawable(context.getResources(), BitmapUtil.createScaledBitmap(measureStream, dataStream, maxWidth, maxHeight));
-      thumbnailCache.put(part.getDataUri(), new SoftReference<Drawable>(thumbnail));
+      Bitmap roundedThumbnail = BitmapUtil.getRoundedCornerBitmap(BitmapUtil.createScaledBitmap(measureStream, dataStream, maxWidth, maxHeight),
+                                                                  context.getResources().getDimensionPixelSize(R.dimen.conversation_item_corner_radius));
+      thumbnail = new BitmapDrawable(context.getResources(), roundedThumbnail);
+      thumbnailCache.put(part.getDataUri(), new SoftReference<>(thumbnail));
 
       return thumbnail;
     } catch (FileNotFoundException e) {

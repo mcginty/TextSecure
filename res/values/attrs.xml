@@ -77,4 +77,11 @@
         <attr name="android:foregroundInsidePadding" />
         <attr name="android:foregroundGravity" />
     </declare-styleable>
+
+    <declare-styleable name="CircularProgressBar">
+        <attr name="hasShadow" format="boolean"/>
+        <attr name="progressColor" format="string"/>
+        <attr name="backgroundColor" format="string"/>
+        <attr name="strokeWidth" format="integer"/>
+    </declare-styleable>
 </resources>

@@ -16,6 +16,8 @@
  */
 package org.whispersystems.textsecure.internal.util;
 
+import org.whispersystems.textsecure.api.util.TransferObserver;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,16 +79,26 @@ public class Util {
   }
 
 
-  public static void copy(InputStream in, OutputStream out) throws IOException {
+  public static void copy(InputStream in, OutputStream out, long contentLength, TransferObserver observer)
+      throws IOException
+  {
     byte[] buffer = new byte[4096];
     int read;
+    int total = 0;
+
+    if (observer != null) observer.onUpdate(0, contentLength);
 
     while ((read = in.read(buffer)) != -1) {
       out.write(buffer, 0, read);
+      total += read;
+      if (observer != null) observer.onUpdate(total, contentLength);
     }
 
     in.close();
     out.close();
   }
 
+  public static void copy(InputStream in, OutputStream out) throws IOException {
+    copy(in, out, -1, null);
+  }
 }

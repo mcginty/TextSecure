@@ -33,6 +33,7 @@ import org.whispersystems.textsecure.api.push.ContactTokenDetails;
 import org.whispersystems.textsecure.api.push.SignedPreKeyEntity;
 import org.whispersystems.textsecure.api.push.TrustStore;
 import org.whispersystems.textsecure.api.push.exceptions.UnregisteredUserException;
+import org.whispersystems.textsecure.api.util.TransferObserver;
 import org.whispersystems.textsecure.internal.push.exceptions.MismatchedDevicesException;
 import org.whispersystems.textsecure.internal.push.exceptions.StaleDevicesException;
 import org.whispersystems.textsecure.internal.util.Base64;
@@ -290,7 +291,7 @@ public class PushServiceSocket {
     makeRequest(SIGNED_PREKEY_PATH, "PUT", SignedPreKeyEntity.toJson(signedPreKeyEntity));
   }
 
-  public long sendAttachment(PushAttachmentData attachment) throws IOException {
+  public long sendAttachment(PushAttachmentData attachment, TransferObserver listener) throws IOException {
     String               response      = makeRequest(String.format(ATTACHMENT_PATH, ""), "GET", null);
     AttachmentDescriptor attachmentKey = new Gson().fromJson(response, AttachmentDescriptor.class);
 
@@ -301,12 +302,12 @@ public class PushServiceSocket {
     Log.w("PushServiceSocket", "Got attachment content location: " + attachmentKey.getLocation());
 
     uploadAttachment("PUT", attachmentKey.getLocation(), attachment.getData(),
-                     attachment.getDataSize(), attachment.getKey());
+                     attachment.getDataSize(), attachment.getKey(), listener);
 
     return attachmentKey.getId();
   }
 
-  public void retrieveAttachment(String relay, long attachmentId, File destination) throws IOException {
+  public void retrieveAttachment(String relay, long attachmentId, File destination, TransferObserver observer) throws IOException {
     String path = String.format(ATTACHMENT_PATH, String.valueOf(attachmentId));
 
     if (!Util.isEmpty(relay)) {
@@ -318,7 +319,7 @@ public class PushServiceSocket {
 
     Log.w("PushServiceSocket", "Attachment: " + attachmentId + " is at: " + descriptor.getLocation());
 
-    downloadExternalFile(descriptor.getLocation(), destination);
+    downloadExternalFile(descriptor.getLocation(), destination, observer);
   }
 
   public List<ContactTokenDetails> retrieveDirectory(Set<String> contactTokens) {
@@ -343,7 +344,7 @@ public class PushServiceSocket {
     }
   }
 
-  private void downloadExternalFile(String url, File localDestination)
+  private void downloadExternalFile(String url, File localDestination, TransferObserver observer)
       throws IOException
   {
     URL               downloadUrl = new URL(url);
@@ -359,12 +360,9 @@ public class PushServiceSocket {
 
       OutputStream output = new FileOutputStream(localDestination);
       InputStream input   = connection.getInputStream();
-      byte[] buffer       = new byte[4096];
-      int read;
+      int contentLength   = connection.getContentLength();
 
-      while ((read = input.read(buffer)) != -1) {
-        output.write(buffer, 0, read);
-      }
+      Util.copy(input, output, contentLength, observer);
 
       output.close();
       Log.w("PushServiceSocket", "Downloaded: " + url + " to: " + localDestination.getAbsolutePath());
@@ -375,13 +373,14 @@ public class PushServiceSocket {
     }
   }
 
-  private void uploadAttachment(String method, String url, InputStream data, long dataSize, byte[] key)
+  private void uploadAttachment(String method, String url, InputStream data, long dataSize, byte[] key, TransferObserver listener)
     throws IOException
   {
     URL                uploadUrl  = new URL(url);
     HttpsURLConnection connection = (HttpsURLConnection) uploadUrl.openConnection();
+    long               totalBytes = AttachmentCipherOutputStream.getCiphertextLength(dataSize);
     connection.setDoOutput(true);
-    connection.setFixedLengthStreamingMode((int) AttachmentCipherOutputStream.getCiphertextLength(dataSize));
+    connection.setFixedLengthStreamingMode((int) totalBytes);
     connection.setRequestMethod(method);
     connection.setRequestProperty("Content-Type", "application/octet-stream");
     connection.connect();
@@ -392,10 +391,7 @@ public class PushServiceSocket {
       OutputStream                 stream = connection.getOutputStream();
       AttachmentCipherOutputStream out    = new AttachmentCipherOutputStream(key, stream);
 
-      Util.copy(data, out);
-      out.flush();
-
-      Util.copy(data, out);
+      Util.copy(data, out, totalBytes, listener);
       out.flush();
 
       Log.w("PushServiceSocket", "Finished writing: " + (System.currentTimeMillis() - startTime)); 

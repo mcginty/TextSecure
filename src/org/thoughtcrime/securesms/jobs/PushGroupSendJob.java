@@ -68,7 +68,7 @@ public class PushGroupSendJob extends PushSendJob implements InjectableType {
   @Override
   public void onRun(MasterSecret masterSecret) throws MmsException, IOException, NoSuchMessageException {
     MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
-    SendReq     message  = database.getOutgoingMessage(masterSecret, messageId);
+    SendReq     message  = database.getOutgoingMessage(masterSecret, messageId, false);
 
     try {
       deliver(masterSecret, message);
@@ -114,7 +114,7 @@ public class PushGroupSendJob extends PushSendJob implements InjectableType {
     byte[]                     groupId       = GroupUtil.getDecodedId(message.getTo()[0].getString());
     Recipients                 recipients    = DatabaseFactory.getGroupDatabase(context).getGroupMembers(groupId, false);
     List<PushAddress>          addresses     = getPushAddresses(recipients);
-    List<TextSecureAttachment> attachments   = getAttachments(message);
+    List<TextSecureAttachment> attachments   = getAttachments(masterSecret, message);
 
     if (MmsSmsColumns.Types.isGroupUpdate(message.getDatabaseMessageBox()) ||
         MmsSmsColumns.Types.isGroupQuit(message.getDatabaseMessageBox()))

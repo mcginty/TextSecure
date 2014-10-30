@@ -35,12 +35,11 @@ public class PartAuthority {
       throws FileNotFoundException
   {
     PartDatabase partDatabase = DatabaseFactory.getPartDatabase(context);
-    long         partId       = ContentUris.parseId(uri);
     int          match        = uriMatcher.match(uri);
 
     switch (match) {
-      case PART_ROW:  return partDatabase.getPartStream(masterSecret, partId);
-      case THUMB_ROW: return partDatabase.getThumbnailStream(masterSecret, partId);
+      case PART_ROW:  return partDatabase.getPartStream(masterSecret, ContentUris.parseId(uri));
+      case THUMB_ROW: return partDatabase.getThumbnailStream(masterSecret, ContentUris.parseId(uri));
       default:        return context.getContentResolver().openInputStream(uri);
     }
   }

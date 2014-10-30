@@ -16,17 +16,25 @@
  */
 package org.whispersystems.textsecure.api.messages;
 
+import org.whispersystems.textsecure.api.util.TransferObserver;
+
 import java.io.InputStream;
 
 public class TextSecureAttachmentStream extends TextSecureAttachment {
 
-  private final InputStream inputStream;
-  private final long        length;
+  private final InputStream      inputStream;
+  private final long             length;
+  private final TransferObserver transferObserver;
 
   public TextSecureAttachmentStream(InputStream inputStream, String contentType, long length) {
+    this(inputStream, contentType, length, null);
+  }
+
+  public TextSecureAttachmentStream(InputStream inputStream, String contentType, long length, TransferObserver transferObserver) {
     super(contentType);
-    this.inputStream = inputStream;
-    this.length      = length;
+    this.inputStream      = inputStream;
+    this.length           = length;
+    this.transferObserver = transferObserver;
   }
 
   @Override
@@ -45,5 +53,9 @@ public class TextSecureAttachmentStream extends TextSecureAttachment {
 
   public long getLength() {
     return length;
+  }
+
+  public TransferObserver getTransferObserver() {
+    return transferObserver;
   }
 }

@@ -463,7 +463,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
     }
   }
 
-  public SendReq getOutgoingMessage(MasterSecret masterSecret, long messageId)
+  public SendReq getOutgoingMessage(MasterSecret masterSecret, long messageId, boolean withData)
       throws MmsException, NoSuchMessageException
   {
     MmsAddressDatabase addr         = DatabaseFactory.getMmsAddressDatabase(context);
@@ -485,7 +485,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
         PduHeaders headers     = getHeadersFromCursor(cursor);
         addr.getAddressesForId(messageId, headers);
 
-        PduBody body = getPartsAsBody(partDatabase.getParts(masterSecret, messageId, false));
+        PduBody body = getPartsAsBody(partDatabase.getParts(masterSecret, messageId, withData));
 
         try {
           if (!TextUtils.isEmpty(messageText) && Types.isSymmetricEncryption(outboxType)) {
@@ -518,7 +518,7 @@ public class MmsDatabase extends Database implements MmsSmsColumns {
 
   public long copyMessageInbox(MasterSecret masterSecret, long messageId) throws MmsException {
     try {
-      SendReq request = getOutgoingMessage(masterSecret, messageId);
+      SendReq request = getOutgoingMessage(masterSecret, messageId, false);
       ContentValues contentValues = getContentValuesFromHeader(request.getPduHeaders());
 
       contentValues.put(MESSAGE_BOX, Types.BASE_INBOX_TYPE | Types.SECURE_MESSAGE_BIT | Types.ENCRYPTION_SYMMETRIC_BIT);

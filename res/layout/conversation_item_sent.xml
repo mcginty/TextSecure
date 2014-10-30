@@ -47,8 +47,6 @@
                       android:layout_height="match_parent"
                       android:layout_alignParentRight="true"
                       android:background="?conversation_item_sent_background"
-                      android:paddingRight="10dip"
-                      android:paddingLeft="10dip"
                       android:layout_marginLeft="50dp"
                       android:layout_marginRight="12dp"
                       android:orientation="vertical">
@@ -62,6 +60,8 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="?conversation_sent_text_primary_color"
                 android:textColorLink="?conversation_sent_text_primary_color"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp"
                 android:textSize="16sp" />
 
             <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -70,10 +70,18 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone">
 
+                <org.thoughtcrime.securesms.components.CircularProgressBar
+                    android:id="@+id/download_progress"
+                    style="@style/Widget.ProgressBar.CircularProgressBar"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:progress="0"/>
+
                 <ImageView
                         android:id="@+id/image_view"
-                        android:layout_width="230dip"
-                        android:layout_height="174dip"
+                        android:layout_width="230dp"
+                        android:layout_height="174dp"
                         android:layout_gravity="center"
                         android:scaleType="centerInside"
                         android:adjustViewBounds="true"

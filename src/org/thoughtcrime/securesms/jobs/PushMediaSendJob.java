@@ -61,7 +61,7 @@ public class PushMediaSendJob extends PushSendJob implements InjectableType {
       throws RetryLaterException, MmsException, NoSuchMessageException
   {
     MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
-    SendReq     message  = database.getOutgoingMessage(masterSecret, messageId);
+    SendReq     message  = database.getOutgoingMessage(masterSecret, messageId, false);
 
     try {
       deliver(masterSecret, message);
@@ -109,7 +109,7 @@ public class PushMediaSendJob extends PushSendJob implements InjectableType {
     try {
       Recipients                 recipients   = RecipientFactory.getRecipientsFromString(context, destination, false);
       PushAddress                address      = getPushAddress(recipients.getPrimaryRecipient());
-      List<TextSecureAttachment> attachments  = getAttachments(message);
+      List<TextSecureAttachment> attachments  = getAttachments(masterSecret, message);
       String                     body         = PartParser.getMessageText(message.getBody());
       TextSecureMessage          mediaMessage = new TextSecureMessage(message.getSentTimestamp(), attachments, body);
 

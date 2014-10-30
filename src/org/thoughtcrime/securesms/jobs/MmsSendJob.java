@@ -62,7 +62,7 @@ public class MmsSendJob extends MasterSecretJob {
   @Override
   public void onRun(MasterSecret masterSecret) throws MmsException, NoSuchMessageException {
     MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
-    SendReq     message  = database.getOutgoingMessage(masterSecret, messageId);
+    SendReq     message  = database.getOutgoingMessage(masterSecret, messageId, true);
 
     try {
       MmsSendResult result = deliver(masterSecret, message);

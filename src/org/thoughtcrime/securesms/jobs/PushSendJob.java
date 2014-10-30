@@ -3,8 +3,11 @@ package org.thoughtcrime.securesms.jobs;
 import android.content.Context;
 import android.util.Log;
 
+import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
+import org.thoughtcrime.securesms.events.TransferProgressEvent;
 import org.thoughtcrime.securesms.jobs.requirements.MasterSecretRequirement;
+import org.thoughtcrime.securesms.mms.PartAuthority;
 import org.thoughtcrime.securesms.notifications.MessageNotifier;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.Recipients;
@@ -18,12 +21,19 @@ import org.whispersystems.textsecure.api.messages.TextSecureAttachmentStream;
 import org.thoughtcrime.securesms.database.TextSecureDirectory;
 import org.whispersystems.textsecure.api.push.PushAddress;
 import org.whispersystems.textsecure.api.util.InvalidNumberException;
+import org.whispersystems.textsecure.api.util.TransferObserver;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
 import ws.com.google.android.mms.ContentType;
+import ws.com.google.android.mms.pdu.PduParser;
+import ws.com.google.android.mms.pdu.PduPart;
 import ws.com.google.android.mms.pdu.SendReq;
 
 public abstract class PushSendJob extends MasterSecretJob {
@@ -71,18 +81,31 @@ public abstract class PushSendJob extends MasterSecretJob {
     return (isSmsFallbackSupported(context, destination) && TextSecurePreferences.isFallbackSmsAskRequired(context));
   }
 
-  protected List<TextSecureAttachment> getAttachments(SendReq message) {
+  protected List<TextSecureAttachment> getAttachments(final MasterSecret masterSecret, final SendReq message) {
     List<TextSecureAttachment> attachments = new LinkedList<>();
 
     for (int i=0;i<message.getBody().getPartsNum();i++) {
-      String contentType = Util.toIsoString(message.getBody().getPart(i).getContentType());
+      PduPart part = message.getBody().getPart(i);
+      String contentType = Util.toIsoString(part.getContentType());
       if (ContentType.isImageType(contentType) ||
           ContentType.isAudioType(contentType) ||
           ContentType.isVideoType(contentType))
       {
-        byte[] data = message.getBody().getPart(i).getData();
-        Log.w(TAG, "Adding attachment...");
-        attachments.add(new TextSecureAttachmentStream(new ByteArrayInputStream(data), contentType, data.length));
+        Log.w(TAG, "Adding attachment with uri " + part.getDataUri() + " and size " + part.getDataSize());
+        TransferObserver observer = new TransferObserver() {
+
+          @Override
+          public void onUpdate(long current, long total) {
+            EventBus.getDefault().postSticky(new TransferProgressEvent(message.getDatabaseMessageId(), total, current));
+          }
+        };
+
+        try {
+          InputStream is = PartAuthority.getPartStream(context, masterSecret, part.getDataUri());
+          attachments.add(new TextSecureAttachmentStream(is, contentType, part.getDataSize(), observer));
+        } catch (IOException fnfe) {
+          Log.w(TAG, "Couldn't open attachment", fnfe);
+        }
       }
     }
 

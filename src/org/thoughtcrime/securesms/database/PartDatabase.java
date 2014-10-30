@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.crypto.DecryptingPartInputStream;
 import org.thoughtcrime.securesms.crypto.EncryptingPartOutputStream;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
@@ -53,6 +54,7 @@ import ws.com.google.android.mms.pdu.PduBody;
 import ws.com.google.android.mms.pdu.PduPart;
 
 public class PartDatabase extends Database {
+  private static final String TAG = PartDatabase.class.getSimpleName();
 
   private static final String TABLE_NAME              = "part";
   private static final String ID                      = "_id";
@@ -72,6 +74,7 @@ public class PartDatabase extends Database {
   private static final String PENDING_PUSH_ATTACHMENT = "pending_push";
   private static final String THUMBNAIL               = "_thumbnail";
   private static final String SIZE                    = "data_size";
+  private static final String ASPECT_RATIO            = "aspect_ratio";
 
   public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" + ID + " INTEGER PRIMARY KEY, "              +
     MMS_ID + " INTEGER, " + SEQUENCE + " INTEGER DEFAULT 0, "                        +
@@ -80,7 +83,7 @@ public class PartDatabase extends Database {
     CONTENT_LOCATION + " TEXT, " + CONTENT_TYPE_START + " INTEGER, "                 +
     CONTENT_TYPE_TYPE + " TEXT, " + ENCRYPTED + " INTEGER, "                         +
     PENDING_PUSH_ATTACHMENT + " INTEGER, "+ DATA + " TEXT, " + THUMBNAIL + " TEXT, " +
-    SIZE + " INTEGER);";
+    SIZE + " INTEGER, " + ASPECT_RATIO + " REAL);";
 
   public static final String[] CREATE_INDEXS = {
     "CREATE INDEX IF NOT EXISTS part_mms_id_index ON " + TABLE_NAME + " (" + MMS_ID + ");",
@@ -407,7 +410,7 @@ public class PartDatabase extends Database {
       OutputStream out             = getPartOutputStream(masterSecret, dataFile, part);
       long         plaintextLength = Util.copy(in, out);
 
-      return new Pair<File, Long>(dataFile, plaintextLength);
+      return new Pair<>(dataFile, plaintextLength);
     } catch (IOException e) {
       throw new MmsException(e);
     }
@@ -472,7 +475,6 @@ public class PartDatabase extends Database {
     return partId;
   }
 
-
   public void updateDownloadedPart(MasterSecret masterSecret, long messageId,
                                    long partId, PduPart part, InputStream data)
       throws MmsException
@@ -491,13 +493,16 @@ public class PartDatabase extends Database {
     }
 
     database.update(TABLE_NAME, values, ID_WHERE, new String[] {partId+""});
+
+    thumbnailGenerator.execute(new GenerateThumbnailTask(masterSecret, partId));
     notifyConversationListeners(DatabaseFactory.getMmsDatabase(context).getThreadIdForMessage(messageId));
   }
 
-  private void updatePartThumbnail(long partId, File thumbnail) {
+  private void updatePartThumbnail(long partId, File thumbnail, float aspectRatio) {
     SQLiteDatabase database = databaseHelper.getWritableDatabase();
     ContentValues  values   = new ContentValues();
     values.put(THUMBNAIL, thumbnail.getAbsolutePath());
+    values.put(ASPECT_RATIO, aspectRatio);
 
     database.update(TABLE_NAME, values, ID_WHERE, new String[] {partId + ""});
   }
@@ -526,10 +531,12 @@ public class PartDatabase extends Database {
         if (thumbnail != null) {
           ByteArrayOutputStream thumbnailBytes = new ByteArrayOutputStream();
           thumbnail.compress(Bitmap.CompressFormat.JPEG, 85, thumbnailBytes);
-            
+
           Pair<File, Long> thumbnailFile = writePartData(masterSecret, part,
                                                          new ByteArrayInputStream(thumbnailBytes.toByteArray()));
-          updatePartThumbnail(partId, thumbnailFile.first);
+          float aspectRatio = (float)thumbnail.getWidth() / (float)thumbnail.getHeight();
+          Log.w(TAG, "generated thumbnail, " + thumbnail.getWidth() + "x" + thumbnail.getHeight() + " (" + aspectRatio + ":1)");
+          updatePartThumbnail(partId, thumbnailFile.first, aspectRatio);
         }
       } catch (MmsException e) {
         Log.w("PartDatabase", e);
@@ -540,23 +547,17 @@ public class PartDatabase extends Database {
       String contentType = new String(part.getContentType());
 
       if      (ContentType.isImageType(contentType)) return generateImageThumbnail(part);
-//      else if (ContentType.isVideoType(contentType)) return generateVideoThumbnail(part);
       else                                           return null;
     }
-
-//    private Bitmap generateVideoThumbnail(PduPart part) {
-//      MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
-//      metadataRetriever.setDataSource(context, part.getDataUri());
-//      return metadataRetriever.getFrameAtTime(-1);
-//    }
 
     private Bitmap generateImageThumbnail(PduPart part) {
       try {
         long        partId        = ContentUris.parseId(part.getDataUri());
         InputStream measureStream = getPartStream(masterSecret, partId);
         InputStream dataStream    = getPartStream(masterSecret, partId);
+        int         maxSize       = context.getResources().getDimensionPixelSize(R.dimen.thumbnail_max_size);
 
-        return BitmapUtil.createScaledBitmap(measureStream, dataStream, 345, 261);
+        return BitmapUtil.createScaledBitmap(measureStream, dataStream, maxSize, maxSize);
       } catch (FileNotFoundException e) {
         Log.w("PartDataase", e);
         return null;
@@ -566,5 +567,4 @@ public class PartDatabase extends Database {
       }
     }
   }
-
 }

@@ -34,6 +34,7 @@ import org.whispersystems.textsecure.api.messages.TextSecureGroup;
 import org.whispersystems.textsecure.api.messages.TextSecureMessage;
 import org.whispersystems.textsecure.api.push.PushAddress;
 import org.whispersystems.textsecure.api.push.TrustStore;
+import org.whispersystems.textsecure.api.util.TransferObserver;
 import org.whispersystems.textsecure.internal.push.MismatchedDevices;
 import org.whispersystems.textsecure.internal.push.OutgoingPushMessage;
 import org.whispersystems.textsecure.internal.push.OutgoingPushMessageList;
@@ -214,7 +215,7 @@ public class TextSecureMessageSender {
                                                                attachment.getLength(),
                                                                attachmentKey);
 
-    long attachmentId = socket.sendAttachment(attachmentData);
+    long attachmentId = socket.sendAttachment(attachmentData, attachment.getTransferObserver());
 
     return AttachmentPointer.newBuilder()
                             .setContentType(attachment.getContentType())
@@ -222,7 +223,6 @@ public class TextSecureMessageSender {
                             .setKey(ByteString.copyFrom(attachmentKey))
                             .build();
   }
-
 
   private OutgoingPushMessageList getEncryptedMessages(PushServiceSocket socket,
                                                        PushAddress recipient,

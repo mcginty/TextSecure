@@ -29,12 +29,14 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Contacts.Intents;
 import android.provider.ContactsContract.QuickContact;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +47,7 @@ import org.thoughtcrime.securesms.database.SmsDatabase;
 import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.database.model.NotificationMmsMessageRecord;
+import org.thoughtcrime.securesms.events.TransferProgressEvent;
 import org.thoughtcrime.securesms.jobs.MmsDownloadJob;
 import org.thoughtcrime.securesms.jobs.MmsSendJob;
 import org.thoughtcrime.securesms.jobs.SmsSendJob;
@@ -56,6 +59,8 @@ import org.thoughtcrime.securesms.util.Dialogs;
 import org.thoughtcrime.securesms.util.Emoji;
 import org.thoughtcrime.securesms.util.FutureTaskListener;
 import org.thoughtcrime.securesms.util.ListenableFutureTask;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * A view that displays an individual conversation item within a conversation
@@ -92,25 +97,26 @@ public class ConversationItem extends LinearLayout {
   private boolean       groupThread;
   private boolean       pushDestination;
 
-  private  View      conversationParent;
-  private  TextView  bodyText;
-  private  TextView  dateText;
-  private  TextView  indicatorText;
-  private  TextView  groupStatusText;
-  private  ImageView secureImage;
-  private  ImageView failedImage;
-  private  ImageView contactPhoto;
-  private  ImageView deliveryImage;
-  private  View      triangleTick;
-  private  ImageView pendingIndicator;
+  private View        conversationParent;
+  private TextView    bodyText;
+  private TextView    dateText;
+  private TextView    indicatorText;
+  private TextView    groupStatusText;
+  private ImageView   secureImage;
+  private ImageView   failedImage;
+  private ImageView   contactPhoto;
+  private ImageView   deliveryImage;
+  private View        triangleTick;
+  private ImageView   pendingIndicator;
+  private ProgressBar downloadProgress;
 
-  private  View      mmsContainer;
-  private  ImageView mmsThumbnail;
-  private  Button    mmsDownloadButton;
-  private  TextView  mmsDownloadingLabel;
-  private  ListenableFutureTask<SlideDeck> slideDeck;
-  private  FutureTaskListener<SlideDeck> slideDeckListener;
-  private  TypedArray backgroundDrawables;
+  private View                            mmsContainer;
+  private ImageView                       mmsThumbnail;
+  private Button                          mmsDownloadButton;
+  private TextView                        mmsDownloadingLabel;
+  private ListenableFutureTask<SlideDeck> slideDeck;
+  private FutureTaskListener<SlideDeck>   slideDeckListener;
+  private TypedArray                      backgroundDrawables;
 
   private final FailedIconClickListener failedIconClickListener         = new FailedIconClickListener();
   private final MmsDownloadClickListener mmsDownloadClickListener       = new MmsDownloadClickListener();
@@ -148,6 +154,7 @@ public class ConversationItem extends LinearLayout {
     this.conversationParent  =            findViewById(R.id.conversation_item_parent);
     this.triangleTick        =            findViewById(R.id.triangle_tick);
     this.pendingIndicator    = (ImageView)findViewById(R.id.pending_approval_indicator);
+    this.downloadProgress    = (ProgressBar)findViewById(R.id.download_progress);
     this.backgroundDrawables = context.obtainStyledAttributes(STYLE_ATTRIBUTES);
 
     setOnClickListener(clickListener);
@@ -181,11 +188,33 @@ public class ConversationItem extends LinearLayout {
         setMediaMmsAttributes((MediaMmsMessageRecord)messageRecord);
       }
     }
+
+    downloadProgress.setProgress(0);
+
+    Log.w(TAG, "registering for " + messageRecord.getId());
+    if (!EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().registerSticky(this);
+    }
   }
 
   public void unbind() {
     if (slideDeck != null && slideDeckListener != null)
       slideDeck.removeListener(slideDeckListener);
+    EventBus.getDefault().unregister(this);
+  }
+
+  @SuppressWarnings("unused")
+  public void onEventMainThread(TransferProgressEvent event) {
+    if (event.messageId != getMessageRecord().getId()) return;
+
+    Log.w(TAG, "got attachment observation event: " + event.transferredBytes + "/" + event.totalBytes + ", " + (((float)event.transferredBytes / (float)event.totalBytes) * 100) + "%");
+
+    if (event.totalBytes > -1) {
+      downloadProgress.setIndeterminate(false);
+      downloadProgress.setMax(100);
+    }
+
+    downloadProgress.setProgress((int)Math.ceil(((double)event.transferredBytes / (double)event.totalBytes) * 100));
   }
 
   public MessageRecord getMessageRecord() {
@@ -232,8 +261,9 @@ public class ConversationItem extends LinearLayout {
   }
 
   private void setBodyText(MessageRecord messageRecord) {
-      bodyText.setText(Emoji.getInstance(context).emojify(messageRecord.getDisplayBody(), new Emoji.InvalidatingPageLoadedListener(bodyText)),
-                       TextView.BufferType.SPANNABLE);
+    bodyText.setVisibility(TextUtils.isEmpty(messageRecord.getDisplayBody()) ? View.GONE : View.VISIBLE);
+    bodyText.setText(Emoji.getInstance(context).emojify(messageRecord.getDisplayBody(), new Emoji.InvalidatingPageLoadedListener(bodyText)),
+                     TextView.BufferType.SPANNABLE);
   }
 
   private void setContactPhoto(MessageRecord messageRecord) {
@@ -337,7 +367,7 @@ public class ConversationItem extends LinearLayout {
     }
   }
 
-  private void setMediaMmsAttributes(MediaMmsMessageRecord messageRecord) {
+  private void setMediaMmsAttributes(final MediaMmsMessageRecord messageRecord) {
     if (messageRecord.getPartCount() > 0) {
       mmsThumbnail.setVisibility(View.VISIBLE);
       mmsContainer.setVisibility(View.VISIBLE);
@@ -359,7 +389,16 @@ public class ConversationItem extends LinearLayout {
           public void run() {
             for (Slide slide : result.getSlides()) {
               if (slide.hasImage()) {
-                slide.setThumbnailOn(mmsThumbnail);
+                if (!messageRecord.isOutgoing()   && slide.getPart().isPendingPush()
+                    || messageRecord.isOutgoing() && messageRecord.isPending()) {
+                  Log.w(TAG, "making progress view visible");
+                  downloadProgress.setVisibility(View.VISIBLE);
+                  mmsThumbnail.setVisibility(View.INVISIBLE);
+                } else {
+                  downloadProgress.setVisibility(View.GONE);
+                  mmsThumbnail.setVisibility(View.VISIBLE);
+                  slide.setThumbnailOn(mmsThumbnail);
+                }
                 mmsThumbnail.setOnClickListener(new ThumbnailClickListener(slide));
                 mmsThumbnail.setOnLongClickListener(new OnLongClickListener() {
                   @Override

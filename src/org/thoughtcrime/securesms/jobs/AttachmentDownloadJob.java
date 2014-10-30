@@ -9,6 +9,7 @@ import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.PartDatabase;
 import org.thoughtcrime.securesms.dependencies.InjectableType;
+import org.thoughtcrime.securesms.events.TransferProgressEvent;
 import org.thoughtcrime.securesms.jobs.requirements.MasterSecretRequirement;
 import org.thoughtcrime.securesms.util.Base64;
 import org.thoughtcrime.securesms.util.Util;
@@ -19,6 +20,7 @@ import org.whispersystems.textsecure.api.TextSecureMessageReceiver;
 import org.whispersystems.textsecure.api.messages.TextSecureAttachmentPointer;
 import org.whispersystems.textsecure.api.push.exceptions.NonSuccessfulResponseCodeException;
 import org.whispersystems.textsecure.api.push.exceptions.PushNetworkException;
+import org.whispersystems.textsecure.api.util.TransferObserver;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import de.greenrobot.event.EventBus;
 import ws.com.google.android.mms.MmsException;
 import ws.com.google.android.mms.pdu.PduPart;
 
@@ -86,7 +89,7 @@ public class AttachmentDownloadJob extends MasterSecretJob implements Injectable
     return false;
   }
 
-  private void retrievePart(MasterSecret masterSecret, PduPart part, long messageId, long partId)
+  private void retrievePart(MasterSecret masterSecret, PduPart part, final long messageId, long partId)
       throws IOException
   {
     PartDatabase database       = DatabaseFactory.getPartDatabase(context);
@@ -95,8 +98,16 @@ public class AttachmentDownloadJob extends MasterSecretJob implements Injectable
     try {
       attachmentFile = createTempFile();
 
+      TransferObserver observer = new TransferObserver() {
+        @Override
+        public void onUpdate(long current, long total) {
+          Log.w(TAG, "got attachment recv event: " + (((float)current / (float)total) * 100) + "%");
+          EventBus.getDefault().postSticky(new TransferProgressEvent(messageId, current, total));
+        }
+      };
+
       TextSecureAttachmentPointer pointer    = createAttachmentPointer(masterSecret, part);
-      InputStream                 attachment = messageReceiver.retrieveAttachment(pointer, attachmentFile);
+      InputStream                 attachment = messageReceiver.retrieveAttachment(pointer, attachmentFile, observer);
 
       database.updateDownloadedPart(masterSecret, messageId, partId, part, attachment);
     } catch (InvalidPartException | NonSuccessfulResponseCodeException | InvalidMessageException | MmsException e) {

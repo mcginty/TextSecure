@@ -700,10 +700,11 @@ public class DatabaseFactory {
         db.execSQL("CREATE INDEX IF NOT EXISTS mms_date_sent_index ON mms (date);");
       }
 
-      if (oldVersion < INTRODUCED_THUMBNAILS_VERSION) {
-        db.execSQL("ALTER TABLE part ADD COLUMN _thumbnail TEXT");
-        db.execSQL("ALTER TABLE part ADD COLUMN data_size INTEGER");
-      }
+//      if (oldVersion < INTRODUCED_THUMBNAILS_VERSION) {
+//        db.execSQL("ALTER TABLE part ADD COLUMN _thumbnail TEXT");
+//        db.execSQL("ALTER TABLE part ADD COLUMN data_size INTEGER");
+//        db.execSQL("ALTER TABLE part ADD COLUMN aspect_ratio REAL");
+//      }
 
       db.setTransactionSuccessful();
       db.endTransaction();

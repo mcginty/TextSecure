@@ -20,6 +20,7 @@ import org.whispersystems.libaxolotl.InvalidMessageException;
 import org.whispersystems.textsecure.api.crypto.AttachmentCipherInputStream;
 import org.whispersystems.textsecure.api.messages.TextSecureAttachmentPointer;
 import org.whispersystems.textsecure.api.push.TrustStore;
+import org.whispersystems.textsecure.api.util.TransferObserver;
 import org.whispersystems.textsecure.internal.push.PushServiceSocket;
 
 import java.io.File;
@@ -36,10 +37,10 @@ public class TextSecureMessageReceiver {
     this.socket = new PushServiceSocket(url, trustStore, user, password);
   }
 
-  public InputStream retrieveAttachment(TextSecureAttachmentPointer pointer, File destination)
+  public InputStream retrieveAttachment(TextSecureAttachmentPointer pointer, File destination, TransferObserver observer)
       throws IOException, InvalidMessageException
   {
-    socket.retrieveAttachment(pointer.getRelay().orNull(), pointer.getId(), destination);
+    socket.retrieveAttachment(pointer.getRelay().orNull(), pointer.getId(), destination, observer);
     return new AttachmentCipherInputStream(destination, pointer.getKey());
   }
 
