@@ -59,6 +59,8 @@ public class PassphraseCreateActivity extends PassphraseActivity {
 
     initializeResources();
 
+    getSupportActionBar().setTitle(null);
+
     ObjectAnimator.ofFloat(findViewById(R.id.catch_phrase), "alpha", 0.0f, 1.0f).setDuration(500).start();
   }
 

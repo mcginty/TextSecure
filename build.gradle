@@ -44,6 +44,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.google.zxing:android-integration:3.1.0'
     compile 'com.afollestad:material-dialogs:0.6.1.2'
+    compile 'me.relex:circleindicator:1.0.0@aar'
     compile('com.android.support:support-v4-preferencefragment:1.0.0@aar') {
         exclude group: 'com.android.support', module: 'support-v4'
     }
