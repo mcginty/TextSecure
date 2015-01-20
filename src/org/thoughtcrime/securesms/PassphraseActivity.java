@@ -27,7 +27,6 @@ import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.thoughtcrime.securesms.util.MemoryCleaner;
 
-
 /**
  * Base Activity for changing/prompting local encryption passphrase.
  *

@@ -22,15 +22,23 @@ import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewAnimationUtils;
+import android.view.ViewParent;
+import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.nineoldandroids.animation.ArgbEvaluator;
 import com.nineoldandroids.animation.ObjectAnimator;
 
 import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
@@ -40,6 +48,8 @@ import org.thoughtcrime.securesms.util.MemoryCleaner;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.thoughtcrime.securesms.util.VersionTracker;
 
+import me.relex.circleindicator.CircleIndicator;
+
 /**
  * Activity for creating a user's local encryption passphrase.
  *
@@ -48,23 +58,29 @@ import org.thoughtcrime.securesms.util.VersionTracker;
 
 public class PassphraseCreateActivity extends PassphraseActivity {
 
-  private Button continueButton;
+  private RelativeLayout layout;
+  private Button         continueButton;
+  private ViewPager      pager;
+  private PagerAdapter   adapter;
+
+  private static final int[] colors = new int[]{
+      0xFF2090EA, 0xFF7C4DFF, 0xFF8BC34A
+  };
+
   public PassphraseCreateActivity() { }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
     super.onCreate(savedInstanceState);
-
     setContentView(R.layout.create_passphrase_activity);
-
     initializeResources();
 
-    getSupportActionBar().setTitle(null);
-
-    ObjectAnimator.ofFloat(findViewById(R.id.catch_phrase), "alpha", 0.0f, 1.0f).setDuration(500).start();
+    getSupportActionBar().hide();
   }
 
   private void initializeResources() {
+    layout         = (RelativeLayout)findViewById(R.id.prompt_layout);
     continueButton = (Button)findViewById(R.id.continue_button);
     continueButton.setOnClickListener(new OnClickListener() {
       @Override
@@ -73,6 +89,26 @@ public class PassphraseCreateActivity extends PassphraseActivity {
         finish();
       }
     });
+
+    CircleIndicator indicator = (CircleIndicator) findViewById(R.id.indicator);
+    pager = (ViewPager) findViewById(R.id.viewpager);
+    adapter = new IntroPagerAdapter(getSupportFragmentManager());
+    pager.setAdapter(adapter);
+    final ArgbEvaluator evaluator = new ArgbEvaluator();
+    indicator.setViewPager(pager);
+    indicator.setOnPageChangeListener(new OnPageChangeListener() {
+      @Override
+      public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        Log.i("PCA", "pos " + position + " at " + positionOffset);
+        final int color = (Integer)evaluator.evaluate(positionOffset, colors[position], colors[(position+1) % colors.length]);
+        layout.setBackgroundColor(color);
+        continueButton.setTextColor(color);
+      }
+
+      @Override public void onPageSelected(int position) {}
+      @Override public void onPageScrollStateChanged(int state) {}
+    });
+
     TextSecurePreferences.setPasswordDisabled(this, true);
     new SecretGenerator().execute(MasterSecretUtil.UNENCRYPTED_PASSPHRASE);
   }

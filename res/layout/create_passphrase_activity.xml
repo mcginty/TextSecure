@@ -5,39 +5,29 @@
                 android:id="@+id/prompt_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/textsecure_primary"
-                android:focusable="true">
+                android:background="@color/textsecure_primary">
 
-<ImageView android:id="@+id/watermark"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_centerHorizontal="true"
-           android:layout_marginBottom="20dp"
-           android:src="@drawable/splash_logo"
-           android:contentDescription="@string/PassphrasePromptActivity_watermark_content_description"
-           android:layout_marginTop="80dp"/>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-<TextView android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceMedium"
-          android:text="You got with it."
-          android:id="@+id/catch_phrase"
-          android:layout_below="@+id/watermark"
-          android:layout_centerHorizontal="true"
-          android:textSize="30sp"
-          android:textIsSelectable="true"
-          android:fontFamily="sans-serif-light"
-          android:textColor="@android:color/white" />
+    <Button android:id="@+id/continue_button"
+            android:layout_width="140sp"
+            android:layout_height="wrap_content"
+            android:text="CONTINUE"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            style="@style/TextSecureButton"
+            android:layout_marginBottom="66dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
 
-<Button android:id="@+id/continue_button"
-        android:layout_width="140sp"
-        android:layout_height="wrap_content"
-        android:text="CONTINUE"
-        android:visibility="invisible"
-        tools:visibility="visible"
-        style="@style/TextSecureButton"
-        android:layout_marginBottom="66dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+    <me.relex.circleindicator.CircleIndicator
+        android:id="@+id/indicator"
+        android:layout_above="@id/continue_button"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"/>
+
 
 </RelativeLayout>

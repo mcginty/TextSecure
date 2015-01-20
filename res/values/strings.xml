@@ -239,6 +239,11 @@
     <string name="PassphraseChangeActivity_passphrases_dont_match_exclamation">Passphrases don\'t match!</string>
     <string name="PassphraseChangeActivity_incorrect_old_passphrase_exclamation">Incorrect old passphrase!</string>
 
+    <!-- IntroFragment -->
+    <string name="IntroFragment_got_with_it">Free private messaging for the world.</string>
+    <string name="IntroFragment_security_by_coconuts">Security by coconuts</string>
+    <string name="IntroFragment_lorem_mango">Lorem ipsum mango</string>
+
     <!-- PassphrasePromptActivity -->
     <string name="PassphrasePromptActivity_enter_passphrase">Enter passphrase</string>
     <string name="PassphrasePromptActivity_watermark_content_description">TextSecure icon</string>
