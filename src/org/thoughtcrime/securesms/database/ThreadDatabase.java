@@ -19,6 +19,7 @@ package org.thoughtcrime.securesms.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
@@ -36,6 +37,7 @@ import org.whispersystems.libaxolotl.InvalidMessageException;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -263,19 +265,30 @@ public class ThreadDatabase extends Database {
     if (recipientIds == null || recipientIds.size() == 0)
       return null;
 
-    String selection       = RECIPIENT_IDS + " = ?";
-    String[] selectionArgs = new String[recipientIds.size()];
+    int            cursorCount = (int) Math.ceil(recipientIds.size() / 1000.0);
+    SQLiteDatabase db          = databaseHelper.getReadableDatabase();
+    Cursor[]       cursors     = new Cursor[cursorCount];
 
-    for (int i=0;i<recipientIds.size()-1;i++)
-      selection += (" OR " + RECIPIENT_IDS + " = ?");
+    for (int cursorIndex = 0; cursorIndex < cursorCount; cursorIndex++) {
+      String selection       = RECIPIENT_IDS + " = ?";
+      String[] selectionArgs = new String[Math.min(1000, recipientIds.size())];
 
-    int i= 0;
-    for (long id : recipientIds) {
-      selectionArgs[i++] = id+"";
+      for (int i = 0; i < Math.min(1000 - 1, recipientIds.size() - cursorIndex * 1000 - 1); i++) {
+        selection += (" OR " + RECIPIENT_IDS + " = ?");
+      }
+
+      int i = 0;
+      for (long id : recipientIds) {
+        selectionArgs[i++] = id+"";
+      }
+
+      cursors[cursorIndex] = db.query(TABLE_NAME, null, selection, selectionArgs, null, null, DATE + " DESC");
     }
 
-    SQLiteDatabase db = databaseHelper.getReadableDatabase();
-    Cursor cursor     = db.query(TABLE_NAME, null, selection, selectionArgs, null, null, DATE + " DESC");
+    Cursor cursor = cursorCount == 1
+                  ? cursors[0]
+                  : new MergeCursor(cursors);
+
     setNotifyConverationListListeners(cursor);
     return cursor;
   }
