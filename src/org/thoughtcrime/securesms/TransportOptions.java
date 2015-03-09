@@ -24,11 +24,11 @@ public class TransportOptions {
 
   private final Context                          context;
   private       PopupWindow                      transportPopup;
-  private final List<String>                     enabledTransports = new ArrayList<>();
-  private final Map<String, TransportOption>     transportMetadata = new HashMap<>();
   private       String                           selectedTransport;
-  private       boolean                          transportOverride = false;
-  private final List<OnTransportChangedListener> listeners         = new LinkedList<>();
+  private       boolean                          isTransportOverriden = false;
+  private final List<OnTransportChangedListener> listeners            = new LinkedList<>();
+  private final List<String>                     enabledTransports    = new ArrayList<>();
+  private final Map<String, TransportOption>     transportMetadata    = new HashMap<>();
 
   public TransportOptions(Context context) {
     this.context = context;
@@ -51,7 +51,7 @@ public class TransportOptions {
       list.setOnItemClickListener(new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-          transportOverride = true;
+          isTransportOverriden = true;
           setTransport((TransportOption) adapter.getItem(position));
           transportPopup.dismiss();
         }
@@ -116,13 +116,17 @@ public class TransportOptions {
   }
 
   public void setDefaultTransport(String transportName) {
-    if (!transportOverride) {
+    if (!isTransportOverriden) {
       setTransport(transportName);
     }
   }
 
   public TransportOption getSelectedTransport() {
     return transportMetadata.get(selectedTransport);
+  }
+
+  public boolean isTransportOverridden() {
+    return isTransportOverriden;
   }
 
   public void disableTransport(String transportName) {

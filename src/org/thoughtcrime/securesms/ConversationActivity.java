@@ -1065,9 +1065,9 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
       if ((!recipients.isSingleRecipient() || recipients.isEmailRecipient()) && !isMmsEnabled) {
         handleManualMmsRequired();
       } else if (attachmentManager.isAttachmentPresent() || !recipients.isSingleRecipient() || recipients.isGroupRecipient() || recipients.isEmailRecipient()) {
-        sendMediaMessage(sendButton.getSelectedTransport().isPlaintext(), sendButton.getSelectedTransport().isSms());
+        sendMediaMessage(sendButton.isForcedPlaintext(), sendButton.isForcedSms());
       } else {
-        sendTextMessage(sendButton.getSelectedTransport().isPlaintext(), sendButton.getSelectedTransport().isSms());
+        sendTextMessage(sendButton.isForcedPlaintext(), sendButton.isForcedSms());
       }
     } catch (RecipientFormattingException ex) {
       Toast.makeText(ConversationActivity.this,

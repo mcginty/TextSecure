@@ -82,6 +82,14 @@ public class SendButton extends ImageButton {
     transportOptions.setDefaultTransport(transport);
   }
 
+  public boolean isForcedSms() {
+    return transportOptions.isTransportOverridden() && getSelectedTransport().isSms();
+  }
+
+  public boolean isForcedPlaintext() {
+    return transportOptions.isTransportOverridden() && getSelectedTransport().isPlaintext();
+  }
+
   private void setComposeTextHint(String hint) {
     if (hint == null) {
       this.composeText.setHint(null);
