@@ -21,6 +21,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.AsyncTask;
@@ -50,8 +52,10 @@ import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.SaveAttachmentTask;
 import org.thoughtcrime.securesms.util.SaveAttachmentTask.Attachment;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 
+import pl.droidsonroids.gif.GifDrawable;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
@@ -185,42 +189,44 @@ public class MediaPreviewActivity extends PassphraseRequiredActionBarActivity im
   }
 
   private void cleanupMedia() {
+    finishDrawable(image.getDrawable());
     image.setImageDrawable(null);
-    if (bitmap != null) {
-      bitmap.recycle();
-      bitmap = null;
-    }
   }
 
   private void displayImage() {
-    new AsyncTask<Void,Void,Bitmap>() {
+    new AsyncTask<Void,Void,Drawable>() {
       @Override
-      protected Bitmap doInBackground(Void... params) {
+      protected Drawable doInBackground(Void... params) {
         try {
-          int[] maxTextureSizeParams = new int[1];
-          GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxTextureSizeParams, 0);
-          int maxTextureSize = Math.max(maxTextureSizeParams[0], 2048);
-          Log.w(TAG, "reported GL_MAX_TEXTURE_SIZE: " + maxTextureSize);
-          return BitmapUtil.createScaledBitmap(MediaPreviewActivity.this, masterSecret, mediaUri,
-                                               maxTextureSize, maxTextureSize);
+          if (mediaType.trim().equals("image/gif")) {
+            return new GifDrawable(new BufferedInputStream(PartAuthority.getPartStream(MediaPreviewActivity.this, masterSecret, mediaUri)));
+          } else {
+            int[] maxTextureSizeParams = new int[1];
+            GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxTextureSizeParams, 0);
+            int maxTextureSize = Math.max(maxTextureSizeParams[0], 2048);
+            Log.w(TAG, "reported GL_MAX_TEXTURE_SIZE: " + maxTextureSize);
+            final Bitmap bitmap = BitmapUtil.createScaledBitmap(MediaPreviewActivity.this,
+                                                                masterSecret, mediaUri,
+                                                                maxTextureSize, maxTextureSize);
+            return new BitmapDrawable(getResources(), bitmap);
+          }
         } catch (IOException | BitmapDecodingException e) {
           return null;
         }
       }
 
       @Override
-      protected void onPostExecute(Bitmap bitmap) {
+      protected void onPostExecute(Drawable drawable) {
         if (paused) {
-          if (bitmap != null) bitmap.recycle();
+          finishDrawable(drawable);
           return;
         }
 
-        if (bitmap == null) {
+        if (drawable == null) {
           errorText.setText(R.string.MediaPreviewActivity_cant_display);
           errorText.setVisibility(View.VISIBLE);
         } else {
-          MediaPreviewActivity.this.bitmap = bitmap;
-          image.setImageBitmap(bitmap);
+          image.setImageDrawable(drawable);
           image.setVisibility(View.VISIBLE);
           imageAttacher.update();
         }
@@ -259,6 +265,12 @@ public class MediaPreviewActivity extends PassphraseRequiredActionBarActivity im
     }
 
     return false;
+  }
+
+  private void finishDrawable(Drawable drawable) {
+    if (drawable != null && drawable instanceof BitmapDrawable) {
+      ((BitmapDrawable)drawable).getBitmap().recycle();
+    }
   }
 
   public static boolean isContentTypeSupported(final String contentType) {

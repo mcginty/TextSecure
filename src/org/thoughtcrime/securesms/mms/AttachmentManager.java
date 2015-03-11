@@ -28,6 +28,7 @@ import android.util.Log;
 import android.provider.ContactsContract;
 import android.util.Pair;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -66,7 +67,20 @@ public class AttachmentManager {
   }
 
   public void setImage(Uri image) throws IOException, BitmapDecodingException {
-    setMedia(new ImageSlide(context, image), 345, 261);
+    String type = context.getContentResolver().getType(image);
+
+    if (type == null) {
+      String extension = MimeTypeMap.getFileExtensionFromUrl(image.toString());
+      type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+    }
+
+    Log.w(TAG, "content type for image: " + type);
+
+    if ("image/gif".equals(type)) {
+      setMedia(new GifSlide(context, image), 345, 261);
+    } else {
+      setMedia(new ImageSlide(context, image), 345, 261);
+    }
   }
 
   public void setVideo(Uri video) throws IOException, MediaTooLargeException {
