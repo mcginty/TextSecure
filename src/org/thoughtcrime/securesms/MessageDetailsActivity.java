@@ -252,7 +252,7 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
       Recipients recipients;
 
       final Recipients intermediaryRecipients;
-      if (messageRecord.isMms()) {
+      if (messageRecord.isMms() && !messageRecord.isPush()) {
         intermediaryRecipients = DatabaseFactory.getMmsAddressDatabase(context).getRecipientsForId(messageRecord.getId());
       } else {
         intermediaryRecipients = messageRecord.getRecipients();
