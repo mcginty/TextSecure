@@ -34,12 +34,14 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
   @Override
   protected final void onCreate(Bundle savedInstanceState) {
     onPreCreate();
-    final MasterSecret masterSecret = KeyCachingService.getMasterSecret(this);
-    routeApplicationState(masterSecret);
     super.onCreate(savedInstanceState);
     if (!isFinishing()) {
-      initializeClearKeyReceiver();
-      onCreate(savedInstanceState, masterSecret);
+      final MasterSecret masterSecret = KeyCachingService.getMasterSecret(this);
+      routeApplicationState(masterSecret);
+      if (!isFinishing()) {
+        initializeClearKeyReceiver();
+        onCreate(savedInstanceState, masterSecret);
+      }
     }
   }
 

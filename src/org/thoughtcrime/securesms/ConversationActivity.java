@@ -162,9 +162,15 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
 
   @Override
   protected void onPreCreate() {
-    dynamicTheme.onCreate(this);
-    dynamicLanguage.onCreate(this);
-    overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+    long[] recipientsExtra = getIntent().getLongArrayExtra(RECIPIENTS_EXTRA);
+    if (recipientsExtra == null || recipientsExtra.length == 0) {
+      startActivity(new Intent(this, ConversationListActivity.class));
+      finish();
+    } else {
+      dynamicTheme.onCreate(this);
+      dynamicLanguage.onCreate(this);
+      overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+    }
   }
 
   @Override
