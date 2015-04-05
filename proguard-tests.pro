@@ -1,0 +1,17 @@
+-keep class android.test.** { *; }
+-keep class com.android.support.test.** { *; }
+-keep class org.mockito.** { *; }
+-keep class org.hamcrest.** { *; }
+-keep class org.assertj.** { *; }
+-keep class junit.** { *; }
+-keep class org.objenesis.instantiator.sun.** { *; }
+-dontwarn sun.misc.Unsafe
+-dontwarn com.google.common.collect.MinMaxPriorityQueue
+-dontwarn com.squareup.javawriter.JavaWriter
+-dontwarn org.mockito.**
+-dontwarn sun.reflect.**
+-dontwarn android.test.**
+-dontwarn org.assertj.**
+-dontwarn org.hamcrest.**
+-dontwarn javax.lang.model.element.**
+-dontwarn org.thoughtcrime.securesms.**.*Test

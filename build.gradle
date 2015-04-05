@@ -167,6 +167,7 @@ android {
                           'proguard-square-okio.pro',
                           'proguard-spongycastle.pro',
                           'proguard-rounded-image-view.pro',
+                          'proguard-tests.pro',
                           'proguard.cfg'
         }
         release {
@@ -181,6 +182,7 @@ android {
                           'proguard-square-okio.pro',
                           'proguard-spongycastle.pro',
                           'proguard-rounded-image-view.pro',
+                          'proguard-tests.pro',
                           'proguard.cfg'
             signingConfig signingConfigs.release
         }
