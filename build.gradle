@@ -156,6 +156,7 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix '.debug'
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'),
                           'proguard-google-play-services.pro',
