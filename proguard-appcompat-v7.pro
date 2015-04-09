@@ -1,3 +1,7 @@
+-keepnames class !android.support.v7.internal.view.menu.**, ** { *; }
+-keepnames interface !android.support.v7.internal.view.menu.**, ** { *; }
+-keepnames enum !android.support.v7.internal.view.menu.**, ** { *; }
+
 -keep public class android.support.v7.widget.** { *; }
 -keep public class android.support.v7.internal.widget.** { *; }
 # below line disabled due to LGE ROM bug.

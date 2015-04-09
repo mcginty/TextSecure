@@ -1,6 +1,4 @@
--dontobfuscate
 -dontskipnonpubliclibraryclassmembers
-
 -dontwarn android.test.**
 -dontwarn com.android.support.test.**
 -dontwarn sun.reflect.**
@@ -8,3 +6,11 @@
 -dontwarn org.hamcrest.**
 -dontwarn org.mockito.**
 -dontwarn com.squareup.**
+
+-keep class android.test.** { *; }
+-keep class com.android.support.test.** { *; }
+-keep class org.mockito.** { *; }
+-keep class org.hamcrest.** { *; }
+-keep class org.assertj.** { *; }
+-keep class junit.** { *; }
+-keep class org.objenesis.instantiator.sun.** { *; }
