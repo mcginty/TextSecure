@@ -3,9 +3,6 @@ package org.thoughtcrime.securesms.components.emoji;
 import android.content.Context;
 import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
-import android.util.Log;
-
-import org.thoughtcrime.securesms.components.emoji.EmojiProvider.InvalidatingPageLoadedListener;
 
 public class EmojiEditText extends AppCompatEditText {
   public EmojiEditText(Context context) {
@@ -33,8 +30,7 @@ public class EmojiEditText extends AppCompatEditText {
     final int          end   = getSelectionEnd();
     final char[]       chars = Character.toChars(codePoint);
     final CharSequence text  = EmojiProvider.getInstance(getContext()).emojify(new String(chars),
-                                                                               EmojiProvider.EMOJI_SMALL,
-                                                                               new InvalidatingPageLoadedListener(this));
+                                                                               EmojiProvider.EMOJI_SMALL);
 
     getText().replace(Math.min(start, end), Math.max(start, end), text);
     setSelection(end + chars.length);

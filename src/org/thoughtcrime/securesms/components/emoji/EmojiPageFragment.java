@@ -17,7 +17,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import org.thoughtcrime.securesms.R;
-import org.thoughtcrime.securesms.components.emoji.EmojiProvider.InvalidatingPageLoadedListener;
 
 public class EmojiPageFragment extends Fragment {
   private static final String TAG = EmojiPageFragment.class.getSimpleName();
@@ -99,9 +98,7 @@ public class EmojiPageFragment extends Fragment {
 
       final Integer       unicodeTag = model.getCodePoints()[position];
       final EmojiProvider provider   = EmojiProvider.getInstance(context);
-      final Drawable      drawable   = provider.getEmojiDrawable(unicodeTag,
-                                                                 EmojiProvider.EMOJI_HUGE,
-                                                                 new InvalidatingPageLoadedListener(view));
+      final Drawable      drawable   = provider.getEmojiDrawable(unicodeTag, EmojiProvider.EMOJI_HUGE);
 
       view.setImageDrawable(drawable);
       view.setPadding(pad, pad, pad, pad);

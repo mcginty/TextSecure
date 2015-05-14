@@ -116,17 +116,13 @@ public class EmojiProvider {
     }
   }
 
-  public CharSequence emojify(CharSequence text, PageLoadedListener pageLoadedListener) {
-    return emojify(text, EMOJI_LARGE, pageLoadedListener);
-  }
-
-  public CharSequence emojify(CharSequence text, double size, PageLoadedListener pageLoadedListener) {
+  public CharSequence emojify(CharSequence text, double size) {
     Matcher                matches = EMOJI_RANGE.matcher(text);
     SpannableStringBuilder builder = new SpannableStringBuilder(text);
 
     while (matches.find()) {
       int codePoint = matches.group().codePointAt(0);
-      Drawable drawable = getEmojiDrawable(codePoint, size, pageLoadedListener);
+      Drawable drawable = getEmojiDrawable(codePoint, size);
       if (drawable != null) {
         ImageSpan imageSpan = new ImageSpan(drawable, ImageSpan.ALIGN_BOTTOM);
         char[] chars = new char[matches.end() - matches.start()];
@@ -139,18 +135,18 @@ public class EmojiProvider {
     return builder;
   }
 
-  public Drawable getEmojiDrawable(int emojiCode, double size, PageLoadedListener pageLoadedListener) {
-    return getEmojiDrawable(offsets.get(emojiCode), size, pageLoadedListener);
+  public Drawable getEmojiDrawable(int emojiCode, double size) {
+    return getEmojiDrawable(offsets.get(emojiCode), size);
   }
 
-  private Drawable getEmojiDrawable(DrawInfo drawInfo, double size, PageLoadedListener pageLoadedListener) {
+  private Drawable getEmojiDrawable(DrawInfo drawInfo, double size) {
     if (drawInfo == null) {
       return null;
     }
     final Drawable drawable = new EmojiDrawable(drawInfo, bigDrawSize);
     drawable.setBounds(0, 0, (int)((double)bigDrawSize * size), (int)((double)bigDrawSize * size));
     if (bitmaps.get(drawInfo.page) == null || bitmaps.get(drawInfo.page).get() == null) {
-      preloadPage(drawInfo.page, pageLoadedListener);
+      preloadPage(drawInfo.page, null);
     }
     return drawable;
   }
@@ -212,24 +208,6 @@ public class EmojiProvider {
           "page=" + page +
           ", index=" + index +
           '}';
-    }
-  }
-
-  public static class InvalidatingPageLoadedListener implements PageLoadedListener {
-    private final View view;
-
-    public InvalidatingPageLoadedListener(final View view) {
-      this.view = view;
-    }
-
-    @Override
-    public void onPageLoaded() {
-      view.postInvalidate();
-    }
-
-    @Override
-    public String toString() {
-      return "InvalidatingPageLoadedListener{}";
     }
   }
 
