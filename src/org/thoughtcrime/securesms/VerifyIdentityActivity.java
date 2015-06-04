@@ -17,22 +17,58 @@
  */
 package org.thoughtcrime.securesms;
 
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.Size;
+import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.commonsware.cwac.camera.PictureTransaction;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.DecodeHintType;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.NotFoundException;
+import com.google.zxing.PlanarYUVLuminanceSource;
+import com.google.zxing.Result;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.HybridBinarizer;
+
+import org.thoughtcrime.securesms.components.CameraFragment;
 import org.thoughtcrime.securesms.crypto.IdentityKeyParcelable;
 import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.crypto.MasterSecret;
 import org.thoughtcrime.securesms.crypto.storage.TextSecureSessionStore;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.RecipientFactory;
+import org.thoughtcrime.securesms.util.Base64;
+import org.thoughtcrime.securesms.util.Util;
 import org.whispersystems.libaxolotl.AxolotlAddress;
 import org.whispersystems.libaxolotl.IdentityKey;
 import org.whispersystems.libaxolotl.state.SessionRecord;
 import org.whispersystems.libaxolotl.state.SessionStore;
 import org.whispersystems.textsecure.api.push.TextSecureAddress;
+
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Activity for verifying identity keys.
@@ -40,12 +76,17 @@ import org.whispersystems.textsecure.api.push.TextSecureAddress;
  * @author Moxie Marlinspike
  */
 public class VerifyIdentityActivity extends KeyScanningActivity {
+  private static final String TAG = VerifyIdentityActivity.class.getSimpleName();
 
   private Recipient    recipient;
   private MasterSecret masterSecret;
 
-  private TextView localIdentityFingerprint;
-  private TextView remoteIdentityFingerprint;
+  private ImageView         success;
+  private ImageView         qrView;
+  private CameraFragment    cameraFragment;
+  private MultiFormatReader qrReader;
+
+  private ExecutorService decoderPool;
 
   @Override
   protected void onCreate(Bundle state, @NonNull MasterSecret masterSecret) {
@@ -53,6 +94,10 @@ public class VerifyIdentityActivity extends KeyScanningActivity {
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     setContentView(R.layout.verify_identity_activity);
 
+    qrReader = new MultiFormatReader();
+    qrReader.setHints(new HashMap<DecodeHintType, Object>() {{
+      put(DecodeHintType.POSSIBLE_FORMATS, EnumSet.of(BarcodeFormat.QR_CODE));
+    }});
     initializeResources();
     initializeFingerprints();
   }
@@ -61,21 +106,101 @@ public class VerifyIdentityActivity extends KeyScanningActivity {
   public void onResume() {
     super.onResume();
     getSupportActionBar().setTitle(R.string.AndroidManifest__verify_identity);
+  }
+
+  @Override
+  public void onPostResume() {
+    super.onPostResume();
+    decoderPool = Executors.newSingleThreadExecutor();
+    cameraFragment.autoFocus();
+    cameraFragment.setPreviewCallback(new PreviewCallback() {
+      @Override public void onPreviewFrame(final byte[] data, final Camera camera) {
+        Log.w(TAG, "decoding!");
+        byte[] receivedBytes = decode(data, camera.getParameters().getPreviewSize());
+        if (receivedBytes != null) {
+          Log.w(TAG, "got identity key QR!");
+          success.setVisibility(View.VISIBLE);
+          cameraFragment.setVisibility(View.INVISIBLE);
+        }
+      }
+    });
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    decoderPool.shutdownNow();
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+  }
+
+  private @Nullable byte[] decode(final byte[] data, final Size size) {
+    PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data,
+                                                                   size.width, size.height,
+                                                                   0, 0,
+                                                                   size.width, size.height,
+                                                                   false);
+    BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+    Result rawResult = null;
+    try {
+      rawResult = qrReader.decodeWithState(bitmap);
+    } catch (NotFoundException nfe) {
+      Log.w(TAG, "NotFoundException");
+    } finally {
+      qrReader.reset();
+    }
+    if (rawResult != null && rawResult.getBarcodeFormat() == BarcodeFormat.QR_CODE) {
+      try {
+        return Base64.decode(rawResult.getText());
+      } catch (IOException ioe) {
+        Log.w(TAG, ioe);
+        return new byte[]{};
+      }
+    }
+    return null;
+  }
+
+  private @Nullable Bitmap encode(final byte[] data, int size) {
+    BitMatrix result;
+    try {
+      result = new MultiFormatWriter().encode(Base64.encodeBytes(data),
+                                              BarcodeFormat.QR_CODE,
+                                              size, size, null);
+      int width = result.getWidth();
+      int height = result.getHeight();
+      int[] pixels = new int[width * height];
+      for (int y = 0; y < height; y++) {
+        int offset = y * width;
+        for (int x = 0; x < width; x++) {
+          pixels[offset + x] = result.get(x, y) ? 0xFF000000 : 0xFFFFFFFF;
+        }
+      }
+      Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+      bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+      return bitmap;
+
+    } catch (IllegalArgumentException | WriterException iae) {
+      Log.w(TAG, iae);
+      return null;
+    }
 
   }
 
   private void initializeLocalIdentityKey() {
     if (!IdentityKeyUtil.hasIdentityKey(this)) {
-      localIdentityFingerprint.setText(R.string.VerifyIdentityActivity_you_do_not_have_an_identity_key);
+      finish(); // XXX
       return;
     }
 
-    localIdentityFingerprint.setText(IdentityKeyUtil.getIdentityKey(this).getFingerprint());
+    qrView.setImageBitmap(encode(IdentityKeyUtil.getIdentityKey(this).getPublicKey().serialize(), 500));
   }
 
   private void initializeRemoteIdentityKey() {
     IdentityKeyParcelable identityKeyParcelable = getIntent().getParcelableExtra("remote_identity");
-    IdentityKey           identityKey           = null;
+    IdentityKey identityKey           = null;
 
     if (identityKeyParcelable != null) {
       identityKey = identityKeyParcelable.get();
@@ -85,11 +210,11 @@ public class VerifyIdentityActivity extends KeyScanningActivity {
       identityKey = getRemoteIdentityKey(masterSecret, recipient);
     }
 
-    if (identityKey == null) {
-      remoteIdentityFingerprint.setText(R.string.VerifyIdentityActivity_recipient_has_no_identity_key);
-    } else {
-      remoteIdentityFingerprint.setText(identityKey.getFingerprint());
-    }
+//    if (identityKey == null) {
+//      remoteIdentityFingerprint.setText(R.string.VerifyIdentityActivity_recipient_has_no_identity_key);
+//    } else {
+//      remoteIdentityFingerprint.setText(identityKey.getFingerprint());
+//    }
   }
 
   private void initializeFingerprints() {
@@ -98,9 +223,13 @@ public class VerifyIdentityActivity extends KeyScanningActivity {
   }
 
   private void initializeResources() {
-    this.localIdentityFingerprint  = (TextView)findViewById(R.id.you_read);
-    this.remoteIdentityFingerprint = (TextView)findViewById(R.id.friend_reads);
+//    this.localIdentityFingerprint  = (TextView)findViewById(R.id.you_read);
+//    this.remoteIdentityFingerprint = (TextView)findViewById(R.id.friend_reads);
     this.recipient                 = RecipientFactory.getRecipientForId(this, this.getIntent().getLongExtra("recipient", -1), true);
+    this.cameraFragment            = (CameraFragment)getSupportFragmentManager().findFragmentById(R.id.camera_fragment);
+    this.success                   = (ImageView)findViewById(R.id.success);
+    this.qrView                    = (ImageView)findViewById(R.id.qr_view);
+    success.setImageDrawable(TextDrawable.builder().buildRound("\u2713", Color.GREEN));
   }
 
   @Override

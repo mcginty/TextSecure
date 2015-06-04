@@ -1,49 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:fillViewport="true">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical">
 
     <LinearLayout android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
+                  android:layout_height="0dp"
+                  android:layout_weight="1"
                   android:padding="20dp"
                   android:gravity="center"
                   android:orientation="vertical">
 
-        <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/verify_identity_activity__their_identity_they_read"
-                android:layout_marginBottom="8dp" />
-
-        <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:typeface="monospace"
-                android:fontFamily="monospace"
-                android:id="@+id/friend_reads"
-                android:text=""
-                android:layout_marginBottom="8dp" />
-
-
-        <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/verify_identity_activity__your_identity_you_read"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:layout_marginBottom="8dp" />
-
-
-        <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/you_read"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:typeface="monospace"
-                android:fontFamily="monospace"
-                android:text="" />
+        <ImageView android:id="@+id/qr_view"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:scaleType="fitCenter" />
 
     </LinearLayout>
-</ScrollView>
+
+    <FrameLayout android:layout_width="match_parent"
+                 android:layout_height="0dp"
+                 android:layout_weight="1">
+
+        <fragment android:name="org.thoughtcrime.securesms.components.CameraFragment"
+                  android:id="@+id/camera_fragment"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent" />
+
+        <ImageView android:id="@+id/success"
+                   android:layout_width="@dimen/contact_photo_target_size"
+                   android:layout_height="@dimen/contact_photo_target_size"
+                   android:layout_gravity="center"
+                   android:visibility="gone" />
+
+        <!--<SurfaceView android:id="@+id/preview_view"-->
+                     <!--android:layout_width="fill_parent"-->
+                     <!--android:layout_height="fill_parent"/>-->
+
+        <!--<org.thoughtcrime.securesms.components.ViewfinderView-->
+            <!--android:id="@+id/viewfinder_view"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="fill_parent"/>-->
+
+    </FrameLayout>
+
+</LinearLayout>

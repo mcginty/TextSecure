@@ -29,6 +29,9 @@ repositories {
     maven { // textdrawable
         url 'https://dl.bintray.com/amulyakhare/maven'
     }
+    maven {
+      url "https://repo.commonsware.com.s3.amazonaws.com"
+    }
     jcenter()
     mavenLocal()
 }
@@ -49,6 +52,8 @@ dependencies {
         exclude module: 'support-annotations'
     }
 
+    compile 'com.google.zxing:core:3.2.0'
+    compile 'com.commonsware.cwac:camera:0.6.12'
     compile 'com.soundcloud.android:android-crop:0.9.10@aar'
     compile 'com.android.support:appcompat-v7:22.1.1'
     compile 'com.android.support:recyclerview-v7:21.0.3'
