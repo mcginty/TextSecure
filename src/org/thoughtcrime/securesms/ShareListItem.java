@@ -59,6 +59,7 @@ public class ShareListItem extends RelativeLayout
 
   @Override
   protected void onFinishInflate() {
+    super.onFinishInflate();
     this.fromView          = (FromTextView)    findViewById(R.id.from);
     this.contactPhotoImage = (AvatarImageView) findViewById(R.id.contact_photo_image);
   }

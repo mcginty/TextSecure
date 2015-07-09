@@ -143,10 +143,6 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
     notifyHiddenListeners();
   }
 
-  public boolean isKeyboardOpen() {
-    return keyboardOpen;
-  }
-
   public int getKeyboardHeight() {
     return isLandscape() ? getKeyboardLandscapeHeight() : getKeyboardPortraitHeight();
   }

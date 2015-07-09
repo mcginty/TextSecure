@@ -59,10 +59,6 @@ import java.util.List;
     started = false;
   }
 
-  public boolean isStarted() {
-    return started;
-  }
-
   public void takePicture(final Rect previewRect) {
     if (capturing) {
       Log.w(TAG, "takePicture() called while previous capture pending.");

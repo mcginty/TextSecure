@@ -398,5 +398,5 @@ public class ConversationFragment extends ListFragment
 
       return false;
     }
-  };
+  }
 }

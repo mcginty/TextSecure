@@ -101,6 +101,7 @@ public class ThumbnailView extends FrameLayout {
       image.setImageDrawable(null);
       this.slide   = null;
       this.slideId = slideId;
+      progress.setVisibility(GONE);
     }
 
     this.slideDeckListener = new SlideDeckListener(masterSecret);
@@ -139,7 +140,7 @@ public class ThumbnailView extends FrameLayout {
 
   public void setShowProgress(boolean showProgress) {
     this.showProgress = showProgress;
-    if (progress.getVisibility() == View.VISIBLE && !showProgress) {
+    if (progress.getVisibility() == VISIBLE && !showProgress) {
       animateOutProgress();
     }
   }

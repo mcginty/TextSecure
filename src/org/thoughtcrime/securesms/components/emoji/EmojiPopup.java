@@ -34,11 +34,6 @@ public class EmojiPopup extends PopupWindow {
     showAtLocation(parent, Gravity.BOTTOM | Gravity.LEFT, 0, 0);
   }
 
-  @Override
-  public void dismiss() {
-    super.dismiss();
-  }
-
   public void update() {
     update(parent, 0, 0, parent.getWidth(), -1);
   }

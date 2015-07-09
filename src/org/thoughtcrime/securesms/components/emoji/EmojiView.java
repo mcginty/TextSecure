@@ -71,8 +71,4 @@ public class EmojiView extends View implements Drawable.Callback {
     super.invalidateDrawable(drawable);
     postInvalidate();
   }
-
-  @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-  }
 }
