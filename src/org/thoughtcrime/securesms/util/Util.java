@@ -344,4 +344,17 @@ public class Util {
     return (VERSION.SDK_INT >= VERSION_CODES.KITKAT && activityManager.isLowRamDevice()) ||
            activityManager.getMemoryClass() <= 64;
   }
+
+  private static long asMegs(long bytes) {
+    return bytes / 1048576L;
+  }
+
+  public static String getMemoryUsage(Context context) {
+    Runtime info = Runtime.getRuntime();
+    info.totalMemory();
+    return String.format(Locale.ENGLISH, "%dM (%.2f%% used, %dM max)",
+                         asMegs(info.totalMemory()),
+                         (float)info.freeMemory() / info.totalMemory(),
+                         asMegs(info.maxMemory()));
+  }
 }

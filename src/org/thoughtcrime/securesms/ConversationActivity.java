@@ -237,6 +237,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
 
   @Override
   protected void onResume() {
+    Log.w(TAG, "onResume start mem " + Util.getMemoryUsage(this));
     super.onResume();
     dynamicTheme.onResume(this);
     dynamicLanguage.onResume(this);
@@ -254,6 +255,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
 
     MessageNotifier.setVisibleThread(threadId);
     markThreadAsRead();
+    Log.w(TAG, "onResume end mem " + Util.getMemoryUsage(this));
   }
 
   @Override
@@ -887,6 +889,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
   }
 
   private void showEmojiDrawer() {
+    Log.w(TAG, "showing emoji drawer, mem " + Util.getMemoryUsage(this));
     getEmojiDrawer().show(container);
     emojiToggle.setToIme();
   }
@@ -894,6 +897,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
   protected void hideEmojiDrawer(boolean expectingKeyboard) {
     if (isEmojiDrawerOpen()) {
       if (!expectingKeyboard || container.isLandscape()) {
+        Log.w(TAG, "hiding emoji drawer, mem " + Util.getMemoryUsage(this));
         getEmojiDrawer().dismiss();
       } else {
         container.postOnKeyboardOpen(new Runnable() {

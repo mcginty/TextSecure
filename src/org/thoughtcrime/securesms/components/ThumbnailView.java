@@ -16,8 +16,8 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.FrameLayout;
 
+import com.bumptech.glide.BitmapRequestBuilder;
 import com.bumptech.glide.DrawableTypeRequest;
-import com.bumptech.glide.GenericRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -33,6 +33,8 @@ import org.thoughtcrime.securesms.mms.SlideDeck;
 import org.thoughtcrime.securesms.util.FutureTaskListener;
 import org.thoughtcrime.securesms.util.ListenableFutureTask;
 import org.thoughtcrime.securesms.util.Util;
+
+import java.util.Locale;
 
 import de.greenrobot.event.EventBus;
 import ws.com.google.android.mms.pdu.PduPart;
@@ -80,7 +82,7 @@ public class ThumbnailView extends FrameLayout {
     if (this.slide != null && event.partId.equals(this.slide.getPart().getPartId())) {
       Util.runOnMain(new Runnable() {
         @Override public void run() {
-          progress.setInstantProgress(((float) event.progress) / event.total);
+          progress.setInstantProgress(((float)event.progress) / event.total);
           if (event.progress >= event.total) animateOutProgress();
         }
       });
@@ -109,7 +111,7 @@ public class ThumbnailView extends FrameLayout {
     this.slideDeckFuture.addListener(this.slideDeckListener);
   }
 
-  public void setImageResource(@NonNull Slide slide, @Nullable MasterSecret masterSecret) {
+  public void setImageResource(final @NonNull Slide slide, @Nullable MasterSecret masterSecret) {
     if (Util.equals(slide, this.slide)) {
       Log.w(TAG, "Not loading resource, slide was identical");
       return;
@@ -126,7 +128,25 @@ public class ThumbnailView extends FrameLayout {
     } else {
       progress.setVisibility(GONE);
     }
-    buildGlideRequest(slide, masterSecret).into(image);
+    buildGlideRequest(slide, masterSecret).listener(new RequestListener<Object, Bitmap>() {
+      @Override public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target,
+                                               boolean isFromMemoryCache, boolean isFirstResource)
+      {
+        if (resource == null) Log.w(TAG, "onResourceReady(NULL RESOURCE!)");
+        else                  Log.w(TAG, String.format("onResourceReady(Bitmap: %dx%d, PartId: %s), mem %s",
+                                                       resource.getWidth(), resource.getHeight(),
+                                                       slide.getPart().getPartId(),
+                                                       Util.getMemoryUsage(getContext())));
+        return false;
+      }
+
+      @Override public boolean onException(Exception e, Object model, Target target,
+                                           boolean isFirstResource)
+      {
+        Log.w(TAG, e);
+        return false;
+      }
+    }).into(image);
     setOnClickListener(new ThumbnailClickDispatcher(thumbnailClickListener, slide));
   }
 
@@ -152,10 +172,10 @@ public class ThumbnailView extends FrameLayout {
            !((Activity)getContext()).isDestroyed();
   }
 
-  private GenericRequestBuilder buildGlideRequest(@NonNull Slide slide,
+  private BitmapRequestBuilder buildGlideRequest(@NonNull Slide slide,
                                                   @Nullable MasterSecret masterSecret)
   {
-    final GenericRequestBuilder builder;
+    final BitmapRequestBuilder builder;
     if (slide.getThumbnailUri() != null) {
       builder = buildThumbnailGlideRequest(slide, masterSecret);
     } else {
@@ -169,15 +189,15 @@ public class ThumbnailView extends FrameLayout {
     }
   }
 
-  private GenericRequestBuilder buildThumbnailGlideRequest(Slide slide, MasterSecret masterSecret) {
+  private BitmapRequestBuilder buildThumbnailGlideRequest(Slide slide, MasterSecret masterSecret) {
 
-    final GenericRequestBuilder builder;
+    final BitmapRequestBuilder builder;
     if   (slide.isDraft()) builder = buildDraftGlideRequest(slide, masterSecret);
     else                   builder = buildPartGlideRequest(slide, masterSecret);
     return builder;
   }
 
-  private GenericRequestBuilder buildDraftGlideRequest(Slide slide, MasterSecret masterSecret) {
+  private BitmapRequestBuilder buildDraftGlideRequest(Slide slide, MasterSecret masterSecret) {
     final DrawableTypeRequest<?> request;
     if (masterSecret == null) request = Glide.with(getContext()).load(slide.getThumbnailUri());
     else                      request = Glide.with(getContext()).load(new DecryptableUri(masterSecret, slide.getThumbnailUri()));
@@ -187,19 +207,20 @@ public class ThumbnailView extends FrameLayout {
                   .listener(new PduThumbnailSetListener(slide.getPart()));
   }
 
-  private GenericRequestBuilder buildPartGlideRequest(Slide slide, MasterSecret masterSecret) {
+  private BitmapRequestBuilder buildPartGlideRequest(Slide slide, MasterSecret masterSecret) {
     if (masterSecret == null) {
       throw new IllegalStateException("null MasterSecret when loading non-draft thumbnail");
     }
 
     return  Glide.with(getContext()).load(new DecryptableUri(masterSecret, slide.getThumbnailUri()))
+                                    .asBitmap()
                                     .centerCrop();
   }
 
-  private GenericRequestBuilder buildPlaceholderGlideRequest(Slide slide) {
+  private BitmapRequestBuilder buildPlaceholderGlideRequest(Slide slide) {
     return Glide.with(getContext()).load(slide.getPlaceholderRes(getContext().getTheme()))
-                                   .fitCenter()
-                                   .crossFade();
+                                   .asBitmap()
+                                   .fitCenter();
   }
 
   private void animateOutProgress() {
