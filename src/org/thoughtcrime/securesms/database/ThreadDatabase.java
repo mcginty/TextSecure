@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.database.MergeCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -118,27 +119,34 @@ public class ThreadDatabase extends Database {
     return db.insert(TABLE_NAME, null, contentValues);
   }
 
-  private void updateThread(long threadId, long count, String body, long date, long type)
-  {
-    ContentValues contentValues = new ContentValues(4);
-    contentValues.put(DATE, date - date % 1000);
+  private void updateCount(SQLiteDatabase db, long threadId, long count) {
+    ContentValues contentValues = new ContentValues(1);
     contentValues.put(MESSAGE_COUNT, count);
-    contentValues.put(SNIPPET, body);
-    contentValues.put(SNIPPET_TYPE, type);
 
-    SQLiteDatabase db = databaseHelper.getWritableDatabase();
     db.update(TABLE_NAME, contentValues, ID + " = ?", new String[] {threadId + ""});
-    notifyConversationListListeners();
   }
 
-  public void updateSnippet(long threadId, String snippet, long date, long type) {
-    ContentValues contentValues = new ContentValues(3);
+  private boolean updateSnippet(SQLiteDatabase db, long threadId) {
+    MessageRecord record = getSnippetRecord(threadId);
+    if (record == null) return false;
 
+    final long timestamp;
+    if (record.isPush()) timestamp = record.getDateSent();
+    else                 timestamp = record.getDateReceived();
+    updateSnippet(db, threadId, record.getBody().getBody(), timestamp, record.getType());
+    return true;
+  }
+
+  private void updateSnippet(SQLiteDatabase db, long threadId, String snippet, long date, long type) {
+    ContentValues contentValues = new ContentValues(3);
     contentValues.put(DATE, date - date % 1000);
     contentValues.put(SNIPPET, snippet);
     contentValues.put(SNIPPET_TYPE, type);
-    SQLiteDatabase db = databaseHelper.getWritableDatabase();
     db.update(TABLE_NAME, contentValues, ID + " = ?", new String[] {threadId + ""});
+  }
+
+  public void updateSnippet(long threadId, String snippet, long date, long type) {
+    updateSnippet(databaseHelper.getWritableDatabase(), threadId, snippet, date, type);
     notifyConversationListListeners();
   }
 
@@ -243,12 +251,14 @@ public class ThreadDatabase extends Database {
   }
 
   public void setUnread(long threadId) {
+    setUnread(databaseHelper.getWritableDatabase(), threadId);
+    notifyConversationListListeners();
+  }
+
+  private void setUnread(SQLiteDatabase db, long threadId) {
     ContentValues contentValues = new ContentValues(1);
     contentValues.put(READ, 0);
-
-    SQLiteDatabase db = databaseHelper.getWritableDatabase();
-    db.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {threadId+""});
-    notifyConversationListListeners();
+    db.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {threadId + ""});
   }
 
   public void setDistributionType(long threadId, int distributionType) {
@@ -391,40 +401,61 @@ public class ThreadDatabase extends Database {
     return null;
   }
 
+  public void onMessageInserted(long threadId,
+                                boolean unread)
+  {
+    final long           start = System.currentTimeMillis();
+    final SQLiteDatabase db    = databaseHelper.getWritableDatabase();
+    try {
+      db.beginTransaction();
+      db.execSQL("UPDATE " + TABLE_NAME
+                     + " SET " + MESSAGE_COUNT + " = (" + MESSAGE_COUNT + " + 1)"
+                     + " WHERE " + ID_WHERE,
+                 new String[] {String.valueOf(threadId)});
+      updateSnippet(db, threadId);
+      if (unread) setUnread(db, threadId);
+      db.setTransactionSuccessful();
+    } finally {
+      db.endTransaction();
+    }
+    Log.w("ThreadDatabase", "onMessageInserted() -> " + (System.currentTimeMillis() - start) + "ms");
+    notifyConversationListListeners();
+  }
+
   public boolean update(long threadId) {
     MmsSmsDatabase mmsSmsDatabase = DatabaseFactory.getMmsSmsDatabase(context);
     long count                    = mmsSmsDatabase.getConversationCount(threadId);
+    SQLiteDatabase db             = databaseHelper.getWritableDatabase();
 
-    if (count == 0) {
-      deleteThread(threadId);
+    try {
+      final boolean threadDeleted;
+      db.beginTransaction();
+      if (count == 0 || !updateSnippet(db, threadId)) {
+        deleteThread(threadId);
+        threadDeleted = true;
+      } else {
+        updateCount(db, threadId, count);
+        threadDeleted = false;
+      }
+      db.setTransactionSuccessful();
       notifyConversationListListeners();
-      return true;
+      return threadDeleted;
+    } finally {
+      db.endTransaction();
     }
+  }
 
-    MmsSmsDatabase.Reader reader = null;
+  private @Nullable MessageRecord getSnippetRecord(long threadId) {
+    MmsSmsDatabase        mmsSmsDatabase = DatabaseFactory.getMmsSmsDatabase(context);
+    MmsSmsDatabase.Reader reader         = null;
 
     try {
       reader = mmsSmsDatabase.readerFor(mmsSmsDatabase.getConversationSnippet(threadId));
-      MessageRecord record;
-
-      if (reader != null && (record = reader.getNext()) != null) {
-        final long timestamp;
-
-        if (record.isPush()) timestamp = record.getDateSent();
-        else                 timestamp = record.getDateReceived();
-
-        updateThread(threadId, count, record.getBody().getBody(), timestamp, record.getType());
-        notifyConversationListListeners();
-        return false;
-      } else {
-        deleteThread(threadId);
-        notifyConversationListListeners();
-        return true;
-      }
+      if (reader != null) return reader.getNext();
     } finally {
-      if (reader != null)
-        reader.close();
+      if (reader != null) reader.close();
     }
+    return null;
   }
 
   public static interface ProgressListener {

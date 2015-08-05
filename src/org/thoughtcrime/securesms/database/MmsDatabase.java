@@ -619,11 +619,7 @@ public class MmsDatabase extends MessagingDatabase {
     long messageId = insertMediaMessage(masterSecret, retrieved.getPduHeaders(),
                                         retrieved.getBody(), contentValues);
 
-    if (unread) {
-      DatabaseFactory.getThreadDatabase(context).setUnread(threadId);
-    }
-
-    DatabaseFactory.getThreadDatabase(context).update(threadId);
+    DatabaseFactory.getThreadDatabase(context).onMessageInserted(threadId, unread);
     notifyConversationListeners(threadId);
     jobManager.add(new TrimThreadJob(context, threadId));
 
@@ -803,7 +799,7 @@ public class MmsDatabase extends MessagingDatabase {
       partsDatabase.insertParts(masterSecret, messageId, body);
 
       notifyConversationListeners(contentValues.getAsLong(THREAD_ID));
-      DatabaseFactory.getThreadDatabase(context).update(contentValues.getAsLong(THREAD_ID));
+      DatabaseFactory.getThreadDatabase(context).onMessageInserted(contentValues.getAsLong(THREAD_ID), false);
       db.setTransactionSuccessful();
       return messageId;
     } finally {
