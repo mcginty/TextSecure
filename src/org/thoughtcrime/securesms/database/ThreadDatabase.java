@@ -230,6 +230,21 @@ public class ThreadDatabase extends Database {
     notifyConversationListListeners();
   }
 
+  public int getMessageCount(long threadId) {
+    SQLiteDatabase db     = databaseHelper.getReadableDatabase();
+    Cursor         cursor = null;
+    try {
+      cursor = db.query(TABLE_NAME,
+                        new String[] {MESSAGE_COUNT},
+                        ID_WHERE,
+                        new String[] {String.valueOf(threadId)},
+                        null, null, null, "1");
+      return cursor.moveToFirst() ? cursor.getInt(0) : -1;
+    } finally {
+      if (cursor != null) cursor.close();
+    }
+  }
+
   public void setRead(long threadId) {
     ContentValues contentValues = new ContentValues(1);
     contentValues.put(READ, 1);

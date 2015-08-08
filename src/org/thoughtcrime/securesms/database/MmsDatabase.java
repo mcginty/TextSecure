@@ -624,7 +624,6 @@ public class MmsDatabase extends MessagingDatabase {
     }
 
     DatabaseFactory.getThreadDatabase(context).update(threadId);
-    notifyConversationListeners(threadId);
     jobManager.add(new TrimThreadJob(context, threadId));
 
     return new Pair<>(messageId, threadId);

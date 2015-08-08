@@ -31,13 +31,17 @@ public class LargeSQLiteCursor extends AbstractCursor {
   private CursorLruCache  loadedCursors;
   private Cursor          current;
 
-  public LargeSQLiteCursor(SQLiteDatabase db, String query, int windowSize) {
+  public LargeSQLiteCursor(SQLiteDatabase db, String query, int windowSize, int count) {
     this.db            = db;
     this.query         = query;
     this.windowSize    = windowSize;
-    this.count         = getCount(db, query);
+    this.count         = count < 0 ? getCount(db, query) : count;
     this.loadedCursors = new CursorLruCache(4);
     this.current       = getCursorFor(0);
+  }
+
+  public LargeSQLiteCursor(SQLiteDatabase db, String query, int windowSize) {
+    this(db, query, windowSize, -1);
   }
 
   private int getCount(SQLiteDatabase db, String query) {

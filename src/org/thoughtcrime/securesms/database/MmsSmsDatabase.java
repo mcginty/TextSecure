@@ -123,7 +123,8 @@ public class MmsSmsDatabase extends Database {
       query = getQuery(CONVERSATION_PROJECTION, selection, selection, CONVERSATION_ORDER, null, null);
       queryCache.put(threadId, query);
     }
-    final Cursor cursor = largeQuery(query);
+    int count = DatabaseFactory.getThreadDatabase(context).getMessageCount(threadId);
+    final Cursor cursor = largeQuery(query, count);
     setNotifyConverationListeners(cursor, threadId);
 
     return cursor;
@@ -205,10 +206,10 @@ public class MmsSmsDatabase extends Database {
     DatabaseFactory.getMmsDatabase(context).incrementDeliveryReceiptCount(address, timestamp);
   }
 
-  private Cursor largeQuery(final String query) {
+  private Cursor largeQuery(final String query, final int count) {
     SQLiteDatabase db = databaseHelper.getReadableDatabase();
     Log.w("MmsSmsDatabase", query);
-    return new LargeSQLiteCursor(db, query, 500);
+    return new LargeSQLiteCursor(db, query, 500, count);
   }
 
   private Cursor rawQuery(final String query) {
