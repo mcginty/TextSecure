@@ -117,9 +117,8 @@ public class SmsDatabase extends MessagingDatabase {
 
     long threadId = getThreadIdForMessage(id);
 
-    DatabaseFactory.getThreadDatabase(context).update(threadId);
+    DatabaseFactory.getThreadDatabase(context).updateSnippetTypeMask(threadId, maskOff, maskOn);
     notifyConversationListeners(threadId);
-    notifyConversationListListeners();
   }
 
   public long getThreadIdForMessage(long id) {
@@ -404,8 +403,7 @@ public class SmsDatabase extends MessagingDatabase {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
     long messageId    = db.insert(TABLE_NAME, null, values);
 
-    final ThreadDatabase threadDb = DatabaseFactory.getThreadDatabase(context);
-    threadDb.onMessageInserted(threadId, unread);
+    DatabaseFactory.getThreadDatabase(context).onMessageInserted(threadId, unread);
     notifyConversationListeners(threadId);
     jobManager.add(new TrimThreadJob(context, threadId));
 
@@ -437,8 +435,7 @@ public class SmsDatabase extends MessagingDatabase {
     long           messageId = db.insert(TABLE_NAME, ADDRESS, contentValues);
 
 
-    final ThreadDatabase threadDb = DatabaseFactory.getThreadDatabase(context);
-    threadDb.onMessageInserted(threadId, false);
+    DatabaseFactory.getThreadDatabase(context).onMessageInserted(threadId, false);
     notifyConversationListeners(threadId);
     jobManager.add(new TrimThreadJob(context, threadId));
 

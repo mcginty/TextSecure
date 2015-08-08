@@ -29,6 +29,7 @@ import android.util.Log;
 
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.crypto.MasterCipher;
+import org.thoughtcrime.securesms.database.MmsSmsColumns.Types;
 import org.thoughtcrime.securesms.database.model.DisplayRecord;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.database.model.ThreadRecord;
@@ -152,7 +153,7 @@ public class ThreadDatabase extends Database {
 
   private void deleteThread(long threadId) {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
-    db.delete(TABLE_NAME, ID_WHERE, new String[] {threadId+""});
+    db.delete(TABLE_NAME, ID_WHERE, new String[] {threadId + ""});
     notifyConversationListListeners();
   }
 
@@ -266,7 +267,7 @@ public class ThreadDatabase extends Database {
     contentValues.put(TYPE, distributionType);
 
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
-    db.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {threadId+""});
+    db.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {threadId + ""});
     notifyConversationListListeners();
   }
 
@@ -401,16 +402,14 @@ public class ThreadDatabase extends Database {
     return null;
   }
 
-  public void onMessageInserted(long threadId,
-                                boolean unread)
-  {
+  public void onMessageInserted(long threadId, boolean unread) {
     final long           start = System.currentTimeMillis();
     final SQLiteDatabase db    = databaseHelper.getWritableDatabase();
     try {
       db.beginTransaction();
       db.execSQL("UPDATE " + TABLE_NAME
-                     + " SET " + MESSAGE_COUNT + " = (" + MESSAGE_COUNT + " + 1)"
-                     + " WHERE " + ID_WHERE,
+                 + " SET " + MESSAGE_COUNT + " = (" + MESSAGE_COUNT + " + 1)"
+                 + " WHERE " + ID_WHERE,
                  new String[] {String.valueOf(threadId)});
       updateSnippet(db, threadId);
       if (unread) setUnread(db, threadId);
@@ -443,6 +442,16 @@ public class ThreadDatabase extends Database {
     } finally {
       db.endTransaction();
     }
+  }
+
+  public void updateSnippetTypeMask(long threadId, long maskOff, long maskOn) {
+    SQLiteDatabase db = databaseHelper.getWritableDatabase();
+    db.execSQL("UPDATE " + TABLE_NAME +
+               " SET " + SNIPPET_TYPE + " = (" + SNIPPET_TYPE + " & " + (Types.TOTAL_MASK - maskOff) + " | " + maskOn + " )" +
+               " WHERE " + ID + " = ?", new String[] {threadId+""});
+
+    notifyConversationListListeners();
+
   }
 
   private @Nullable MessageRecord getSnippetRecord(long threadId) {
